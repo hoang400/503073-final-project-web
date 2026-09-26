@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CINEMAVIE — Trang Chủ Phim</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <!-- Logo -->
+      <a href="#top" class="brand-logo" aria-label="CINEMATHEQUE — Trang chủ">
+        <span class="logo-badge">C</span>
+        <span class="logo-text">CINEMAVIE</span>
+      </a>
+
+      <!-- Search desktop -->
+      <div class="header-search-wrap">
+        <label class="search-box">
+          <svg class="icon icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>
+          </svg>
+          <input type="text" id="desktop-search-input" placeholder="Tìm kiếm phim, diễn viên..." autocomplete="off" />
+        </label>
+      </div>
+
+      <!-- Nav desktop -->
+      <nav class="header-nav" aria-label="Điều hướng chính">
+        <a class="nav-link active" href="#top">Trang chủ</a>
+        <a class="nav-link" href="#discover">Khám phá</a>
+        <a class="nav-link" href="#trending">Thịnh hành</a>
+      </nav>
+
+      <!-- Hamburger button Mobile -->
+      <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Mở menu" aria-expanded="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu dropdown -->
+    <div class="mobile-menu" id="mobile-menu">
+      <label class="search-box mobile-search">
+        <svg class="icon icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>
+        </svg>
+        <input type="text" id="mobile-search-input" placeholder="Tìm kiếm phim..." autocomplete="off" />
+      </label>
+      <nav class="mobile-nav-links">
+        <a href="#top">Trang chủ</a>
+        <a href="#discover">Khám phá</a>
+        <a href="#trending">Thịnh hành</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section id="top" class="hero-section">
+      <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1800&q=90" alt="Khung cảnh điện ảnh ánh đèn rực đỏ" class="hero-bg-img" />
+      <div class="hero-overlay"></div>
+      
+      <div class="hero-container container">
+        <div class="hero-content">
+          <p class="hero-tag">
+            <span class="tag-line"></span> Phim tiêu điểm / 2024
+          </p>
+          <h1 class="hero-title">
+            Thành phố<br><em class="hero-highlight">không ngủ</em>
+          </h1>
+          <div class="hero-meta">
+            <span class="hero-rating">★ 8.7 / 10</span>
+            <span>2h 14p</span>
+            <span>T18</span>
+            <span>Chính kịch · Tội phạm</span>
+          </div>
+          <p class="hero-desc">
+            Trong một đêm mưa, một người đưa thư phát hiện chiếc hộp có thể thay đổi số phận của cả thành phố — và của chính anh.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="m9 7 7 5-7 5V7Z"/>
+              </svg>
+              Xem trailer
+            </button>
+            <button class="btn btn-outline">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Danh sách của tôi
+            </button>
+          </div>
+        </div>
+
+        <aside class="hero-aside">
+          <p class="aside-label">Đạo diễn</p>
+          <p class="aside-value director-name">Lê Minh Hoàng</p>
+          <p class="aside-label mt-4">Có mặt từ</p>
+          <p class="aside-value">08.11.2024</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SECTION 1: PHIM ĐANG CHIẾU -->
+    <section id="discover" class="section container">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Tuyển chọn trong tuần</p>
+          <h2 class="section-title">Phim đang chiếu</h2>
+        </div>
+        <a href="#all-movies" class="link-all">
+          Xem tất cả 
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </a>
+      </div>
+      <div class="movie-grid" id="now-showing-grid">
+        <!-- Render bằng JS từ danh sách nowShowing -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: BỘ LỌC & DANH SÁCH TÌM KIẾM -->
+    <section id="all-movies" class="catalog-section">
+      <div class="container">
+        <div class="catalog-header">
+          <p class="eyebrow">Danh sách phim</p>
+          <h2 class="section-title">Tìm bộ phim của bạn</h2>
+        </div>
+
+        <div class="filter-bar">
+          <label class="filter-item">
+            <span>Thể loại</span>
+            <select id="genre-filter">
+              <option value="Tất cả thể loại">Tất cả thể loại</option>
+              <option value="Chính kịch">Chính kịch</option>
+              <option value="Hành động">Hành động</option>
+              <option value="Lãng mạn">Lãng mạn</option>
+              <option value="Tội phạm">Tội phạm</option>
+              <option value="Khoa học viễn tưởng">Khoa học viễn tưởng</option>
+              <option value="Bí ẩn">Bí ẩn</option>
+              <option value="Kinh dị">Kinh dị</option>
+              <option value="Phiêu lưu">Phiêu lưu</option>
+              <option value="Tâm lý">Tâm lý</option>
+            </select>
+          </label>
+
+          <label class="filter-item">
+            <span>Năm sản xuất</span>
+            <select id="year-filter">
+              <option value="Tất cả năm">Tất cả năm</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </label>
+
+          <label class="filter-item">
+            <span>Sắp xếp</span>
+            <select id="sort-filter">
+              <option value="Phổ biến nhất">Phổ biến nhất</option>
+              <option value="Điểm đánh giá">Điểm đánh giá (Cao xuống thấp)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="movie-grid" id="catalog-movie-grid">
+          <!-- Render danh sách đã lọc bằng JavaScript -->
+        </div>
+
+        <p class="empty-state" id="empty-state" style="display: none;">Không tìm thấy bộ phim phù hợp.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 3: PHIM THỊNH HÀNH -->
+    <section id="trending" class="section container">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Được xem nhiều</p>
+          <h2 class="section-title">Phim thịnh hành</h2>
+        </div>
+        <span class="badge-accent">Cập nhật hôm nay</span>
+      </div>
+      <div class="movie-grid trending-grid" id="trending-grid">
+        <!-- Render bằng JS từ danh sách trending -->
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="brand-logo footer-logo">
+          <span class="logo-text">CINEMAVIE</span>
+        </a>
+        <p class="footer-desc">Nơi mỗi khung hình đều có một câu chuyện đáng được giữ lại.</p>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-title">Khám phá</p>
+        <ul class="footer-links">
+          <li><a href="#top">Phim mới</a></li>
+          <li><a href="#top">Top IMDB</a></li>
+          <li><a href="#top">Sắp ra mắt</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-title">Trợ giúp</p>
+        <ul class="footer-links">
+          <li><a href="#top">Liên hệ</a></li>
+          <li><a href="#top">Điều khoản</a></li>
+          <li><a href="#top">Chính sách riêng tư</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-title">Theo dõi</p>
+        <div class="social-links">
+          <a class="social-btn" href="#instagram" aria-label="Instagram">IG</a>
+          <a class="social-btn" href="#facebook" aria-label="Facebook">FB</a>
+          <a class="social-btn" href="#youtube" aria-label="YouTube">YT</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>© 2024 Cinematheque. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
