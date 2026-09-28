@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phim Đang Chiếu - CineStar Cinema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { dark: '#0f131f', accent: '#6366f1', blue: '#38bdf8' } } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased pb-12">
+
+    <!-- Header Navigation Thanh Điều Hướng -->
+    <header class="w-full glass-panel sticky top-0 z-40 px-4 lg:px-12 py-3.5 border-b border-slate-800/80 mb-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-black text-white text-xl">C</i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-sky-400 bg-clip-text text-transparent">CINESTAR<span class="text-sky-400">.</span></span>
+                    <span class="text-[9px] text-slate-400 font-semibold tracking-widest uppercase -mt-1">Hệ Thống Rạp Rẻ Nhất Việt Nam</span>
+                </div>
+            </a>
+
+            <!-- Menu Navigation -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-house text-xs"></i> Trang Chủ</a>
+                <a href="movies.html" class="text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-2"><i class="fa-solid fa-film text-xs"></i> Phim Đang Chiếu</a>
+                <a href="booking.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-ticket text-xs"></i> Đặt Vé</a>
+                <a href="history.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-xs"></i> Lịch Sử Vé</a>
+                <a href="admin.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-user-gear text-xs"></i> Trang Admin</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="showToast('Thành viên CineStar!')" class="flex items-center gap-2 bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 px-4 py-2 rounded-xl text-xs font-semibold">
+                    <i class="fa-regular fa-user"></i><span>Đăng Nhập</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Trang Phim Đang Chiếu -->
+    <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 space-y-8 flex-grow">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white flex items-center gap-3">
+                    <i class="fa-solid fa-film text-sky-400"></i> PHIM ĐANG CHIẾU TẠI RẠP (4 PHIM HOT SV2)
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Danh sách các siêu phẩm điện ảnh chiếu rạp mới nhất tại hệ thống CineStar</p>
+            </div>
+            <span class="bg-sky-500/10 text-sky-400 border border-sky-400/30 px-3 py-1 rounded-full text-xs font-bold">4 Phim Đang Chiếu</span>
+        </div>
+
+        <!-- Grid Danh Sách 4 Phim Sv2 -->
+        <div id="movies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Được render động từ main.js -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full px-4 lg:px-8 mt-16 text-center text-xs text-slate-500 space-y-3">
+        <p>© 2026 CineStar Cinema Vietnam. Đã đăng ký bản quyền.</p>
+    </footer>
+
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-indigo-500/60 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-info text-sky-400 text-lg"></i><span id="toast-message" class="text-xs font-semibold">Thông báo</span>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Render 4 Phim Từ Sv2 Lên Giao Diện Trang movies.html
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('movies-grid');
+            container.innerHTML = MOVIES.map(m => `
+                <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between hover:border-sky-500/50 transition-all group">
+                    <div class="relative overflow-hidden aspect-[2/3] bg-slate-900">
+                        <img src="${m.poster}" alt="${m.title}" onerror="handlePosterError(this)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 bg-red-600 text-white font-black text-xs px-2.5 py-1 rounded-md shadow">${m.ageTag}</span>
+                        <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-amber-500/40 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400"></i> ${m.imdb}
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="text-[10px] text-sky-400 font-bold uppercase tracking-wider mb-1">${m.genres.join(' • ')}</div>
+                            <h3 class="font-bold text-white text-sm line-clamp-2 leading-snug">${m.title}</h3>
+                            <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                                <i class="fa-regular fa-clock"></i> ${m.duration}
+                            </div>
+                        </div>
+                        <div class="pt-2 space-y-2">
+                            <a href="booking.html?movie=${m.id}" class="w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-ticket"></i> ĐẶT VÉ NGAY
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>

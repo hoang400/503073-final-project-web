@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị Admin Back-End - CineStar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { dark: '#0f131f', accent: '#6366f1', blue: '#38bdf8' } } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased pb-12">
+
+    <!-- Header Navigation Thanh Điều Hướng -->
+    <header class="w-full glass-panel sticky top-0 z-40 px-4 lg:px-12 py-3.5 border-b border-slate-800/80 mb-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-black text-white text-xl">C</i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-sky-400 bg-clip-text text-transparent">CINESTAR<span class="text-sky-400">.</span></span>
+                    <span class="text-[9px] text-slate-400 font-semibold tracking-widest uppercase -mt-1">Hệ Thống Rạp Rẻ Nhất Việt Nam</span>
+                </div>
+            </a>
+
+            <!-- Menu Navigation -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-house text-xs"></i> Trang Chủ</a>
+                <a href="movies.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-film text-xs"></i> Phim Đang Chiếu</a>
+                <a href="booking.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-ticket text-xs"></i> Đặt Vé</a>
+                <a href="history.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-xs"></i> Lịch Sử Vé</a>
+                <a href="admin.html" class="text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-2"><i class="fa-solid fa-user-gear text-xs"></i> Trang Admin</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs px-3 py-1 rounded-full font-bold">Admin Mode</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Trang Admin Back-End Dashboard -->
+    <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 space-y-8 flex-grow">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white flex items-center gap-3">
+                    <i class="fa-solid fa-user-gear text-sky-400"></i> HỆ THỐNG QUẢN TRỊ BACK-END ADMIN
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Quản lý doanh thu, danh sách đơn vé đã xuất và thống kê suất chiếu rạp</p>
+            </div>
+        </div>
+
+        <!-- 3 Thống Kê Tổng Quan Admin Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-slate-400 uppercase">TỔNG DOANH THU ĐẶT VÉ</span>
+                <div id="admin-total-revenue" class="text-3xl font-black text-emerald-400">0 VNĐ</div>
+                <p class="text-[11px] text-slate-500">Tính từ dữ liệu localStorage hệ thống</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-slate-400 uppercase">TỔNG SỐ VÉ ĐÃ BÁN</span>
+                <div id="admin-total-tickets" class="text-3xl font-black text-sky-400">0 Vé</div>
+                <p class="text-[11px] text-slate-500">Cập nhật thời gian thực</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-slate-400 uppercase">SỐ PHIM ĐANG CHIẾU</span>
+                <div class="text-3xl font-black text-indigo-400">4 Phim</div>
+                <p class="text-[11px] text-slate-500">Danh mục phim Sv2 active</p>
+            </div>
+        </div>
+
+        <!-- Bảng Quản Lý Danh Sách Đơn Vé -->
+        <div class="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-sky-400"></i> DANH SÁCH ĐƠN VÉ HỆ THỐNG
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase font-bold border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">Mã Vé</th>
+                            <th class="p-3">Tên Phim</th>
+                            <th class="p-3">Rạp / Suất Chiếu</th>
+                            <th class="p-3">Ghế Chọn</th>
+                            <th class="p-3">Doanh Thu</th>
+                            <th class="p-3 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-tickets-table-body" class="divide-y divide-slate-800/60">
+                        <!-- Render động từ JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full px-4 lg:px-8 mt-16 text-center text-xs text-slate-500 space-y-3">
+        <p>© 2026 CineStar Cinema Vietnam. Bảng điều khiển quản trị viên.</p>
+    </footer>
+
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-indigo-500/60 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-info text-sky-400 text-lg"></i><span id="toast-message" class="text-xs font-semibold">Thông báo</span>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Execution Logic Trang admin.html
+        document.addEventListener('DOMContentLoaded', () => { renderAdminDashboard(); });
+
+        function renderAdminDashboard() {
+            const tickets = getStoredTickets();
+            
+            // Tính tổng doanh thu
+            const totalRev = tickets.reduce((acc, t) => acc + (t.totalPrice || 0), 0);
+            document.getElementById('admin-total-revenue').innerText = formatVND(totalRev);
+            document.getElementById('admin-total-tickets').innerText = `${tickets.length} Đơn vé`;
+
+            const tbody = document.getElementById('admin-tickets-table-body');
+            if (tickets.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Chưa có đơn vé nào được ghi nhận trong hệ thống!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = tickets.map(t => `
+                <tr class="hover:bg-slate-800/40">
+                    <td class="p-3 font-mono font-bold text-sky-400">#${t.ticketCode}</td>
+                    <td class="p-3 font-semibold text-white">${t.movie}</td>
+                    <td class="p-3 text-slate-400">${t.cinema} <br><span class="text-sky-300 font-bold">${t.time} - ${t.date}</span></td>
+                    <td class="p-3 font-bold text-amber-400">${t.seats.join(', ')}</td>
+                    <td class="p-3 font-black text-emerald-400">${formatVND(t.totalPrice)}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="adminDeleteTicket('${t.ticketCode}')" class="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/40 px-2.5 py-1 rounded-lg text-[11px]">
+                            Xóa Đơn
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function adminDeleteTicket(code) {
+            if (confirm(`ADMIN: Xác nhận xóa hủy bỏ vé #${code}?`)) {
+                removeTicketFromStorage(code);
+                renderAdminDashboard();
+                showToast(`Đã xóa đơn vé #${code} thành công khỏi hệ thống!`);
+            }
+        }
+    </script>
+</body>
+</html>

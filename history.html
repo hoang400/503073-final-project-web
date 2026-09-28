@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Đặt Vé - CineStar Cinema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { dark: '#0f131f', accent: '#6366f1', blue: '#38bdf8' } } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased pb-12">
+
+    <!-- Header Navigation Thanh Điều Hướng -->
+    <header class="w-full glass-panel sticky top-0 z-40 px-4 lg:px-12 py-3.5 border-b border-slate-800/80 mb-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-black text-white text-xl">C</i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-sky-400 bg-clip-text text-transparent">CINESTAR<span class="text-sky-400">.</span></span>
+                    <span class="text-[9px] text-slate-400 font-semibold tracking-widest uppercase -mt-1">Hệ Thống Rạp Rẻ Nhất Việt Nam</span>
+                </div>
+            </a>
+
+            <!-- Menu Navigation -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-house text-xs"></i> Trang Chủ</a>
+                <a href="movies.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-film text-xs"></i> Phim Đang Chiếu</a>
+                <a href="booking.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-ticket text-xs"></i> Đặt Vé</a>
+                <a href="history.html" class="text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-xs"></i> Lịch Sử Vé</a>
+                <a href="admin.html" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2"><i class="fa-solid fa-user-gear text-xs"></i> Trang Admin</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="showToast('Thành viên CineStar!')" class="flex items-center gap-2 bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 px-4 py-2 rounded-xl text-xs font-semibold">
+                    <i class="fa-regular fa-user"></i><span>Đăng Nhập</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Trang Lịch Sử Đặt Vé -->
+    <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 space-y-8 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white flex items-center gap-3">
+                    <i class="fa-solid fa-clock-rotate-left text-sky-400"></i> LỊCH SỬ ĐẶT VÉ PHIM
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Danh sách thông tin các vé đã thanh toán được lưu trực tiếp trên thiết bị</p>
+            </div>
+            
+            <div class="relative w-full md:w-72">
+                <input type="text" id="search-ticket-input" onkeyup="filterTickets()" placeholder="Tìm theo mã vé hoặc tên phim..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2 text-xs focus:border-sky-400 focus:outline-none">
+            </div>
+        </div>
+
+        <!-- Khung Danh Sách Vé -->
+        <div id="tickets-history-list" class="space-y-4">
+            <!-- Render động bằng JavaScript -->
+        </div>
+    </main>
+
+    <!-- Modal Xem Mã QR Nhận Vé Lên Rạp -->
+    <div id="qr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
+        <div class="relative w-full max-w-sm mx-4 glass-panel rounded-3xl border border-slate-700 p-6 text-center space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-sm font-bold text-white">MÃ VÀO RẠP SOÁT VÉ</h3>
+                <button onclick="closeQrModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="bg-white p-4 rounded-2xl w-48 h-48 mx-auto flex items-center justify-center border-2 border-indigo-500">
+                <img id="qr-modal-img" src="" alt="Mã QR Vé" class="w-full h-full object-contain">
+            </div>
+            <p id="qr-modal-code" class="font-mono font-black text-sky-400 text-lg"></p>
+            <p class="text-[11px] text-slate-400">Vui lòng xuất trình mã QR này tại quầy soát vé CineStar</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full px-4 lg:px-8 mt-16 text-center text-xs text-slate-500 space-y-3">
+        <p>© 2026 CineStar Cinema Vietnam. Đã đăng ký bản quyền.</p>
+    </footer>
+
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-indigo-500/60 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-info text-sky-400 text-lg"></i><span id="toast-message" class="text-xs font-semibold">Thông báo</span>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Execution Logic Trang history.html
+        document.addEventListener('DOMContentLoaded', () => { renderHistory(); });
+
+        function renderHistory(filterKeyword = '') {
+            const container = document.getElementById('tickets-history-list');
+            const tickets = getStoredTickets();
+
+            if (tickets.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel p-12 text-center rounded-3xl border border-slate-800 space-y-3">
+                        <i class="fa-solid fa-ticket-simple text-4xl text-slate-600 block"></i>
+                        <p class="text-slate-400 text-sm">Chưa có lịch sử đặt vé nào!</p>
+                        <a href="booking.html" class="inline-block bg-sky-500 text-slate-900 font-extrabold px-5 py-2.5 rounded-xl text-xs">ĐẶT VÉ NGAY</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const filtered = tickets.filter(t => 
+                t.ticketCode.toLowerCase().includes(filterKeyword.toLowerCase()) || 
+                t.movie.toLowerCase().includes(filterKeyword.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 py-8">Không tìm thấy vé phù hợp từ khóa!</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(t => `
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between gap-6 items-start md:items-center">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono font-black text-sky-400 text-base bg-sky-500/10 px-3 py-1 rounded-lg border border-sky-500/30">#${t.ticketCode}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${t.bookingTime || 'Vừa xong'}</span>
+                        </div>
+                        <h3 class="font-black text-white text-lg">${t.movie}</h3>
+                        <div class="text-xs text-slate-300 space-y-1">
+                            <p><i class="fa-solid fa-location-dot text-sky-400"></i> ${t.cinema} | <span class="text-sky-300 font-bold">${t.time} - ${t.date}</span> (${t.format})</p>
+                            <p><i class="fa-solid fa-couch text-indigo-400"></i> Ghế: <span class="font-bold text-amber-400">${t.seats.join(', ')}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:items-end space-y-3 w-full md:w-auto border-t md:border-t-0 border-slate-800 pt-3 md:pt-0">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block uppercase">Tổng tiền đã trả</span>
+                            <span class="text-xl font-black text-emerald-400">${formatVND(t.totalPrice)}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="showQrModal('${t.ticketCode}')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-qrcode"></i> Xem QR Vé
+                            </button>
+                            <button onclick="handleCancelTicket('${t.ticketCode}')" class="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 font-bold px-3 py-2 rounded-xl text-xs">
+                                Hủy Vé
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterTickets() {
+            const kw = document.getElementById('search-ticket-input').value;
+            renderHistory(kw);
+        }
+
+        function showQrModal(code) {
+            document.getElementById('qr-modal-code').innerText = code;
+            document.getElementById('qr-modal-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${code}`;
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQrModal() { document.getElementById('qr-modal').classList.add('hidden'); }
+
+        function handleCancelTicket(code) {
+            if (confirm(`Bạn có chắc muốn hủy đơn vé #${code}?`)) {
+                removeTicketFromStorage(code);
+                renderHistory();
+                showToast(`Đã hủy vé #${code} thành công!`);
+            }
+        }
+    </script>
+</body>
+</html>
