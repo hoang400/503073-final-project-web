@@ -28,48 +28,52 @@ Các trang PHP phục vụ giao diện và gọi API; xử lý nghiệp vụ đ�
 
 ~~~text
 cinestar/
-├── public/                     # Thư mục web server phục vụ trực tiếp
-│   ├── index.php               # Trang chủ khách hàng
-│   ├── movies.php              # Xem, tìm kiếm và lọc phim
-│   ├── login.php               # Giao diện đăng nhập
-│   ├── register.php            # Giao diện đăng ký tài khoản
-│   ├── booking.php             # Chọn suất, ghế, bắp nước và thanh toán demo
-│   ├── history.php             # Lịch sử đặt vé của khách hàng
-│   ├── order-detail.php        # Chi tiết đơn và mã vé
-│   ├── profile.php             # Thông tin cá nhân và đổi mật khẩu
-│   ├── admin/                  # Giao diện dành cho quản trị viên
-│   │   ├── index.php           # Dashboard tổng quan quản trị
-│   │   ├── movies.php          # Quản lý phim, poster và trailer
-│   │   ├── cinemas.php         # Quản lý rạp chiếu
-│   │   ├── rooms.php           # Quản lý phòng chiếu và sơ đồ ghế
-│   │   ├── showtimes.php       # Quản lý suất chiếu và giá vé
-│   │   ├── bookings.php        # Tra cứu và quản lý đơn vé
-│   │   ├── concessions.php     # Quản lý danh mục và giá bắp nước
-│   │   └── reports.php         # Thống kê vé và doanh thu mô phỏng
-│   ├── staff/                  # Giao diện dành cho nhân viên
-│   │   └── check-in.php        # Nhập mã vé và xác nhận sử dụng vé
-│   ├── api/                    # Cửa vào API cho frontend
-│   │   └── index.php           # Tiếp nhận yêu cầu, gọi router, trả JSON
-│   ├── css/                    # Các file định dạng giao diện
-│   │   └── style.css           # CSS dùng chung và responsive
-│   └── js/                     # JavaScript giao diện và gọi API
-│       ├── main.js             # Menu và tương tác dùng chung
-│       ├── auth.js             # Gửi yêu cầu đăng nhập, đăng ký, đăng xuất
-│       ├── booking.js          # Chọn ghế, bắp nước và gửi yêu cầu đặt vé
-│       ├── history.js          # Tải và hiển thị lịch sử đơn vé
-│       └── admin.js            # Tương tác quản trị và gọi API quản lý
-├── app/                        # Mã xử lý backend, ngoài Document Root
-│   ├── controllers/            # Nhận yêu cầu, gọi service và tạo phản hồi
-│   ├── services/               # Nghiệp vụ giữ ghế, đặt vé, thanh toán demo
-│   ├── models/                 # Truy vấn MySQL qua PDO
-│   ├── middleware/             # Kiểm tra đăng nhập, vai trò và CSRF
-│   └── core/                   # Router, kết nối PDO và tiện ích nền tảng
-├── config/                     # Cấu hình ứng dụng và cơ sở dữ liệu
-├── routes/                     # Khai báo quy tắc định tuyến
-│   └── api.php                 # Ánh xạ phương thức/đường dẫn tới controller
-├── database/                   # Script tạo cấu trúc và dữ liệu mẫu
-│   ├── schema.sql              # Tạo bảng, khóa và ràng buộc theo ERD
-│   └── seed.sql                # Thêm dữ liệu demo sau khi chạy schema
-├── README.md                   # Tổng quan, công nghệ và cấu trúc dự án
-└── Readme.txt                  # Hướng dẫn cài đặt và chạy bản nộp
+├── public/                     # A/C: giao diện; B: API và bảo vệ trang
+│   ├── index.php               # [A] Trang chủ khách hàng
+│   ├── movies.php              # [A] Xem, tìm kiếm và lọc phim
+│   ├── login.php               # [A] Giao diện đăng nhập
+│   ├── register.php            # [A] Giao diện đăng ký tài khoản
+│   ├── booking.php             # [A] Chọn suất, ghế, bắp nước, thanh toán demo
+│   ├── history.php             # [A] Lịch sử đặt vé của khách hàng
+│   ├── order-detail.php        # [A] Chi tiết đơn và mã vé
+│   ├── profile.php             # [A] Thông tin cá nhân và đổi mật khẩu
+│   ├── admin/                  # [C] Giao diện dành cho quản trị viên
+│   │   ├── index.php           # [C] Dashboard tổng quan quản trị
+│   │   ├── movies.php          # [C] Quản lý phim, poster và trailer
+│   │   ├── cinemas.php         # [C] Quản lý rạp chiếu
+│   │   ├── rooms.php           # [C] Quản lý phòng chiếu và sơ đồ ghế
+│   │   ├── showtimes.php       # [C] Quản lý suất chiếu và giá vé
+│   │   ├── bookings.php        # [C] Tra cứu và quản lý đơn vé
+│   │   ├── concessions.php     # [C] Quản lý danh mục và giá bắp nước
+│   │   └── reports.php         # [C] Thống kê vé và doanh thu mô phỏng
+│   ├── staff/                  # [C] Giao diện dành cho nhân viên
+│   │   └── check-in.php        # [C] Nhập mã vé và xác nhận sử dụng vé
+│   ├── api/                    # [B] Cửa vào API cho frontend
+│   │   └── index.php           # [B] Nhận yêu cầu, gọi router, trả JSON
+│   ├── css/                    # [A/C] Các file định dạng giao diện
+│   │   └── style.css           # [A/C] CSS dùng chung và responsive
+│   └── js/                     # [A/C] JavaScript giao diện và gọi API
+│       ├── main.js             # [A] Menu và tương tác dùng chung
+│       ├── auth.js             # [A] Gọi API đăng nhập, đăng ký, đăng xuất
+│       ├── booking.js          # [A] Chọn ghế, bắp nước và gọi API đặt vé
+│       ├── history.js          # [A] Tải và hiển thị lịch sử đơn vé
+│       └── admin.js            # [C] Tương tác Admin/Staff và gọi API
+├── app/                        # [B] Mã xử lý backend, ngoài Document Root
+│   ├── controllers/            # [B] Nhận yêu cầu, gọi service, tạo phản hồi
+│   ├── services/               # [B] Nghiệp vụ tài khoản, đặt vé, Admin/Staff
+│   ├── models/                 # [B] Truy vấn MySQL qua PDO
+│   ├── middleware/             # [B] Kiểm tra đăng nhập, vai trò và CSRF
+│   └── core/                   # [B] Router, kết nối PDO, tiện ích nền tảng
+├── config/                     # [B] Cấu hình ứng dụng và cơ sở dữ liệu
+├── routes/                     # [B] Khai báo quy tắc định tuyến
+│   └── api.php                 # [B] Ánh xạ phương thức/đường dẫn tới controller
+├── database/                   # [B] Script cấu trúc và dữ liệu mẫu
+│   ├── schema.sql              # [B] Tạo bảng, khóa, ràng buộc theo ERD
+│   └── seed.sql                # [B] Viết SQL dữ liệu demo; C chuẩn bị nội dung
+├── README.md                   # [C] Tổng quan, công nghệ, cấu trúc, phân công
+└── Readme.txt                  # [C] Hướng dẫn cài đặt và chạy bản nộp
 ~~~
+
+A/C dựng giao diện và nối API do B cung cấp. B viết toàn bộ API/controller/service/model cho cả khách hàng, Admin và Staff, đồng thời cung cấp phần kiểm tra PHP để bảo vệ các trang cần đăng nhập/phân quyền. A/C sử dụng phần kiểm tra này khi tích hợp, không tự truy vấn MySQL trong trang giao diện.
+
+Với `style.css`, A phụ trách giao diện khách hàng, C phụ trách Admin/Staff; thống nhất trước khi sửa CSS dùng chung. C tổng hợp tài liệu và tổ chức kiểm thử tích hợp; B cung cấp cách cấu hình, import database và danh sách API; A/C/B cùng kiểm tra luồng hoàn chỉnh.
