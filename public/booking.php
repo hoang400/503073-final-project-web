@@ -26,7 +26,7 @@
                 <div class="seat-scroll">
                     <div id="seats"></div>
                 </div>
-                <p>Thường: 90.000đ • VIP: 110.000đ • Đôi: 200.000đ</p>
+                <p>Giá vé được áp dụng theo giá cơ bản của từng suất chiếu.</p>
                 <p>Ghế mờ: đã đặt • Ghế xanh: đang chọn • Tối đa 8 ghế</p>
             </section>
             <aside class="card">
