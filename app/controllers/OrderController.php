@@ -1,0 +1,70 @@
+<?php
+declare(strict_types=1);
+
+final class OrderController
+{
+    public function __construct(private OrderModel $orders)
+    {
+    }
+
+    public function index(): void
+    {
+        $userId = $this->userId();
+
+        $data = array_map(static fn(array $row): array => [
+            'id' => (int) $row['id'],
+            'code' => $row['ma_don_hang'],
+            'movie' => $row['ten_phim'],
+            'showtime' => $row['thoi_gian_bat_dau'],
+            'total' => (float) $row['tong_tien'],
+            'status' => $row['trang_thai_thanh_toan'],
+            'createdAt' => $row['thoi_gian_dat'],
+        ], $this->orders->findByUser($userId));
+
+        jsonResponse(['ok' => true, 'data' => $data]);
+    }
+
+    public function detail(): void
+    {
+        $userId = $this->userId();
+
+        $query = [];
+        parse_str(
+            (string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY),
+            $query
+        );
+
+        $orderId = filter_var(
+            $query['order_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($orderId === false) {
+            throw new ApiException('Mã đơn hàng không hợp lệ.', 422);
+        }
+
+        $order = $this->orders->findDetail($userId, (int) $orderId);
+
+        if ($order === null) {
+            throw new ApiException('Không tìm thấy đơn hàng.', 404);
+        }
+
+        jsonResponse(['ok' => true, 'data' => $order]);
+    }
+
+    private function userId(): int
+    {
+        $userId = filter_var(
+            $_SESSION['user_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($userId === false) {
+            throw new ApiException('Vui lòng đăng nhập.', 401);
+        }
+
+        return (int) $userId;
+    }
+}
