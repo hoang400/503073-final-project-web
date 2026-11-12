@@ -117,7 +117,7 @@ final class BookingController
     }
 
     $validatedSeats = [];
-
+    $seenSeatIds = [];
     foreach ($seatIds as $seatId) {
         $id = filter_var(
             $seatId,
@@ -127,9 +127,14 @@ final class BookingController
 
         if ($id === false) {
             throw new ApiException('Mã ghế không hợp lệ.', 422);
-        }
+            }
 
-        $validatedSeats[] = (int) $id;
+            if (isset($seenSeatIds[$id])) {
+                throw new ApiException('Danh sách ghế có mã ghế bị trùng.', 422);
+            }
+
+            $seenSeatIds[$id] = true;
+            $validatedSeats[] = (int) $id;
     }
 
     $data = $this->booking->holdSeats(
