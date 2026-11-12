@@ -201,6 +201,42 @@ final class BookingModel
     array $concessionItems
 ): array {
     $pdo = Database::connection();
+    
+    $validatedConcessions = [];
+
+    foreach ($concessionItems as $itemId => $quantity) {
+        $validatedItemId = filter_var(
+            $itemId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        $validatedQuantity = filter_var(
+            $quantity,
+            FILTER_VALIDATE_INT,
+            ['options' => [
+                'min_range' => 1,
+                'max_range' => 20,
+            ]]
+        );
+
+        if ($validatedItemId === false) {
+            throw new ApiException('Mã món bắp nước không hợp lệ.', 422);
+        }
+
+        if ($validatedQuantity === false) {
+            throw new ApiException('Số lượng mỗi món phải từ 1 đến 20.', 422);
+        }
+
+        if (isset($validatedConcessions[$validatedItemId])) {
+            throw new ApiException('Danh sách món bắp nước có dữ liệu trùng.', 422);
+        }
+
+        $validatedConcessions[$validatedItemId] = $validatedQuantity;
+    }
+
+    $concessionItems = $validatedConcessions;
+    
     $pdo->beginTransaction();
 
     try {

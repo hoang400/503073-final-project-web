@@ -127,7 +127,7 @@ final class BookingController
 
         if ($id === false) {
             throw new ApiException('Mã ghế không hợp lệ.', 422);
-            }
+        }
 
             if (isset($seenSeatIds[$id])) {
                 throw new ApiException('Danh sách ghế có mã ghế bị trùng.', 422);
