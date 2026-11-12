@@ -19,45 +19,58 @@ final class BookingModel
         return $statement->fetchAll();
     }
 
-    public function findSeats(int $showtimeId): array
+    public function findSeats(int $showtimeId, int $userId): array
     {
-        $pdo = Database::connection();
+    $pdo = Database::connection();
 
-        $statement = $pdo->prepare(
-            "SELECT g.id, g.hang_ghe, g.so_thu_tu, g.loai_ghe,
-                    CASE
-                        WHEN EXISTS (
-                            SELECT 1
-                            FROM chitietve cv
-                            JOIN datve d ON d.id = cv.dat_ve_id
-                            WHERE cv.ghe_id = g.id
-                              AND d.suat_chieu_id = :showtime_id
-                              AND d.trang_thai_thanh_toan <> 'DaHuy'
-                        ) THEN 'BOOKED'
-                        WHEN EXISTS (
-                            SELECT 1
-                            FROM ghedanggiu gd
-                            WHERE gd.ghe_id = g.id
-                              AND gd.suat_chieu_id = :hold_showtime_id
-                              AND gd.expires_at > NOW()
-                        ) THEN 'HELD'
-                        ELSE 'AVAILABLE'
-                    END AS trang_thai
-             FROM ghe g
-             JOIN suatchieu s ON s.phong_id = g.phong_id
-             WHERE s.id = :seat_showtime_id
-             ORDER BY g.hang_ghe, g.so_thu_tu"
-        );
+    $statement = $pdo->prepare(
+        "SELECT g.id, g.hang_ghe, g.so_thu_tu, g.loai_ghe,
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM chitietve cv
+                        JOIN datve d ON d.id = cv.dat_ve_id
+                        WHERE cv.ghe_id = g.id
+                          AND d.suat_chieu_id = :showtime_id
+                          AND d.trang_thai_thanh_toan <> 'DaHuy'
+                    ) THEN 'BOOKED'
 
-        $statement->execute([
-            'showtime_id' => $showtimeId,
-            'hold_showtime_id' => $showtimeId,
-            'seat_showtime_id' => $showtimeId,
-        ]);
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM ghedanggiu gd
+                        WHERE gd.ghe_id = g.id
+                          AND gd.suat_chieu_id = :my_showtime_id
+                          AND gd.user_id = :user_id
+                          AND gd.expires_at > NOW()
+                    ) THEN 'HELD_BY_ME'
 
-        return $statement->fetchAll();
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM ghedanggiu gd
+                        WHERE gd.ghe_id = g.id
+                          AND gd.suat_chieu_id = :hold_showtime_id
+                          AND gd.expires_at > NOW()
+                    ) THEN 'HELD'
+
+                    ELSE 'AVAILABLE'
+                END AS trang_thai
+         FROM ghe g
+         JOIN suatchieu s ON s.phong_id = g.phong_id
+         WHERE s.id = :seat_showtime_id
+         ORDER BY g.hang_ghe, g.so_thu_tu"
+    );
+
+    $statement->execute([
+        'showtime_id' => $showtimeId,
+        'my_showtime_id' => $showtimeId,
+        'user_id' => $userId,
+        'hold_showtime_id' => $showtimeId,
+        'seat_showtime_id' => $showtimeId,
+    ]);
+
+    return $statement->fetchAll();
     }
-
+    
     public function findConcessions(): array
     {
         $statement = Database::connection()->query(

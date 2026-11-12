@@ -58,7 +58,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         seatsContainer.innerHTML = seats.map(seat => {
-            const unavailable = seat.status !== 'AVAILABLE';
+            const unavailable =
+                seat.status !== 'AVAILABLE'
+                && seat.status !== 'HELD_BY_ME';
 
             return `
                 <button
