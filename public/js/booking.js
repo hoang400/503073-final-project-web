@@ -11,7 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let concessions = [];
     let basePrice = 0;
 
-    const user = await api('/auth/me');
+    let user;
+
+    try {
+        user = await api('/auth/me');
+    } catch (error) {
+        message(error.message, true);
+        checkoutButton.disabled = true;
+        return;
+    }
 
     if (!user) {
         const next = location.pathname.split('/').pop()
