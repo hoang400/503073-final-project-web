@@ -13,6 +13,10 @@ $orders = new OrderController(
     new OrderModel()
 );
 
+$booking = new BookingController(
+    new BookingModel()
+);
+
 return [
     '/csrf' => [
         'GET' => [$auth, 'csrf'],
