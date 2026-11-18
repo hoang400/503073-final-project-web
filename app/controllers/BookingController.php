@@ -41,49 +41,39 @@ final class BookingController
 
     public function seats(): void
     {
-    $query = [];
+        $query = [];
+        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
 
-    parse_str(
-        (string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY),
-        $query
-    );
+        $showtimeId = filter_var(
+            $query['showtime_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-    $showtimeId = filter_var(
-        $query['showtime_id'] ?? null,
-        FILTER_VALIDATE_INT,
-        ['options' => ['min_range' => 1]]
-    );
+        if ($showtimeId === false) {
+            throw new ApiException('Mã suất chiếu không hợp lệ.', 422);
+        }
 
-    if ($showtimeId === false) {
-        throw new ApiException('Mã suất chiếu không hợp lệ.', 422);
+        // Cho phép xem ghế không cần đăng nhập (userId = 0)
+        $userId = filter_var(
+            $_SESSION['user_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        ) ?? 0;
+
+        $rows = $this->booking->findSeats((int) $showtimeId, (int) $userId);
+
+        $data = array_map(static fn(array $row): array => [
+            'id' => (int) $row['id'],
+            'row' => $row['hang_ghe'],
+            'number' => (int) $row['so_thu_tu'],
+            'type' => $row['loai_ghe'],
+            'status' => $row['trang_thai'],
+        ], $rows);
+
+        jsonResponse(['ok' => true, 'data' => $data]);
     }
 
-    $userId = filter_var(
-        $_SESSION['user_id'] ?? null,
-        FILTER_VALIDATE_INT,
-        ['options' => ['min_range' => 1]]
-    );
-
-    if ($userId === false) {
-        throw new ApiException('Vui lòng đăng nhập.', 401);
-    }
-
-    $rows = $this->booking->findSeats(
-        (int) $showtimeId,
-        (int) $userId
-    );
-
-    $data = array_map(static fn(array $row): array => [
-        'id' => (int) $row['id'],
-        'row' => $row['hang_ghe'],
-        'number' => (int) $row['so_thu_tu'],
-        'type' => $row['loai_ghe'],
-        'status' => $row['trang_thai'],
-    ], $rows);
-
-    jsonResponse(['ok' => true, 'data' => $data]);
-    }
-    
     public function concessions(): void
     {
         $rows = $this->booking->findConcessions();
