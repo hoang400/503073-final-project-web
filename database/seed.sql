@@ -75,13 +75,110 @@ DROP PROCEDURE seed_seats;
 -- ============================================
 -- PHIM
 -- ============================================
-INSERT INTO `phim` (`ten_phim`, `the_loai`, `thoi_luong`, `poster_url`, `mo_ta`, `trailer_url`, `trang_thai`) VALUES
-('Lật Mặt 7: Một Điều Ước', 'Hài hước, Tâm lý', 120, 'https://image.tmdb.org/t/p/w500/lat_mat_7.jpg', 'Bộ phim hài hước Việt Nam về gia đình và điều ước.', 'https://youtube.com/watch?v=latmat7', 'DANG_CHIEU'),
-('Kẻ Ăn Hồn', 'Hành động, Giả tưởng', 135, 'https://image.tmdb.org/t/p/w500/ke_an_hon.jpg', 'Cuộc chiến giữa thiện và ác trong thế giới siêu nhiên.', 'https://youtube.com/watch?v=keanhon', 'DANG_CHIEU'),
-('Siêu Nhân Gấu Trúc', 'Hoạt hình, Gia đình', 95, 'https://image.tmdb.org/t/p/w500/sieu_nhan_gau_truc.jpg', 'Chuyện về chú gấu trúc có siêu năng lực.', 'https://youtube.com/watch?v=gaotruc', 'DANG_CHIEU'),
-('Mật Vụ Biển Đông', 'Hành động, Điệp viên', 140, 'https://image.tmdb.org/t/p/w500/mat_vu_bien_dong.jpg', 'Nhiệm vụ bí mật trên biển Đông đầy kịch tính.', 'https://youtube.com/watch?v=matvubien', 'SAP_CHIEU'),
-('Tình Yêu Mau Quên', 'Lãng mạn, Tâm lý', 110, 'https://image.tmdb.org/t/p/w500/tinh_yeu_mau_quen.jpg', 'Câu chuyện tình yêu giữa quá khứ và hiện tại.', 'https://youtube.com/watch?v=tinhyeu', 'SAP_CHIEU'),
-('Kho Báu Cũ', 'Phiêu lưu, Hài hước', 125, 'https://image.tmdb.org/t/p/w500/kho_bau_cu.jpg', 'Nhóm bạn tìm kiếm kho báu thất lạc.', 'https://youtube.com/watch?v=kho_bau', 'NGUNG_CHIEU');
+
+-- ============================================
+-- PHIM - DỮ LIỆU TỪ FRONTEND ZIP
+-- Thứ tự phim được giữ nguyên để khớp phim_id 1-4
+-- trong các suất chiếu bên dưới.
+-- ============================================
+INSERT INTO `phim` (
+    `ten_phim`,
+    `ten_ngan`,
+    `ten_hien_thi_dropdown`,
+    `the_loai`,
+    `thoi_luong`,
+    `poster_url`,
+    `mo_ta`,
+    `trailer_url`,
+    `do_tuoi`,
+    `mo_ta_do_tuoi`,
+    `diem_imdb`,
+    `dao_dien`,
+    `bien_kich`,
+    `dien_vien`,
+    `trang_thai`
+) VALUES
+
+(
+    'Godzilla x Kong: Đế Chế Mới (Godzilla x Kong: The New Empire)',
+    'Godzilla x Kong',
+    'Godzilla x Kong: Đế Chế Mới (2D Vietsub)',
+    'Hành Động, Viễn Tưởng, Phiêu Lưu',
+    115,
+    'https://image.tmdb.org/t/p/w780/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg',
+    'Trận chiến hoành tráng giữa các Titan tiếp tục bùng nổ! Sau những sự kiện đối đầu nảy lửa trước đó, Godzilla và Kong đối mặt với một mối đe dọa sinh tồn hoàn toàn mới, khổng lồ và tàn bạo hơn bao giờ hết ẩn giấu sâu bên trong Trái Đất Rỗng (Hollow Earth). Sinh vật cổ đại Skar King cùng đội quân quái thú hung hãn đe dọa hủy diệt toàn bộ hệ sinh thái thế giới loài người.
+
+Để bảo vệ sự sống còn của Trái Đất, hai huyền thoại Godzilla và Kong buộc phải gạt bỏ hiềm khích cũ, hợp sức chiến đấu bên cạnh những trang bị công nghệ đỉnh cao. Tác phẩm mang đến những pha giao tranh hoành tráng, mãn nhãn cùng kỹ xảo đỉnh cao của điện ảnh Hollywood.',
+    'https://www.youtube.com/watch?v=lV1OOlGwExM',
+    'C13',
+    'C13 - Khán giả trên 13 tuổi',
+    7.4,
+    'Adam Wingard',
+    'Terry Rossio, Simon Barrett, Jeremy Slater',
+    'Rebecca Hall, Brian Tyree Henry, Dan Stevens',
+    'DANG_CHIEU'
+),
+
+(
+    'Avengers: Hồi Kết (Avengers: Endgame)',
+    'Avengers: Endgame',
+    'Avengers: Hồi Kết (2D Vietsub)',
+    'Hành Động, Sci-Fi, Siêu Anh Hùng',
+    181,
+    'https://image.tmdb.org/t/p/w780/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg',
+    'Sau cú búng tay tàn khốc của Thanos trong Cuộc Chiến Vô Cực làm biến mất một nửa sinh linh trong vũ trụ, biệt đội Avengers chìm trong đau thương và thất vọng. Những người còn sống sót gồm Iron Man, Captain America, Thor, Black Widow và Hulk phải tìm cách vượt qua nỗi đau mất mát để khôi phục lại trật tự thế giới.
+
+Với sự xuất hiện bất ngờ của Ant-Man và phát kiến du hành thời gian qua Cõi Lượng Tử, các anh hùng quyết định dấn thân vào một sứ mệnh mạo hiểm chưa từng có: du hành về quá khứ để thu thập các Viên Đá Vô Cực trước Thanos. Đây là trận chiến cuối cùng đầy xúc động quyết định số phận vũ trụ.',
+    'https://www.youtube.com/watch?v=TcMBFSGVi1c',
+    'C13',
+    'C13 - Khán giả trên 13 tuổi',
+    8.4,
+    'Anthony Russo, Joe Russo',
+    'Christopher Markus, Stephen McFeely',
+    'Robert Downey Jr., Chris Evans, Mark Ruffalo, Scarlett Johansson',
+    'DANG_CHIEU'
+),
+
+(
+    'Dune: Hành Tinh Cát - Phần Hai (Dune: Part Two)',
+    'Dune: Part Two',
+    'Dune: Hành Tinh Cát - Phần Hai (2D Vietsub)',
+    'Hành Động, Viễn Tưởng, Phiêu Lưu',
+    166,
+    'https://image.tmdb.org/t/p/w780/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg',
+    'Hành trình tiếp theo của Paul Atreides khi anh cùng mẹ là phu nhân Jessica hội ngộ với người Fremen trên hành tinh sa mạc khắc nghiệt Arrakis. Mối tình nảy nở giữa Paul và Chani cùng sự công nhận của các chiến binh sa mạc đã biến Paul trở thành vị cứu tinh Lisan al-Gaib theo lời tiên tri.
+
+Đứng trước những âm mưu tàn bạo của gia tộc Harkonnen và Hoàng đế vũ trụ, Paul buộc phải đưa ra lựa chọn sinh tử giữa tình yêu cá nhân và định mệnh giải phóng Arrakis. Tác phẩm sở hữu quy mô hoành tráng, âm nhạc ma mị và góc quay choáng ngợp đạt giải Oscar.',
+    'https://www.youtube.com/watch?v=Way9Dexny3w',
+    'C16',
+    'C16 - Khán giả trên 16 tuổi',
+    8.6,
+    'Denis Villeneuve',
+    'Denis Villeneuve, Jon Spaihts',
+    'Timothée Chalamet, Zendaya, Rebecca Ferguson, Javier Bardem',
+    'DANG_CHIEU'
+),
+
+(
+    'Spider-Man: Không Còn Nhà (Spider-Man: No Way Home)',
+    'Spider-Man: No Way Home',
+    'Spider-Man: Không Còn Nhà (2D Lồng Tiếng)',
+    'Hành Động, Siêu Anh Hùng, Phiêu Lưu',
+    148,
+    'https://image.tmdb.org/t/p/w780/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
+    'Lần đầu tiên trong lịch sử điện ảnh của Người Nhện, danh tính thật Peter Parker bị Mysterio vạch trần trước toàn thế giới. Cuộc sống riêng tư cùng tương lai của Peter và các bạn thân MJ, Ned hoàn toàn bị xáo trộn.
+
+Trong sự bế tắc, Peter đã nhờ đến Doctor Strange thực hiện một câu bùa phép xóa ký ký ức của mọi người. Tuy nhiên, sự cố ma thuật xảy ra đã vô tình xé rách ranh giới Đa Vũ Trụ, kéo theo hàng loạt ác nhân huyền thoại từ các vũ trụ song song trở lại đối đầu với Spider-Man.',
+    'https://www.youtube.com/watch?v=JfVOs4VSpmA',
+    'C13',
+    'C13 - Khán giả trên 13 tuổi',
+    8.2,
+    'Jon Watts',
+    'Chris McKenna, Erik Sommers',
+    'Tom Holland, Zendaya, Benedict Cumberbatch, Andrew Garfield',
+    'SAP_CHIEU'
+);
+
 
 -- ============================================
 -- BẮP NƯỚC
