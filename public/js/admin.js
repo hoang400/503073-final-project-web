@@ -211,42 +211,73 @@ const isEditing = Boolean(editingMovieId);
 async function loadMovieForEdit(id) {
     try {
         const movie = await api(`/admin/movies/${id}`);
+
         document.getElementById('movieId').value = movie.id;
+
         document.getElementById('ten_ngan').value =
             movie.shortTitle || '';
+
         document.getElementById('ten_hien_thi_dropdown').value =
             movie.dropdownTitle || '';
+
         document.getElementById('do_tuoi').value =
             movie.ageTag || '';
+
         document.getElementById('mo_ta_do_tuoi').value =
             movie.ageDesc || '';
+
         document.getElementById('imdb').value =
             movie.imdb ?? '';
+
         document.getElementById('dao_dien').value =
             movie.director || '';
+
         document.getElementById('bien_kich').value =
             movie.writers || '';
+
         document.getElementById('dien_vien').value =
             movie.stars || '';
-        document.getElementById('ten_phim').value = movie.title;
-        document.getElementById('the_loai').value = movie.genre;
-        document.getElementById('thoi_luong').value = movie.duration;
-        document.getElementById('trang_thai').value = movie.status;
-        document.getElementById('poster_url').value = movie.poster_url || '';
-        document.getElementById('trailer_url').value = movie.trailer_url || '';
-        document.getElementById('mo_ta').value = movie.description || '';
-        
-        // Preview poster
+
+        document.getElementById('ten_phim').value =
+            movie.title || '';
+
+        document.getElementById('the_loai').value =
+            movie.genre || '';
+
+        document.getElementById('thoi_luong').value =
+            movie.duration ?? '';
+
+        document.getElementById('trang_thai').value =
+            movie.status || 'SAP_CHIEU';
+
+        document.getElementById('poster_url').value =
+            movie.poster_url || '';
+
+        document.getElementById('trailer_url').value =
+            movie.trailer_url || '';
+
+        document.getElementById('mo_ta').value =
+            movie.description || '';
+
         const preview = document.getElementById('posterPreview');
+
         if (movie.poster_url) {
-            preview.innerHTML = `<img src="${esc(movie.poster_url)}" alt="Preview" style="max-height:150px; border-radius:4px;">`;
+            preview.innerHTML = `
+                <img
+                    src="${esc(movie.poster_url)}"
+                    alt="Preview"
+                    style="max-height:150px; border-radius:4px;"
+                >
+            `;
+        } else {
+            preview.innerHTML = '';
         }
+
     } catch (e) {
         message(e.message, true);
         closeMovieModal();
     }
 }
-
 // Poster preview on URL change
 document.addEventListener('DOMContentLoaded', () => {
     const posterInput = document.getElementById('poster_url');
@@ -268,40 +299,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const btn = document.getElementById('submitBtn');
+
+            // Lưu trạng thái trước khi đóng modal
+            const wasEditing = Boolean(editingMovieId);
+
             btn.disabled = true;
             btn.textContent = 'Đang lưu...';
-            
+
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
-            
-            // Convert numeric fields
-            if (data.thoi_luong) data.thoi_luong = parseInt(data.thoi_luong);
-            
-            // Remove empty optional fields
-            Object.keys(data).forEach(k => {
-                if (data[k] === '' && !['ten_phim', 'the_loai', 'thoi_luong', 'trang_thai'].includes(k)) {
-                    delete data[k];
-                }
-            });
-            
+
+            // Chuyển thời lượng thành số nguyên
+            if (data.thoi_luong) {
+                data.thoi_luong = parseInt(data.thoi_luong, 10);
+            }
+
             try {
-                if (editingMovieId) {
-                    await api(`/admin/movies/${editingMovieId}`, 'PATCH', data);
+                if (wasEditing) {
+                    await api(
+                        `/admin/movies/${editingMovieId}`,
+                        'PATCH',
+                        data
+                    );
+
                     message('Cập nhật phim thành công!');
                 } else {
                     await api('/admin/movies', 'POST', data);
+
                     message('Thêm phim thành công!');
                 }
-                
+
                 closeMovieModal();
-                loadMoviesAdmin();
+                await loadMoviesAdmin();
+
             } catch (err) {
                 message(err.message, true);
+
             } finally {
                 btn.disabled = false;
-                btn.textContent = editingMovieId ? 'Cập nhật' : 'Thêm';
+                btn.textContent = wasEditing ? 'Cập nhật' : 'Thêm';
             }
         });
     }

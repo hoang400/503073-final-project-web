@@ -35,9 +35,7 @@ INSERT INTO `phongchieu` (`rap_id`, `ten_phong`, `loai_phong`) VALUES
 (3, 'Phòng 1', '2D'), (3, 'Phòng 2', '4DX'),
 (4, 'Phòng 1', '2D'), (4, 'Phòng 2', '3D'), (4, 'Phòng 3', 'IMAX');
 
--- ============================================
--- GHẺ (Procedure tạo 360 ghế)
--- ============================================
+-- GHẾ (Procedure tạo 400 ghế cho 10 phòng)
 DELIMITER $$
 CREATE PROCEDURE seed_seats()
 BEGIN
@@ -46,7 +44,7 @@ BEGIN
     DECLARE v_so INT UNSIGNED;
     DECLARE v_loai VARCHAR(50);
     
-    WHILE v_phong_id <= 9 DO
+    WHILE v_phong_id <= 10 DO
         SET v_hang = 'A';
         WHILE v_hang <= 'E' DO
             SET v_so = 1;

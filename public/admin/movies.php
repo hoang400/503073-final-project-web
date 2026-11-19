@@ -205,6 +205,28 @@
                                 style="width:100%;"
                             ></textarea>
                         </div>
+                        <div style="grid-column:1/-1;">
+                            <label>URL Trailer YouTube</label>
+                            <input
+                                type="url"
+                                name="trailer_url"
+                                id="trailer_url"
+                                maxlength="500"
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                style="width:100%;"
+                            >
+                        </div>
+
+                        <div style="grid-column:1/-1;">
+                            <label>Mô tả phim</label>
+                            <textarea
+                                name="mo_ta"
+                                id="mo_ta"
+                                rows="5"
+                                style="width:100%;"
+                                placeholder="Nhập nội dung giới thiệu phim..."
+                            ></textarea>
+                        </div>
                     </div>
                     <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px; border-top:1px solid #334155;">
                         <button type="button" id="cancelModal" class="button" style="background:transparent; color:#94a3b8;">Hủy</button>
