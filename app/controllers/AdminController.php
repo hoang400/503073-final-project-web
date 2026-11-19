@@ -13,12 +13,16 @@ final class AdminController
     // MOVIES
     // ============================================
 
+    
     public function getMovies(): void
     {
         AdminMiddleware::requireAdmin();
 
         $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        parse_str(
+            (string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY),
+            $query
+        );
 
         $search = $query['search'] ?? null;
         $status = $query['status'] ?? null;
@@ -27,55 +31,183 @@ final class AdminController
 
         $data = array_map(static fn(array $row): array => [
             'id' => (int) $row['id'],
+
             'title' => $row['ten_phim'],
+            'shortTitle' => $row['ten_ngan'] ?? '',
+            'dropdownTitle' => $row['ten_hien_thi_dropdown'] ?? '',
+
             'genre' => $row['the_loai'],
             'duration' => (int) $row['thoi_luong'],
+
             'poster_url' => $row['poster_url'] ?? '',
             'description' => $row['mo_ta'] ?? '',
             'trailer_url' => $row['trailer_url'] ?? '',
+
+            'ageTag' => $row['do_tuoi'] ?? '',
+            'ageDesc' => $row['mo_ta_do_tuoi'] ?? '',
+            'imdb' => $row['diem_imdb'] !== null
+                ? (float) $row['diem_imdb']
+                : null,
+
+            'director' => $row['dao_dien'] ?? '',
+            'writers' => $row['bien_kich'] ?? '',
+            'stars' => $row['dien_vien'] ?? '',
+
             'status' => $row['trang_thai'],
         ], $movies);
 
-        jsonResponse(['ok' => true, 'data' => $data]);
+        jsonResponse([
+            'ok' => true,
+            'data' => $data,
+        ]);
     }
 
+
+    public function getMovie(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã phim không hợp lệ.', 422);
+        }
+
+        $movie = $this->admin->findMovieById($id);
+
+        if (!$movie) {
+            throw new ApiException('Không tìm thấy phim.', 404);
+        }
+
+        $data = [
+            'id' => (int) $movie['id'],
+
+            'title' => $movie['ten_phim'],
+            'shortTitle' => $movie['ten_ngan'] ?? '',
+            'dropdownTitle' => $movie['ten_hien_thi_dropdown'] ?? '',
+
+            'genre' => $movie['the_loai'],
+            'duration' => (int) $movie['thoi_luong'],
+
+            'poster_url' => $movie['poster_url'] ?? '',
+            'description' => $movie['mo_ta'] ?? '',
+            'trailer_url' => $movie['trailer_url'] ?? '',
+
+            'ageTag' => $movie['do_tuoi'] ?? '',
+            'ageDesc' => $movie['mo_ta_do_tuoi'] ?? '',
+            'imdb' => $movie['diem_imdb'] !== null
+                ? (float) $movie['diem_imdb']
+                : null,
+
+            'director' => $movie['dao_dien'] ?? '',
+            'writers' => $movie['bien_kich'] ?? '',
+            'stars' => $movie['dien_vien'] ?? '',
+
+            'status' => $movie['trang_thai'],
+        ];
+
+        jsonResponse([
+            'ok' => true,
+            'data' => $data,
+        ]);
+    }
+
+    
     public function createMovie(): void
     {
         AdminMiddleware::requireAdmin();
 
         $body = readJsonBody();
 
-        $required = ['ten_phim', 'the_loai', 'thoi_luong'];
+        $required = [
+            'ten_phim',
+            'the_loai',
+            'thoi_luong',
+        ];
+
         foreach ($required as $field) {
-            if (empty($body[$field])) {
+            if (
+                !isset($body[$field])
+                || trim((string) $body[$field]) === ''
+            ) {
                 throw new ApiException("Thiếu trường: {$field}", 422);
+            }
+        }
+
+        $duration = filter_var(
+            $body['thoi_luong'],
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 600]]
+        );
+
+        if ($duration === false) {
+            throw new ApiException('Thời lượng phim không hợp lệ.', 422);
+        }
+
+        $status = $body['trang_thai'] ?? 'SAP_CHIEU';
+
+        $allowedStatus = [
+            'DANG_CHIEU',
+            'SAP_CHIEU',
+            'NGUNG_CHIEU',
+        ];
+
+        if (!in_array($status, $allowedStatus, true)) {
+            throw new ApiException('Trạng thái không hợp lệ.', 422);
+        }
+
+        $imdb = null;
+
+        if (
+            isset($body['imdb'])
+            && $body['imdb'] !== ''
+        ) {
+            if (!is_numeric($body['imdb'])) {
+                throw new ApiException('Điểm IMDb phải là số.', 422);
+            }
+
+            $imdb = (float) $body['imdb'];
+
+            if ($imdb < 0 || $imdb > 10) {
+                throw new ApiException('Điểm IMDb phải từ 0 đến 10.', 422);
             }
         }
 
         $data = [
             'ten_phim' => trim($body['ten_phim']),
+            'ten_ngan' => trim($body['ten_ngan'] ?? ''),
+            'ten_hien_thi_dropdown' => trim(
+                $body['ten_hien_thi_dropdown'] ?? ''
+            ),
+
             'the_loai' => trim($body['the_loai']),
-            'thoi_luong' => (int) $body['thoi_luong'],
-            'poster_url' => $body['poster_url'] ?? null,
-            'mo_ta' => $body['mo_ta'] ?? null,
-            'trailer_url' => $body['trailer_url'] ?? null,
-            'trang_thai' => $body['trang_thai'] ?? 'SAP_CHIEU',
+            'thoi_luong' => $duration,
+
+            'poster_url' => trim($body['poster_url'] ?? '') ?: null,
+            'mo_ta' => trim($body['mo_ta'] ?? '') ?: null,
+            'trailer_url' => trim($body['trailer_url'] ?? '') ?: null,
+
+            'do_tuoi' => trim($body['do_tuoi'] ?? '') ?: null,
+            'mo_ta_do_tuoi' => trim($body['mo_ta_do_tuoi'] ?? '') ?: null,
+            'diem_imdb' => $imdb,
+
+            'dao_dien' => trim($body['dao_dien'] ?? '') ?: null,
+            'bien_kich' => trim($body['bien_kich'] ?? '') ?: null,
+            'dien_vien' => trim($body['dien_vien'] ?? '') ?: null,
+
+            'trang_thai' => $status,
         ];
-
-        // Validate status
-        $allowedStatus = ['DANG_CHIEU', 'SAP_CHIEU', 'NGUNG_CHIEU'];
-        if (!in_array($data['trang_thai'], $allowedStatus, true)) {
-            throw new ApiException('Trạng thái không hợp lệ.', 422);
-        }
-
-        // Validate duration
-        if ($data['thoi_luong'] <= 0) {
-            throw new ApiException('Thời lượng phải lớn hơn 0.', 422);
-        }
 
         $id = $this->admin->createMovie($data);
 
-        jsonResponse(['ok' => true, 'data' => ['id' => $id]], 201);
+        jsonResponse([
+            'ok' => true,
+            'data' => ['id' => $id],
+        ], 201);
     }
 
     public function updateMovie(): void
@@ -84,43 +216,113 @@ final class AdminController
 
         $query = [];
         parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã phim không hợp lệ.', 422);
         }
 
         $body = readJsonBody();
 
+        $allowed = [
+            'ten_phim',
+            'ten_ngan',
+            'ten_hien_thi_dropdown',
+            'the_loai',
+            'thoi_luong',
+            'poster_url',
+            'mo_ta',
+            'trailer_url',
+            'do_tuoi',
+            'mo_ta_do_tuoi',
+            'diem_imdb',
+            'dao_dien',
+            'bien_kich',
+            'dien_vien',
+            'trang_thai',
+        ];
+
         $data = [];
-        $allowed = ['ten_phim', 'the_loai', 'thoi_luong', 'poster_url', 'mo_ta', 'trailer_url', 'trang_thai'];
+
         foreach ($allowed as $field) {
             if (array_key_exists($field, $body)) {
                 $data[$field] = $body[$field];
             }
         }
 
+        if (isset($data['thoi_luong'])) {
+            $duration = filter_var(
+                $data['thoi_luong'],
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1, 'max_range' => 600]]
+            );
+
+            if ($duration === false) {
+                throw new ApiException('Thời lượng phim không hợp lệ.', 422);
+            }
+
+            $data['thoi_luong'] = $duration;
+        }
+
+        if (isset($data['diem_imdb']) && $data['diem_imdb'] !== '') {
+            if (
+                !is_numeric($data['diem_imdb'])
+                || (float) $data['diem_imdb'] < 0
+                || (float) $data['diem_imdb'] > 10
+            ) {
+                throw new ApiException('Điểm IMDb phải từ 0 đến 10.', 422);
+            }
+
+            $data['diem_imdb'] = (float) $data['diem_imdb'];
+        } elseif (array_key_exists('diem_imdb', $data)) {
+            $data['diem_imdb'] = null;
+        }
+
         if (isset($data['trang_thai'])) {
-            $allowedStatus = ['DANG_CHIEU', 'SAP_CHIEU', 'NGUNG_CHIEU'];
+            $allowedStatus = [
+                'DANG_CHIEU',
+                'SAP_CHIEU',
+                'NGUNG_CHIEU',
+            ];
+
             if (!in_array($data['trang_thai'], $allowedStatus, true)) {
                 throw new ApiException('Trạng thái không hợp lệ.', 422);
             }
         }
 
-        if (isset($data['thoi_luong']) && $data['thoi_luong'] <= 0) {
-            throw new ApiException('Thời lượng phải lớn hơn 0.', 422);
-        }
-
-        if (isset($data['ten_phim'])) {
-            $data['ten_phim'] = trim($data['ten_phim']);
-        }
-        if (isset($data['the_loai'])) {
-            $data['the_loai'] = trim($data['the_loai']);
+        foreach ([
+            'ten_phim',
+            'ten_ngan',
+            'ten_hien_thi_dropdown',
+            'the_loai',
+            'poster_url',
+            'mo_ta',
+            'trailer_url',
+            'do_tuoi',
+            'mo_ta_do_tuoi',
+            'dao_dien',
+            'bien_kich',
+            'dien_vien',
+        ] as $field) {
+            if (array_key_exists($field, $data)) {
+                $data[$field] = trim((string) $data[$field]);
+                if ($data[$field] === '') {
+                    $data[$field] = null;
+                }
+            }
         }
 
         $this->admin->updateMovie($id, $data);
 
-        jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
+        jsonResponse([
+            'ok' => true,
+            'data' => ['id' => $id],
+        ]);
+
     }
 
     public function deleteMovie(): void
@@ -130,11 +332,15 @@ final class AdminController
         $query = [];
         parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
         if ($id === false) {
             throw new ApiException('Mã phim không hợp lệ.', 422);
         }
-
         $this->admin->deleteMovie($id);
 
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);

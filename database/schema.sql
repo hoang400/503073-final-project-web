@@ -22,18 +22,43 @@ CREATE TABLE `nguoidung` (
 
 -- 2. PHIM
 DROP TABLE IF EXISTS `phim`;
+
 CREATE TABLE `phim` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
+
+  -- Thông tin tên phim
   `ten_phim` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `the_loai` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ten_ngan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ten_hien_thi_dropdown` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+
+  -- Thông tin cơ bản
+  `the_loai` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `thoi_luong` int unsigned NOT NULL,
-  `poster_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `poster_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `mo_ta` text COLLATE utf8mb4_unicode_ci,
   `trailer_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `trang_thai` enum('SAP_CHIEU','DANG_CHIEU','NGUNG_CHIEU') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SAP_CHIEU',
+
+  `do_tuoi` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mo_ta_do_tuoi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `diem_imdb` decimal(3,1) DEFAULT NULL,
+  `dao_dien` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bien_kich` text COLLATE utf8mb4_unicode_ci,
+  `dien_vien` text COLLATE utf8mb4_unicode_ci,
+
+  -- Trạng thái
+  `trang_thai` enum('SAP_CHIEU','DANG_CHIEU','NGUNG_CHIEU')
+      COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SAP_CHIEU',
+
   PRIMARY KEY (`id`),
-  CONSTRAINT `chk_phim_thoi_luong` CHECK ((`thoi_luong` > 0))
+
+  CONSTRAINT `chk_phim_thoi_luong`
+      CHECK (`thoi_luong` > 0),
+
+  CONSTRAINT `chk_phim_imdb`
+      CHECK (`diem_imdb` IS NULL OR (`diem_imdb` >= 0 AND `diem_imdb` <= 10))
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 -- 3. RẠP CHIẾU

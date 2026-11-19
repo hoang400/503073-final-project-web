@@ -145,6 +145,13 @@ function renderMoviesTable(movies) {
             </td>
             <td style="padding:12px; max-width:200px;">
                 <strong>${esc(m.title)}</strong>
+                <br>
+                <small style="color:#94a3b8;">
+                    ${esc(m.director || 'Chưa có đạo diễn')}
+                    ${m.imdb !== null && m.imdb !== undefined
+                        ? ` · IMDb ${esc(String(m.imdb))}/10`
+                        : ''}
+                </small>
             </td>
             <td style="padding:12px; color:#94a3b8; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(m.genre)}</td>
             <td style="padding:12px;">${m.duration} phút</td>
@@ -200,11 +207,27 @@ function closeMovieModal() {
     document.body.style.overflow = '';
     editingMovieId = null;
 }
-
+const isEditing = Boolean(editingMovieId);
 async function loadMovieForEdit(id) {
     try {
         const movie = await api(`/admin/movies/${id}`);
         document.getElementById('movieId').value = movie.id;
+        document.getElementById('ten_ngan').value =
+            movie.shortTitle || '';
+        document.getElementById('ten_hien_thi_dropdown').value =
+            movie.dropdownTitle || '';
+        document.getElementById('do_tuoi').value =
+            movie.ageTag || '';
+        document.getElementById('mo_ta_do_tuoi').value =
+            movie.ageDesc || '';
+        document.getElementById('imdb').value =
+            movie.imdb ?? '';
+        document.getElementById('dao_dien').value =
+            movie.director || '';
+        document.getElementById('bien_kich').value =
+            movie.writers || '';
+        document.getElementById('dien_vien').value =
+            movie.stars || '';
         document.getElementById('ten_phim').value = movie.title;
         document.getElementById('the_loai').value = movie.genre;
         document.getElementById('thoi_luong').value = movie.duration;
@@ -1216,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } finally {
                 btn.disabled = false;
-                btn.textContent = editingShowtimeId ? 'Cập nhật' : 'Thêm';
+                btn.textContent = isEditing ? 'Cập nhật' : 'Thêm';
             }
         });
     }
