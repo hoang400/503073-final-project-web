@@ -12,7 +12,7 @@ const statusStyles = {
 };
 
 const statusLabels = {
-    valid: '✅ Hợp lệ - Cho vào rạp',
+    valid: '✅ Hợp lệ',
     pending: '⏳ Chưa thanh toán',
     used: '❌ Đã sử dụng',
     cancelled: '🚫 Đã hủy',
@@ -81,7 +81,7 @@ async function verifyTicket() {
         // Update title based on status
         const title = document.getElementById('resultTitle');
         if (result.status === 'valid') {
-            title.textContent = '✅ Vé HỢP LỆ - Cho phép vào rạp';
+            title.textContent = '✅ Vé HỢP LỆ';
         } else if (result.status === 'used') {
             title.textContent = '❌ Vé ĐÃ ĐƯỢC SỬ DỤNG';
         } else if (result.status === 'pending') {
