@@ -9,7 +9,8 @@ final class OrderController
 
     public function index(): void
     {
-        $userId = $this->userId();
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
 
         $data = array_map(static fn(array $row): array => [
             'id' => (int) $row['id'],
@@ -26,7 +27,8 @@ final class OrderController
 
     public function detail(): void
     {
-        $userId = $this->userId();
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
 
         $query = [];
         parse_str(
@@ -51,20 +53,5 @@ final class OrderController
         }
 
         jsonResponse(['ok' => true, 'data' => $order]);
-    }
-
-    private function userId(): int
-    {
-        $userId = filter_var(
-            $_SESSION['user_id'] ?? null,
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
-        );
-
-        if ($userId === false) {
-            throw new ApiException('Vui lòng đăng nhập.', 401);
-        }
-
-        return (int) $userId;
     }
 }

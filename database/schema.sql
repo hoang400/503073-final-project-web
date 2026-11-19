@@ -125,6 +125,8 @@ CREATE TABLE `datve` (
   `phuong_thuc_thanh_toan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `trang_thai_thanh_toan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ChuaThanhToan',
   `thoi_gian_dat` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `idempotency_key` VARCHAR(64) DEFAULT NULL,
+  UNIQUE KEY `uq_datve_idempotency` (`idempotency_key`),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_datve_ma_don` (`ma_don_hang`),
   KEY `idx_datve_user_thoi_gian` (`user_id`,`thoi_gian_dat`),

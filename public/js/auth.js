@@ -7,10 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const register = form.dataset.mode === 'register';
     const params = new URLSearchParams(location.search);
-
-    const destination = params.has('next')
-        ? returnPage()
-        : 'profile.php';
+    const destination = returnPage();
 
     $('#switch-auth').href =
         (register ? 'login.php' : 'register.php')

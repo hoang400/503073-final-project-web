@@ -14,7 +14,14 @@ final class AuthController
 
     public function me(): void
     {
-        $this->respond($this->auth->me());
+        $user = AuthMiddleware::requireAuth();
+        $this->respond([
+            'id' => (int) $user['id'],
+            'name' => $user['ho_ten'],
+            'email' => $user['email'],
+            'phone' => $user['so_dien_thoai'] ?? '',
+            'role' => $user['vai_tro'],
+        ]);
     }
 
     public function register(): void
@@ -38,11 +45,19 @@ final class AuthController
 
     public function profile(): void
     {
-        $this->respond($this->auth->profile());
+        $user = AuthMiddleware::requireAuth();
+        $this->respond([
+            'id' => (int) $user['id'],
+            'name' => $user['ho_ten'],
+            'email' => $user['email'],
+            'phone' => $user['so_dien_thoai'] ?? '',
+            'role' => $user['vai_tro'],
+        ]);
     }
 
     public function updateProfile(): void
     {
+        $user = AuthMiddleware::requireAuth();
         $this->respond(
             $this->auth->updateProfile(readJsonBody())
         );
@@ -50,6 +65,7 @@ final class AuthController
 
     public function changePassword(): void
     {
+        $user = AuthMiddleware::requireAuth();
         $this->auth->changePassword(readJsonBody());
         $this->respond(null);
     }

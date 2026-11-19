@@ -1,11 +1,27 @@
 const API_BASE = 'api/index.php';
 let csrfToken = '';
 
+
+const IDEMPOTENCY_KEYS = new Map();
+
+function generateIdempotencyKey() {
+    return 'idem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function getIdempotencyKey(path) {
+    if (path === '/checkout') {
+        // Tạo key mới cho mỗi lần checkout
+        const key = generateIdempotencyKey();
+        return key;
+    }
+    return null;
+}
+
 const money = value =>
     Number(value).toLocaleString('vi-VN') + ' VNĐ';
 
 const esc = value =>
-    String(value ?? '').replace(/[&<>"']/g, character => ({
+    String(value ?? '').replace(/[&<>\"']/g, character => ({
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
@@ -39,6 +55,11 @@ async function api(path, method = 'GET', body) {
         headers['X-CSRF-Token'] = csrfToken;
     }
 
+    const idempotencyKey = getIdempotencyKey(path);
+    if (idempotencyKey) {
+        headers['Idempotency-Key'] = idempotencyKey;
+    }
+
     const response = await fetch(
         API_BASE + '?route=' + encodeURIComponent(path),
         {
@@ -65,18 +86,24 @@ async function api(path, method = 'GET', body) {
         if (response.status === 403) {
             csrfToken = '';
         }
-
+        // Xử lý lỗi duplicate (409) - có thể retry hoặc báo cho user
+        if (response.status === 409 && result?.error?.message?.includes('duplicate')) {
+            throw new Error('Yêu cầu đã được xử lý. Vui lòng không bấm nhiều lần.');
+        }
         throw new Error(
             result?.error?.message
             || 'Không thể thực hiện yêu cầu.'
         );
     }
 
+    // Reset CSRF token sau các endpoint quan trọng
     if (changesData && [
         '/auth/register',
         '/auth/login',
         '/auth/logout',
         '/profile/password',
+        '/holds',
+        '/checkout',
     ].includes(path)) {
         csrfToken = '';
     }

@@ -185,14 +185,15 @@ final class BookingModel
     public function checkout(
         int $userId,
         int $showtimeId,
-        array $concessionItems
+        array $concessionItems,
+        string $idempotencyKey 
     ): array {
         $pdo = Database::connection();
 
         // Lấy seatIds từ holds của user này
         $holdQuery = $pdo->prepare(
             'SELECT ghe_id FROM ghedanggiu
-            WHERE suat_chieu_id = ? AND user_id = ? AND expires_at > NOW()'
+             WHERE suat_chieu_id = ? AND user_id = ? AND expires_at > NOW()'
         );
         $holdQuery->execute([$showtimeId, $userId]);
         $seatIds = $holdQuery->fetchAll(PDO::FETCH_COLUMN);
@@ -230,11 +231,11 @@ final class BookingModel
             $marks = implode(',', array_fill(0, count($seatIds), '?'));
             $holdCheck = $pdo->prepare(
                 "SELECT COUNT(*)
-                FROM ghedanggiu
-                WHERE suat_chieu_id = ?
-                AND user_id = ?
-                AND ghe_id IN ($marks)
-                AND expires_at > NOW()"
+                 FROM ghedanggiu
+                 WHERE suat_chieu_id = ?
+                   AND user_id = ?
+                   AND ghe_id IN ($marks)
+                   AND expires_at > NOW()"
             );
             $holdCheck->execute(array_merge([$showtimeId, $userId], $seatIds));
 
@@ -245,9 +246,9 @@ final class BookingModel
             // Check suất chiếu chưa kết thúc
             $showtimeCheck = $pdo->prepare(
                 'SELECT id, phong_id, gia_ve_co_ban, thoi_gian_ket_thuc
-                FROM suatchieu
-                WHERE id = ? AND thoi_gian_ket_thuc > NOW()
-                FOR UPDATE'
+                 FROM suatchieu
+                 WHERE id = ? AND thoi_gian_ket_thuc > NOW()
+                 FOR UPDATE'
             );
             $showtimeCheck->execute([$showtimeId]);
             $showtime = $showtimeCheck->fetch();
@@ -259,11 +260,11 @@ final class BookingModel
             // Check ghế đã bán (double check)
             $soldQuery = $pdo->prepare(
                 "SELECT COUNT(*)
-                FROM chitietve cv
-                JOIN datve d ON d.id = cv.dat_ve_id
-                WHERE d.suat_chieu_id = ?
-                AND d.trang_thai_thanh_toan <> 'DaHuy'
-                AND cv.ghe_id IN ($marks)"
+                 FROM chitietve cv
+                 JOIN datve d ON d.id = cv.dat_ve_id
+                 WHERE d.suat_chieu_id = ?
+                   AND d.trang_thai_thanh_toan <> 'DaHuy'
+                   AND cv.ghe_id IN ($marks)"
             );
             $soldQuery->execute(array_merge([$showtimeId], $seatIds));
 
@@ -271,17 +272,16 @@ final class BookingModel
                 throw new ApiException('Có ghế đã được đặt.', 409);
             }
 
-            // Lấy loại ghế để tính giá差异化
+            // Lấy loại ghế để tính giá
             $seatPriceQuery = $pdo->prepare(
                 "SELECT g.id, g.loai_ghe, s.gia_ve_co_ban
-                FROM ghe g
-                JOIN suatchieu s ON s.phong_id = g.phong_id
-                WHERE s.id = ? AND g.id IN ($marks)"
+                 FROM ghe g
+                 JOIN suatchieu s ON s.phong_id = g.phong_id
+                 WHERE s.id = ? AND g.id IN ($marks)"
             );
             $seatPriceQuery->execute(array_merge([$showtimeId], $seatIds));
             $seatPrices = $seatPriceQuery->fetchAll(PDO::FETCH_KEY_PAIR);
 
-            // Phụ thu: VIP +20%, Couple +50%
             $multiplier = ['Thuong' => 1.0, 'VIP' => 1.2, 'Couple' => 1.5];
             $totalCents = 0;
             $seatPriceMap = [];
@@ -295,14 +295,13 @@ final class BookingModel
                 $seatPriceMap[$seatId] = number_format($priceCents / 100, 2, '.', '');
             }
 
-            // Xử lý bắp nước
             $selectedConcessions = [];
 
             foreach ($validatedConcessions as $itemId => $quantity) {
                 $itemQuery = $pdo->prepare(
                     'SELECT id, don_gia
-                    FROM bapnuoc
-                    WHERE id = :id AND trang_thai = 1'
+                     FROM bapnuoc
+                     WHERE id = :id AND trang_thai = 1'
                 );
                 $itemQuery->execute(['id' => $itemId]);
                 $item = $itemQuery->fetch();
@@ -327,16 +326,17 @@ final class BookingModel
             $orderQuery = $pdo->prepare(
                 "INSERT INTO datve
                     (user_id, suat_chieu_id, ma_don_hang, tong_tien,
-                    phuong_thuc_thanh_toan, trang_thai_thanh_toan)
-                VALUES
+                     phuong_thuc_thanh_toan, trang_thai_thanh_toan, idempotency_key)
+                 VALUES
                     (:user_id, :showtime_id, :order_code, :total,
-                    'DEMO', 'DaThanhToan')"
+                     'DEMO', 'DaThanhToan', :idempotency_key)"
             );
             $orderQuery->execute([
                 'user_id' => $userId,
                 'showtime_id' => $showtimeId,
                 'order_code' => $orderCode,
                 'total' => $total,
+                'idempotency_key' => $idempotencyKey,
             ]);
 
             $orderId = (int) $pdo->lastInsertId();
@@ -345,7 +345,7 @@ final class BookingModel
             $ticketQuery = $pdo->prepare(
                 'INSERT INTO chitietve
                     (dat_ve_id, ghe_id, gia_ve, ma_qr_code)
-                VALUES (:order_id, :seat_id, :price, :qr_code)'
+                 VALUES (:order_id, :seat_id, :price, :qr_code)'
             );
 
             foreach ($seatIds as $seatId) {
@@ -360,7 +360,7 @@ final class BookingModel
             $concessionQuery = $pdo->prepare(
                 'INSERT INTO chitietdatbapnuoc
                     (dat_ve_id, bap_nuoc_id, so_luong, gia_tien)
-                VALUES (:order_id, :item_id, :quantity, :price)'
+                 VALUES (:order_id, :item_id, :quantity, :price)'
             );
 
             foreach ($selectedConcessions as $item) {
@@ -375,8 +375,8 @@ final class BookingModel
             // Xóa holds sau khi đặt thành công
             $deleteHolds = $pdo->prepare(
                 'DELETE FROM ghedanggiu
-                WHERE suat_chieu_id = :showtime_id
-                AND user_id = :user_id'
+                 WHERE suat_chieu_id = :showtime_id
+                   AND user_id = :user_id'
             );
             $deleteHolds->execute([
                 'showtime_id' => $showtimeId,
@@ -395,7 +395,6 @@ final class BookingModel
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            
             throw $exception;
         }
     }
