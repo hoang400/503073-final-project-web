@@ -229,7 +229,7 @@ INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_
 (1, 3, DATE_ADD(CURDATE(), INTERVAL '41:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '43:00' HOUR_MINUTE), 150000),
 (1, 3, DATE_ADD(CURDATE(), INTERVAL '44:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '46:00' HOUR_MINUTE), 150000);
 
--- Phim 2 (Kẻ Ăn Hồn) - Phòng 4,5 (Rạp 2)
+
 INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_ket_thuc`, `gia_ve_co_ban`) VALUES
 (2, 4, DATE_ADD(CURDATE(), INTERVAL '10:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '12:15' HOUR_MINUTE), 95000),
 (2, 4, DATE_ADD(CURDATE(), INTERVAL '13:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '15:15' HOUR_MINUTE), 95000),
@@ -240,7 +240,7 @@ INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_
 (2, 5, DATE_ADD(CURDATE(), INTERVAL '16:30' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '18:45' HOUR_MINUTE), 115000),
 (2, 5, DATE_ADD(CURDATE(), INTERVAL '19:30' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '21:45' HOUR_MINUTE), 125000);
 
--- Phim 3 (Siêu Nhân Gấu Trúc) - Phòng 6,7 (Rạp 3)
+
 INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_ket_thuc`, `gia_ve_co_ban`) VALUES
 (3, 6, DATE_ADD(CURDATE(), INTERVAL '9:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '10:35' HOUR_MINUTE), 75000),
 (3, 6, DATE_ADD(CURDATE(), INTERVAL '11:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '12:35' HOUR_MINUTE), 75000),
@@ -250,7 +250,7 @@ INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_
 (3, 7, DATE_ADD(CURDATE(), INTERVAL '13:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '14:35' HOUR_MINUTE), 95000),
 (3, 7, DATE_ADD(CURDATE(), INTERVAL '15:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '16:35' HOUR_MINUTE), 105000);
 
--- Phim 4 (Mật Vụ Biển Đông - Sắp chiếu) - Phòng 8,9,10 (Rạp 4)
+
 INSERT INTO `suatchieu` (`phim_id`, `phong_id`, `thoi_gian_bat_dau`, `thoi_gian_ket_thuc`, `gia_ve_co_ban`) VALUES
 (4, 8, DATE_ADD(CURDATE(), INTERVAL '82:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '84:20' HOUR_MINUTE), 100000),
 (4, 8, DATE_ADD(CURDATE(), INTERVAL '85:00' HOUR_MINUTE), DATE_ADD(CURDATE(), INTERVAL '87:20' HOUR_MINUTE), 100000),
