@@ -19,6 +19,19 @@ final class BookingModel
         return $statement->fetchAll();
     }
 
+
+    public function findConcessions(): array
+    {
+        $statement = Database::connection()->query(
+            "SELECT id, ten_mon, loai, don_gia, hinh_anh
+            FROM bapnuoc
+            WHERE trang_thai = 1
+            ORDER BY id"
+        );
+
+        return $statement->fetchAll();
+    }
+
     public function findSeats(int $showtimeId, int $userId): array
     {
         $pdo = Database::connection();

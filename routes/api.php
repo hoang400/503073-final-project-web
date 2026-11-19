@@ -91,15 +91,18 @@ return [
 
     // ADMIN ROUTES
 
+    
     '/admin/movies' => [
         'GET' => [$admin, 'getMovies'],
         'POST' => [$admin, 'createMovie'],
     ],
 
     '/admin/movies/{id}' => [
+        'GET' => [$admin, 'getMovie'],
         'PATCH' => [$admin, 'updateMovie'],
         'DELETE' => [$admin, 'deleteMovie'],
     ],
+
 
     '/admin/cinemas' => [
         'GET' => [$admin, 'getCinemas'],

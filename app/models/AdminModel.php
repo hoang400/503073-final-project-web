@@ -10,8 +10,26 @@ final class AdminModel
     public function findMovies(?string $search = null, ?string $status = null): array
     {
         $pdo = Database::connection();
-        $sql = "SELECT id, ten_phim, the_loai, thoi_luong, poster_url, mo_ta, trailer_url, trang_thai
+
+        $sql = "SELECT
+                    id,
+                    ten_phim,
+                    ten_ngan,
+                    ten_hien_thi_dropdown,
+                    the_loai,
+                    thoi_luong,
+                    poster_url,
+                    mo_ta,
+                    trailer_url,
+                    do_tuoi,
+                    mo_ta_do_tuoi,
+                    diem_imdb,
+                    dao_dien,
+                    bien_kich,
+                    dien_vien,
+                    trang_thai
                 FROM phim";
+
         $conditions = [];
         $params = [];
 
@@ -33,45 +51,109 @@ final class AdminModel
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->fetchAll();
     }
-
     public function findMovieById(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, ten_phim, the_loai, thoi_luong, poster_url, mo_ta, trailer_url, trang_thai
-             FROM phim WHERE id = ? LIMIT 1'
+            "SELECT
+                id,
+                ten_phim,
+                ten_ngan,
+                ten_hien_thi_dropdown,
+                the_loai,
+                thoi_luong,
+                poster_url,
+                mo_ta,
+                trailer_url,
+                do_tuoi,
+                mo_ta_do_tuoi,
+                diem_imdb,
+                dao_dien,
+                bien_kich,
+                dien_vien,
+                trang_thai
+            FROM phim
+            WHERE id = ?
+            LIMIT 1"
         );
+
         $stmt->execute([$id]);
+
         return $stmt->fetch() ?: null;
     }
 
     public function createMovie(array $data): int
     {
         $pdo = Database::connection();
+
         $stmt = $pdo->prepare(
-            'INSERT INTO phim (ten_phim, the_loai, thoi_luong, poster_url, mo_ta, trailer_url, trang_thai)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            "INSERT INTO phim (
+                ten_phim,
+                ten_ngan,
+                ten_hien_thi_dropdown,
+                the_loai,
+                thoi_luong,
+                poster_url,
+                mo_ta,
+                trailer_url,
+                do_tuoi,
+                mo_ta_do_tuoi,
+                diem_imdb,
+                dao_dien,
+                bien_kich,
+                dien_vien,
+                trang_thai
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
+
         $stmt->execute([
             $data['ten_phim'],
+            $data['ten_ngan'] ?? null,
+            $data['ten_hien_thi_dropdown'] ?? null,
             $data['the_loai'],
             $data['thoi_luong'],
             $data['poster_url'] ?? null,
             $data['mo_ta'] ?? null,
             $data['trailer_url'] ?? null,
+            $data['do_tuoi'] ?? null,
+            $data['mo_ta_do_tuoi'] ?? null,
+            $data['diem_imdb'] ?? null,
+            $data['dao_dien'] ?? null,
+            $data['bien_kich'] ?? null,
+            $data['dien_vien'] ?? null,
             $data['trang_thai'] ?? 'SAP_CHIEU',
         ]);
+
         return (int) $pdo->lastInsertId();
     }
 
     public function updateMovie(int $id, array $data): void
     {
         $pdo = Database::connection();
+
+        $allowed = [
+            'ten_phim',
+            'ten_ngan',
+            'ten_hien_thi_dropdown',
+            'the_loai',
+            'thoi_luong',
+            'poster_url',
+            'mo_ta',
+            'trailer_url',
+            'do_tuoi',
+            'mo_ta_do_tuoi',
+            'diem_imdb',
+            'dao_dien',
+            'bien_kich',
+            'dien_vien',
+            'trang_thai',
+        ];
+
         $fields = [];
         $params = [];
 
-        $allowed = ['ten_phim', 'the_loai', 'thoi_luong', 'poster_url', 'mo_ta', 'trailer_url', 'trang_thai'];
         foreach ($allowed as $field) {
             if (array_key_exists($field, $data)) {
                 $fields[] = "{$field} = ?";
@@ -84,10 +166,13 @@ final class AdminModel
         }
 
         $params[] = $id;
-        $stmt = $pdo->prepare('UPDATE phim SET ' . implode(', ', $fields) . ' WHERE id = ?');
+
+        $stmt = $pdo->prepare(
+            'UPDATE phim SET ' . implode(', ', $fields) . ' WHERE id = ?'
+        );
+
         $stmt->execute($params);
     }
-
     public function deleteMovie(int $id): void
     {
         // Soft delete: set status to NGUNG_CHIEU

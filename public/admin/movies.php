@@ -110,14 +110,100 @@
                             <div id="posterPreview" style="margin-top:8px; max-height:200px;"></div>
                         </div>
                         
-                        <div style="grid-column:1/-1;">
-                            <label>URL Trailer (YouTube)</label>
-                            <input type="url" name="trailer_url" id="trailer_url" maxlength="500" placeholder="https://youtube.com/watch?v=..." style="width:100%;">
+                        <div>
+                            <label>Tên ngắn</label>
+                            <input
+                                type="text"
+                                name="ten_ngan"
+                                id="ten_ngan"
+                                maxlength="255"
+                                placeholder="Ví dụ: Godzilla x Kong"
+                                style="width:100%;"
+                            >
                         </div>
-                        
+
+                        <div>
+                            <label>Tên hiển thị trong danh sách chọn</label>
+                            <input
+                                type="text"
+                                name="ten_hien_thi_dropdown"
+                                id="ten_hien_thi_dropdown"
+                                maxlength="255"
+                                placeholder="Tên phim (2D Vietsub)"
+                                style="width:100%;"
+                            >
+                        </div>
+
+                        <div>
+                            <label>Phân loại độ tuổi</label>
+                            <select name="do_tuoi" id="do_tuoi" style="width:100%;">
+                                <option value="">Chưa xác định</option>
+                                <option value="P">P</option>
+                                <option value="K">K</option>
+                                <option value="T13">T13</option>
+                                <option value="T16">T16</option>
+                                <option value="T18">T18</option>
+                                <option value="C13">C13</option>
+                                <option value="C16">C16</option>
+                                <option value="C18">C18</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Mô tả độ tuổi</label>
+                            <input
+                                type="text"
+                                name="mo_ta_do_tuoi"
+                                id="mo_ta_do_tuoi"
+                                maxlength="255"
+                                placeholder="Ví dụ: C13 - Khán giả trên 13 tuổi"
+                                style="width:100%;"
+                            >
+                        </div>
+
+                        <div>
+                            <label>Điểm IMDb (0–10)</label>
+                            <input
+                                type="number"
+                                name="imdb"
+                                id="imdb"
+                                min="0"
+                                max="10"
+                                step="0.1"
+                                placeholder="8.5"
+                                style="width:100%;"
+                            >
+                        </div>
+
+                        <div>
+                            <label>Đạo diễn</label>
+                            <input
+                                type="text"
+                                name="dao_dien"
+                                id="dao_dien"
+                                maxlength="255"
+                                style="width:100%;"
+                            >
+                        </div>
+
                         <div style="grid-column:1/-1;">
-                            <label>Mô tả</label>
-                            <textarea name="mo_ta" id="mo_ta" rows="4" maxlength="2000" placeholder="Mô tả phim..." style="width:100%;"></textarea>
+                            <label>Biên kịch</label>
+                            <textarea
+                                name="bien_kich"
+                                id="bien_kich"
+                                rows="2"
+                                style="width:100%;"
+                            ></textarea>
+                        </div>
+
+                        <div style="grid-column:1/-1;">
+                            <label>Diễn viên</label>
+                            <textarea
+                                name="dien_vien"
+                                id="dien_vien"
+                                rows="2"
+                                style="width:100%;"
+                            ></textarea>
                         </div>
                     </div>
                     <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px; border-top:1px solid #334155;">
