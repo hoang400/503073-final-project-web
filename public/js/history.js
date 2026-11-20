@@ -1,5 +1,3 @@
-// Lịch sử đặt vé + chi tiết đơn (báo cáo 6.1.3.5, 6.1.3.6):
-// rạp/địa chỉ/ghế/ngày đặt, xem QR vé từng ghế, hủy vé.
 document.addEventListener('DOMContentLoaded', async () => {
     if (!await requireUser()) {
         return;
@@ -21,7 +19,7 @@ function qrImageUrl(code, size = 160) {
 }
 
 async function cancelOrder(orderId, button) {
-    if (!confirm('Bạn có chắc muốn hủy đơn này? Các ghế sẽ được trả lại để người khác đặt.')) {
+    if (!confirm('Bạn có chắc muốn hủy đơn này?')) {
         return;
     }
 

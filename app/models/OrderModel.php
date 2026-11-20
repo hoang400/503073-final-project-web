@@ -13,7 +13,7 @@ final class OrderModel
                     GROUP_CONCAT(
                         CONCAT(g.hang_ghe, g.so_thu_tu)
                         ORDER BY g.hang_ghe, g.so_thu_tu
-                        SEPARATOR ', '
+                        SEPARATOR \', \'
                     ) AS ghe_da_chon
              FROM datve d
              JOIN suatchieu s ON s.id = d.suat_chieu_id
@@ -23,11 +23,6 @@ final class OrderModel
              LEFT JOIN chitietve cv ON cv.dat_ve_id = d.id
              LEFT JOIN ghe g ON g.id = cv.ghe_id
              WHERE d.user_id = :user_id
-             -- GROUP BY liệt kê đủ các cột không gom nhóm: XAMPP dùng
-             -- MariaDB, chế độ ONLY_FULL_GROUP_BY ở đây không chấp nhận
-             -- GROUP BY d.id một mình (dù MySQL 8 cho phép nhờ khóa
-             -- chính), nên /orders trả 500. Liệt kê đủ cột thì kết quả
-             -- vẫn như cũ vì d.id là duy nhất cho mỗi đơn.
              GROUP BY d.id, d.ma_don_hang, d.tong_tien,
                       d.trang_thai_thanh_toan, d.thoi_gian_dat,
                       p.ten_phim, s.thoi_gian_bat_dau,
@@ -94,10 +89,6 @@ final class OrderModel
         return $order;
     }
 
-    // Hủy vé (khách hàng tự hủy): chỉ hủy đơn của chính mình, chưa hủy
-    // trước đó và suất chiếu chưa bắt đầu. Chỉ đổi trạng thái sang DaHuy
-    // (không xóa) để bảo toàn lịch sử; ghế tự về trạng thái trống vì các
-    // truy vấn ghế chỉ tính đơn chưa hủy (trang_thai_thanh_toan <> 'DaHuy').
     public function cancelOrder(int $userId, int $orderId): bool
     {
         $pdo = Database::connection();
