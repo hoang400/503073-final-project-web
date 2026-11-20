@@ -192,6 +192,6 @@
     </footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js?v=3"></script>
+    <script src="../js/admin.js?v=4"></script>
 </body>
 </html>

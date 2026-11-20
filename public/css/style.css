@@ -3323,6 +3323,29 @@ button:disabled {
 .profile-page form > button { width: 100%; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 800; letter-spacing: .5px; cursor: pointer; }
 .profile-page form > button:hover { filter: brightness(1.12); }
 .profile-page form > button:disabled { opacity: .6; cursor: default; }
+
+/* Sơ đồ ghế trang admin — cùng bố cục với trang đặt vé.
+   (Rule .seat-row cũ ở trên vẫn đặt margin/min-width nên cần ghi đè.) */
+#seatMapSection .seats-container { min-width: 600px; }
+#seatMapSection .seat-row { min-width: 0; margin: 0; }
+
+/* Trang soát vé (nhân viên) — dùng chung hệ thống với trang admin */
+.staff-checkin .staff-info { color: #94a3b8; font-size: 13px; }
+.staff-checkin .checkin-card { max-width: 600px; margin-bottom: 24px; }
+.staff-checkin .checkin-form { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.staff-checkin .checkin-input { flex: 1; min-width: 280px; padding: 14px; font-size: 16px; font-family: monospace; background: #0f172a; border: 1px solid #334155; border-radius: 12px; color: #fff; }
+.staff-checkin .checkin-input:focus { border-color: #38bdf8; outline: none; }
+.staff-checkin .checkin-hint { font-size: 12px; color: #94a3b8; margin: 0; }
+.staff-checkin h2 { margin-bottom: 16px; }
+.staff-checkin .result-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.staff-checkin .result-head h2 { margin-bottom: 0; }
+.staff-checkin .ticket-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.staff-checkin .info-item label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; }
+.staff-checkin .info-item strong { font-size: 14px; }
+.staff-checkin .checkin-code { font-family: monospace; font-size: 13px; word-break: break-all; }
+.staff-checkin .result-actions { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid #334155; }
+.staff-checkin .history-card { margin-top: 24px; }
+.staff-checkin .checkin-history-code { font-family: monospace; font-size: 12px; }
 @media (max-width: 768px) {
     .profile-page { padding: 24px 16px; }
     .two-columns { grid-template-columns: 1fr; }

@@ -17,48 +17,62 @@
                     <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
                 </span>
             </a>
-            <nav class="main-nav" aria-label="Staff navigation">
+
+            <nav class="main-nav" aria-label="Điều hướng chính">
                 <a href="../index.php">
                     <i class="fa-solid fa-house"></i> Trang Chủ
                 </a>
+                <a href="../movies.php">
+                    <i class="fa-solid fa-film"></i> Phim Đang Chiếu
+                </a>
+                <a href="../booking.php">
+                    <i class="fa-solid fa-ticket"></i> Đặt Vé
+                </a>
+                <a href="../history.php">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Vé
+                </a>
+                <a href="../admin/index.php">
+                    <i class="fa-solid fa-user-shield"></i> Trang Admin
+                </a>
             </nav>
+
             <div class="account-area">
-                <span class="staff-badge"><i class="fa-solid fa-user-check"></i> Nhân viên</span>
+                <span class="staff-badge">Nhân viên</span>
                 <div id="account"></div>
             </div>
         </div>
     </header>
-    <main>
+    <main class="admin-main staff-checkin">
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
-            <h1>Soát Vé & Check-in</h1>
-            <span id="staffInfo" style="color:#94a3b8; font-size:13px;"></span>
+
+        <div class="admin-page-head">
+            <h1>Soát Vé &amp; Check-in</h1>
+            <span id="staffInfo" class="staff-info"></span>
         </div>
 
-        <!-- QR Input Section -->
-        <article class="card" style="max-width:600px; margin-bottom:24px;">
-            <h2>Nhập Mã Vé / Quét QR</h2>
-            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
-                <input type="text" id="qrInput" placeholder="Nhập mã QR hoặc mã vé..." style="flex:1; min-width:280px; padding:14px; font-size:16px; font-family:monospace;">
-                <button id="verifyBtn" class="button" style="padding:14px 24px; font-size:16px;">🔍 Kiểm tra</button>
+        <!-- Nhập mã vé -->
+        <article class="card checkin-card">
+            <h2>Nhập mã vé</h2>
+            <div class="checkin-form">
+                <input type="text" id="qrInput" class="checkin-input" placeholder="Nhập mã đơn hàng, VD: CS474322" autocomplete="off">
+                <button id="verifyBtn" class="btn-gradient">Kiểm tra</button>
             </div>
-            <p style="font-size:12px; color:#94a3b8;">Hỗ trợ nhập mã QR code hoặc mã đơn hàng (VD: CS...)</p>
+            <p class="checkin-hint">Nhập mã đơn hàng (VD: CS474322) để xem toàn bộ vé của đơn. Chỉ cần nhập mã, không cần quét QR.</p>
         </article>
 
         <!-- Result Section -->
         <article class="card" id="resultSection" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div class="result-head">
                 <h2 id="resultTitle">Kết Quả Kiểm Tra</h2>
                 <span id="resultStatus" class="status-badge"></span>
             </div>
-            
-            <div id="resultContent" style="display:grid; gap:16px;">
-                <!-- Ticket Info Grid -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+
+            <!-- Kết quả 1 vé -->
+            <div id="singleResult">
+                <div class="ticket-info">
                     <div class="info-item">
-                        <label>Mã vé / QR</label>
-                        <strong id="resQrCode" style="font-family:monospace; font-size:13px; word-break:break-all;"></strong>
+                        <label>Mã vé</label>
+                        <strong id="resQrCode" class="checkin-code"></strong>
                     </div>
                     <div class="info-item">
                         <label>Mã đơn hàng</label>
@@ -89,27 +103,48 @@
                         <strong id="resPaymentStatus"></strong>
                     </div>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div id="resultActions" style="display:flex; gap:12px; flex-wrap:wrap; padding-top:16px; border-top:1px solid #334155;">
-                    <button id="confirmCheckinBtn" class="button" style="background:#22c55e; display:none;">✅ Xác nhận vào rạp</button>
-                    <button id="clearResultBtn" class="button" style="background:transparent; color:#94a3b8;">🔄 Kiểm tra vé khác</button>
+
+                <div class="result-actions">
+                    <button id="confirmCheckinBtn" class="button btn-confirm" style="display:none;">Xác nhận vào rạp</button>
+                    <button type="button" class="button btn-ghost clear-result-btn">Kiểm tra vé khác</button>
+                </div>
+            </div>
+
+            <!-- Kết quả mã đơn hàng: danh sách vé của đơn -->
+            <div id="orderResult" style="display:none;">
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Ghế</th>
+                                <th>Phim</th>
+                                <th>Suất chiếu</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTicketsBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="result-actions">
+                    <button type="button" class="button btn-ghost clear-result-btn">Kiểm tra vé khác</button>
                 </div>
             </div>
         </article>
 
-        <!-- History/Log Section (Optional) -->
-        <article class="card" style="margin-top:24px;">
+        <!-- History/Log Section -->
+        <article class="card history-card">
             <h2>Lịch Sử Soát Vé Gần Đây</h2>
-            <div style="overflow-x:auto;">
-                <table id="historyTable" style="width:100%; border-collapse:collapse; font-size:13px;">
+            <div class="admin-table-wrap">
+                <table id="historyTable" class="admin-table">
                     <thead>
-                        <tr style="border-bottom:1px solid #334155; text-align:left;">
-                            <th style="padding:10px;">Thời gian</th>
-                            <th style="padding:10px;">Mã vé</th>
-                            <th style="padding:10px;">Phim</th>
-                            <th style="padding:10px;">Kết quả</th>
-                            <th style="padding:10px;">Nhân viên</th>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Mã vé</th>
+                            <th>Phim</th>
+                            <th>Kết quả</th>
+                            <th>Nhân viên</th>
                         </tr>
                     </thead>
                     <tbody id="historyBody"></tbody>

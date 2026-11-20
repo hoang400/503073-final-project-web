@@ -347,6 +347,23 @@ async function header() {
             </a>
         `;
 
+    // Trang soát vé đã có sẵn nhưng trước đây không có đường dẫn tới nó
+    // từ giao diện — nhân viên đăng nhập xong không biết vào đâu để soát vé.
+    if (
+        user
+        && (user.role === 'STAFF' || user.role === 'ADMIN')
+        && !document.querySelector('[data-nav-checkin]')
+    ) {
+        const nav = document.querySelector('.main-nav');
+        if (nav) {
+            nav.insertAdjacentHTML('beforeend', `
+                <a href="${SITE_BASE}staff/check-in.php" data-nav-checkin>
+                    <i class="fa-solid fa-circle-check"></i> Soát vé
+                </a>
+            `);
+        }
+    }
+
     if (!user) {
         return;
     }
@@ -402,6 +419,13 @@ async function loadMovies() {
                 .slice(0, 4);
 
             renderMovies(container, showingMovies);
+
+            // Trang chủ thường chỉ có 3 phim đang chiếu trong lưới 4 cột
+            // -> cột thứ 4 trống làm nút "XEM TẤT CẢ PHIM" (căn phải theo
+            // mép section) trông lệch khỏi mép phải của poster cuối.
+            // Co số cột theo số phim để mép phải lưới trùng mép phải poster.
+            container.style.gridTemplateColumns =
+                `repeat(${Math.max(1, Math.min(4, showingMovies.length))}, minmax(0, 1fr))`;
         }
 
     } catch (error) {

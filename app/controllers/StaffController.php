@@ -10,9 +10,9 @@ final class StaffController
     }
 
 
-    // CHECK-IN: Verify mã QR
+    // CHECK-IN: Soát vé bằng mã nhập tay
     // POST /staff/check-in
-    // Body: { "qr_code": "..." }
+    // Body: { "qr_code": "..." } (mã vé hoặc mã đơn hàng)
     public function verifyTicket(): void
     {
         StaffMiddleware::requireStaff();
@@ -21,27 +21,16 @@ final class StaffController
 
         $qrCode = trim($body['qr_code'] ?? '');
         if ($qrCode === '') {
-            throw new ApiException('Thiếu mã QR.', 422);
+            throw new ApiException('Thiếu mã vé.', 422);
         }
 
+        // Tra cứu là thao tác đọc: vé hợp lệ hay không đều là kết quả
+        // tra cứu thành công (trả 200) để frontend hiển thị đúng trạng
+        // thái. Trước đây trả 402/404/409... làm api() ném lỗi chung
+        // "Không thể thực hiện yêu cầu." và không hiện chi tiết vé.
         $result = $this->staff->verifyTicket($qrCode);
 
-        // Map status code for frontend
-        $statusMap = [
-            'valid' => 200,
-            'pending' => 402,     // Payment required
-            'used' => 409,        // Conflict
-            'cancelled' => 410,   // Gone
-            'early' => 425,       // Too early
-            'invalid' => 404,     // Not found
-        ];
-
-        $statusCode = $statusMap[$result['status']] ?? 200;
-
-        jsonResponse([
-            'ok' => $result['status'] === 'valid',
-            'data' => $result,
-        ], $statusCode);
+        jsonResponse(['ok' => true, 'data' => $result]);
     }
 
     // CHECK-IN: Xác nhận vào rạp
@@ -55,7 +44,7 @@ final class StaffController
 
         $qrCode = trim($body['qr_code'] ?? '');
         if ($qrCode === '') {
-            throw new ApiException('Thiếu mã QR.', 422);
+            throw new ApiException('Thiếu mã vé.', 422);
         }
 
         $result = $this->staff->confirmCheckin($qrCode);

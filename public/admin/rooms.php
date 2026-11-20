@@ -106,10 +106,13 @@
                 <span id="selectedSeatInfo" style="margin-left:auto; font-weight:bold; color:#38bdf8;"></span>
             </div>
 
-            <div class="screen" style="margin:20px auto; text-align:center;">MÀN HÌNH</div>
-            
-            <div class="seat-scroll" style="overflow-x:auto; padding:10px 0;">
-                <div id="seatMap" style="min-width:600px;"></div>
+            <div class="screen-area">
+                <div class="screen-light"></div>
+                <div class="screen">MÀN HÌNH</div>
+            </div>
+
+            <div class="seat-scroll">
+                <div id="seatMap" class="seats-container"></div>
             </div>
         </article>
 
@@ -197,6 +200,6 @@
     </footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js?v=3"></script>
+    <script src="../js/admin.js?v=4"></script>
 </body>
 </html>

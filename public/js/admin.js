@@ -792,36 +792,48 @@ function renderSeatMap(seats) {
         container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "Tự động tạo ghế" hoặc thêm thủ công.</p>';
         return;
     }
-    
-    // Group by row
+
+    // Gom theo hàng, bố cục giống hệt trang đặt vé:
+    // nhãn hàng 2 bên, lối đi sau ghế 2 / 7 / 10, ghế Couple rộng gấp đôi.
     const rows = {};
     seats.forEach(s => {
         if (!rows[s.row]) rows[s.row] = [];
         rows[s.row].push(s);
     });
-    
-    const rowLabels = Object.keys(rows).sort();
-    
-    let html = '';
-    rowLabels.forEach(row => {
+
+    const rowLabels = Object.keys(rows).sort((a, b) =>
+        a.localeCompare(b, 'vi', { numeric: true })
+    );
+
+    container.innerHTML = rowLabels.map(row => {
         const rowSeats = rows[row].sort((a, b) => a.number - b.number);
-        html += `
-            <div class="seat-row" style="display:flex; align-items:center; gap:6px; margin:8px 0; min-width:540px;">
-                <b style="width:20px; text-align:right; color:#94a3b8;">${esc(row)}</b>
-                ${rowSeats.map(s => `
-                    <button type="button" class="seat ${s.type === 'VIP' ? 'vip' : ''} ${s.type === 'Couple' ? 'double' : ''} ${s.selected ? 'selected' : ''}" 
-                            data-seat-id="${s.id}" data-row="${esc(row)}" data-number="${s.number}" data-type="${s.type}"
-                            style="padding:0; width:${s.type === 'Couple' ? '76px' : '35px'}; height:32px; border:1px solid #475569; background:${s.type === 'VIP' ? '#312e81' : s.type === 'Couple' ? '#581c87' : '#1e293b'}; font-size:10px; flex-shrink:0;"
-                            title="Ghế ${esc(row)}${s.number} (${esc(s.type)})">
-                        ${esc(row)}${s.number}
-                    </button>
-                `).join('')}
+
+        const cells = [];
+        rowSeats.forEach((s, index) => {
+            const typeClass = s.type === 'VIP' ? 'vip' : s.type === 'Couple' ? 'couple' : 'standard';
+            cells.push(`
+                <button type="button" class="seat ${typeClass}"
+                        data-seat-id="${s.id}" data-row="${esc(row)}" data-number="${s.number}" data-type="${s.type}"
+                        title="Ghế ${esc(row)}${s.number} (${esc(s.type)})">
+                    ${esc(row)}${s.number}
+                </button>
+            `);
+
+            // Lối đi như trang đặt vé: hàng dài (>8 ghế) chừa khe sau ghế 2, 7, 10
+            if (rowSeats.length > 8 && [1, 6, 9].includes(index)) {
+                cells.push('<span class="seat-aisle" aria-hidden="true"></span>');
+            }
+        });
+
+        return `
+            <div class="seat-row">
+                <span class="seat-row-label">${esc(row)}</span>
+                <div class="seat-row-list">${cells.join('')}</div>
+                <span class="seat-row-label">${esc(row)}</span>
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
-    
+    }).join('');
+
     // Bind seat click events
     container.querySelectorAll('.seat').forEach(btn => {
         btn.addEventListener('click', () => handleSeatClick(btn));
