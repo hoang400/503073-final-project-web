@@ -1,4 +1,5 @@
 const $ = selector => document.querySelector(selector);
+const SITE_BASE = new URL('../', document.currentScript.src).href;
 
 function message(text, error = false) {
     const notice = $('#notice');
@@ -304,10 +305,15 @@ async function requireUser() {
         return true;
     }
 
-    const next = location.pathname.split('/').pop()
+    // Đường dẫn trang hiện tại tính từ thư mục gốc của web
+    // (vd. "admin/index.php") để sau khi đăng nhập quay lại đúng trang.
+    const basePath = new URL(SITE_BASE).pathname;
+    const next = (location.pathname.startsWith(basePath)
+        ? location.pathname.slice(basePath.length)
+        : location.pathname.split('/').pop())
         + (location.search || '');
 
-    location.href = 'login.php?next=' + encodeURIComponent(next);
+    location.href = SITE_BASE + 'login.php?next=' + encodeURIComponent(next);
 
     return false;
 }
@@ -323,7 +329,7 @@ async function header() {
 
     account.innerHTML = user
         ? `
-            <a href="profile.php" class="account-user">
+            <a href="${SITE_BASE}profile.php" class="account-user">
                 <i class="fa-solid fa-circle-user"></i>
                 ${esc(user.name)}
             </a>
@@ -333,7 +339,7 @@ async function header() {
             </button>
         `
         : `
-            <a href="login.php" class="account-login">
+            <a href="${SITE_BASE}login.php" class="account-login">
                 Đăng nhập
             </a>
         `;
@@ -348,7 +354,7 @@ async function header() {
 
         try {
             await api('/auth/logout', 'POST');
-            location.href = 'login.php';
+            location.href = SITE_BASE + 'login.php';
         } catch (error) {
             message(error.message, true);
             button.disabled = false;
