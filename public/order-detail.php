@@ -49,6 +49,6 @@
     <footer>© 2026 CineStar • Đồ án website đặt vé xem phim</footer>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/history.js?v=8"></script>
+    <script src="js/history.js?v=9"></script>
 </body>
 </html>

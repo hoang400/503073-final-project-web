@@ -89,7 +89,7 @@ async function loadHistory(container) {
                             <p class="order-total-label">TỔNG TIỀN ĐÃ TRẢ</p>
                             <p class="order-total">${money(order.total)}</p>
                             <div class="order-actions">
-                                <button type="button" class="button" data-qr-order="${order.id}" data-qr-code="${esc(order.code)}">
+                                <button type="button" class="button" data-qr-order="${order.id}" data-qr-code="${esc(order.code)}" data-qr-seats="${esc(order.seats || '')}">
                                     <i class="fa-solid fa-qrcode" aria-hidden="true"></i> Xem QR Vé
                                 </button>
                                 ${order.status !== 'DaHuy' ? `
@@ -111,7 +111,7 @@ async function loadHistory(container) {
 
             container.querySelectorAll('[data-qr-order]').forEach(button => {
                 button.addEventListener('click', () => {
-                    openQrModal(button.dataset.qrOrder, button.dataset.qrCode);
+                    openQrModal(button.dataset.qrOrder, button.dataset.qrCode, button.dataset.qrSeats);
                 });
             });
         }
@@ -124,8 +124,9 @@ async function loadHistory(container) {
     }
 }
 
-// Modal mã QR vào rạp (Hình 6.1.3.6 trong báo cáo).
-function openQrModal(orderId, orderCode) {
+// Modal mã QR vào rạp (Hình 6.1.3.6 trong báo cáo): 1 mã QR duy nhất
+// cho cả đơn (mã đơn hàng), dù đơn có nhiều ghế.
+function openQrModal(orderId, orderCode, orderSeats) {
     const modal = $('#qr-modal');
     const body = $('#qr-modal-body');
 
@@ -136,40 +137,31 @@ function openQrModal(orderId, orderCode) {
 
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
-    body.innerHTML = 'Đang tải mã vé…';
 
-    api(`/order?order_id=${encodeURIComponent(orderId)}`).then(order => {
-        const tickets = (order.tickets || []).filter(ticket => ticket.ma_qr_code);
+    const code = orderCode || '';
 
-        if (!tickets.length) {
-            body.innerHTML = '<p>Đơn này chưa có mã vé.</p>';
-            return;
-        }
+    if (!code) {
+        body.innerHTML = '<p>Đơn này chưa có mã vé.</p>';
+        return;
+    }
 
-        const single = tickets.length === 1;
-
-        body.innerHTML = `
-            <div class="qr-modal-tickets">
-                ${tickets.map(ticket => `
-                    <figure class="qr-modal-ticket">
-                        <span class="qr-modal-qr">
-                            <img src="${qrImageUrl(ticket.ma_qr_code, single ? 200 : 140)}"
-                                alt="Mã QR vé ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}"
-                                width="${single ? 200 : 140}" height="${single ? 200 : 140}">
-                        </span>
-                        <figcaption>Ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}</figcaption>
-                    </figure>
-                `).join('')}
-            </div>
-            <p class="qr-modal-code">${esc(orderCode || order.ma_don_hang || '')}</p>
-            <p class="qr-modal-note">Vui lòng xuất trình mã QR này tại quầy soát vé CineStar</p>
-            <a class="qr-modal-detail" href="order-detail.php?id=${encodeURIComponent(orderId)}">
-                Xem chi tiết đơn →
-            </a>
-        `;
-    }).catch(error => {
-        body.innerHTML = `<p>Không tải được mã vé: ${esc(error.message)}</p>`;
-    });
+    body.innerHTML = `
+        <div class="qr-modal-tickets">
+            <figure class="qr-modal-ticket">
+                <span class="qr-modal-qr">
+                    <img src="${qrImageUrl(code, 220)}"
+                        alt="Mã QR đơn vé ${esc(code)}"
+                        width="220" height="220">
+                </span>
+            </figure>
+        </div>
+        ${orderSeats ? `<p class="qr-modal-seats">Ghế: ${esc(orderSeats)}</p>` : ''}
+        <p class="qr-modal-code">${esc(code)}</p>
+        <p class="qr-modal-note">Vui lòng xuất trình mã QR này tại quầy soát vé CineStar</p>
+        <a class="qr-modal-detail" href="order-detail.php?id=${encodeURIComponent(orderId)}">
+            Xem chi tiết đơn →
+        </a>
+    `;
 }
 
 function closeQrModal() {

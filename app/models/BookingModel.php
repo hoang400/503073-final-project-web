@@ -9,6 +9,7 @@ final class BookingModel
             "SELECT s.id, s.phim_id, s.phong_id, s.thoi_gian_bat_dau,
                     s.thoi_gian_ket_thuc, s.gia_ve_co_ban,
                     ph.ten_phong AS ten_phong,
+                    ph.loai_phong AS loai_phong,
                     r.ten_rap AS ten_rap
              FROM suatchieu s
              JOIN phongchieu ph ON ph.id = s.phong_id

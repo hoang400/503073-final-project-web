@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 
 <body>
@@ -269,32 +269,34 @@
             <div id="vietqrModal" class="fnb-modal" hidden>
                 <div class="fnb-modal-backdrop" data-close-vietqr></div>
                 <div class="fnb-modal-card vietqr-card" role="dialog" aria-modal="true" aria-label="Thanh toán VietQR">
-                    <div class="fnb-modal-head">
-                        <div>
-                            <span class="section-eyebrow">THANH TOÁN MÔ PHỎNG</span>
-                            <h3>Quét mã VietQR để thanh toán</h3>
-                            <p>Mở ứng dụng ngân hàng và quét mã bên dưới.</p>
-                        </div>
+                    <div class="fnb-modal-head fnb-modal-head-title">
+                        <h3><i class="fa-solid fa-border-all" aria-hidden="true"></i> THANH TOÁN VÉ CINESTAR</h3>
                         <button id="vietqrClose" type="button" class="fnb-modal-close" aria-label="Đóng">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                     <div class="vietqr-body">
-                        <img id="vietqrImage" src="" alt="Mã VietQR thanh toán" width="220" height="220">
                         <dl class="vietqr-rows">
-                            <div><dt>Mã đơn:</dt><dd id="vietqrCode">—</dd></div>
-                            <div><dt>Tổng tiền:</dt><dd id="vietqrTotal">—</dd></div>
+                            <div><dt>Mã đơn:</dt><dd id="vietqrCode" class="vietqr-code">—</dd></div>
+                            <div><dt>Phim:</dt><dd id="vietqrMovie">—</dd></div>
+                            <div><dt>Ghế:</dt><dd id="vietqrSeats" class="vietqr-seats">—</dd></div>
+                            <div><dt>Tổng tiền:</dt><dd id="vietqrTotal" class="vietqr-total">—</dd></div>
                         </dl>
-                        <p class="vietqr-note">Thanh toán mô phỏng cho đồ án: sau khi quét mã, bấm "Xem chi tiết đơn" để kiểm tra vé và mã QR soát vé.</p>
+                        <div class="vietqr-frame">
+                            <span class="vietqr-brand">VietQR</span>
+                            <img id="vietqrImage" src="" alt="Mã VietQR thanh toán" width="220" height="220">
+                            <span class="vietqr-banks">napas&nbsp;&nbsp;•&nbsp;&nbsp;MB</span>
+                        </div>
+                        <p class="vietqr-note">Quét mã QR bằng ứng dụng Ngân hàng để hoàn tất thanh toán</p>
                     </div>
-                    <div class="fnb-modal-foot">
-                        <button id="vietqrViewOrder" type="button" class="fnb-modal-apply">Xem chi tiết đơn</button>
+                    <div class="fnb-modal-foot fnb-modal-foot-single">
+                        <button id="vietqrViewOrder" type="button" class="fnb-modal-apply vietqr-confirm">ĐÃ HOÀN TẤT THANH TOÁN</button>
                     </div>
                 </div>
             </div>
 
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/booking.js?v=6"></script>
+    <script src="js/booking.js?v=7"></script>
 </body>
 </html>

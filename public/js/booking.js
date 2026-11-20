@@ -229,6 +229,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const codeEl = document.getElementById('vietqrCode');
         if (codeEl) codeEl.textContent = order.code || '—';
+        const movieEl = document.getElementById('vietqrMovie');
+        if (movieEl) {
+            const movie = selectedMovie();
+            movieEl.textContent = movie
+                ? (movie.title || movie.shortTitle || '—')
+                : '—';
+        }
+        const seatsEl = document.getElementById('vietqrSeats');
+        if (seatsEl) {
+            seatsEl.textContent = selectedSeatDetails.length
+                ? selectedSeatDetails.map(s => `${s.row}${s.number}`).join(', ')
+                : '—';
+        }
         const totalEl = document.getElementById('vietqrTotal');
         if (totalEl) totalEl.textContent = money(order.total);
 
@@ -397,19 +410,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return showtimes.filter(s => {
             if (selectedDate && dateOfShowtime(s) !== selectedDate) return false;
             if (cinemaSelect.value && (s.cinemaName || '') !== cinemaSelect.value) return false;
+            if (formatSelect.value && (s.roomType || '') !== formatSelect.value) return false;
             return true;
         });
     }
 
     function populateFilters() {
-        // Định dạng: lấy từ phim đang chọn (backend hiện không có trường format riêng)
-        const movie = selectedMovie();
-        const fmt = movieFormat(movie);
+        // Định dạng: distinct loại phòng (2D/3D/IMAX/4DX) từ suất chiếu của ngày đang chọn
+        const formats = [...new Set(
+            showtimes
+                .filter(s => !selectedDate || dateOfShowtime(s) === selectedDate)
+                .map(s => s.roomType)
+                .filter(Boolean)
+        )];
         if (formatSelect) {
-            formatSelect.innerHTML = fmt
-                ? `<option value="${esc(fmt)}">${esc(fmt)}</option>`
-                : '<option value="">—</option>';
-            formatSelect.disabled = !fmt;
+            const prevFormat = formatSelect.value;
+            formatSelect.innerHTML =
+                '<option value="">Tất cả định dạng</option>' +
+                formats.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+            formatSelect.disabled = formats.length === 0;
+            if (prevFormat && formats.includes(prevFormat)) {
+                formatSelect.value = prevFormat;
+            }
         }
 
         // Cụm rạp: distinct cinemaName từ suất chiếu (cần backend patch, xem README)
@@ -804,6 +826,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     cinemaSelect.addEventListener('change', populateFilters);
+    formatSelect.addEventListener('change', populateFilters);
 
     document.getElementById('datePrev')?.addEventListener('click', () => {
         if (dateOffset <= 0) return;

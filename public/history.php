@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Lịch sử đặt vé | CineStar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 
 <body>
@@ -71,6 +71,6 @@
     <footer>© 2026 CineStar • Đồ án website đặt vé xem phim</footer>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/history.js?v=8"></script>
+    <script src="js/history.js?v=9"></script>
 </body>
 </html>
