@@ -6,12 +6,16 @@ final class BookingModel
     public function findShowtimes(int $movieId): array
     {
         $statement = Database::connection()->prepare(
-            "SELECT id, phim_id, phong_id, thoi_gian_bat_dau,
-                    thoi_gian_ket_thuc, gia_ve_co_ban
-             FROM suatchieu
-             WHERE phim_id = :movie_id
-               AND thoi_gian_bat_dau > NOW()
-             ORDER BY thoi_gian_bat_dau"
+            "SELECT s.id, s.phim_id, s.phong_id, s.thoi_gian_bat_dau,
+                    s.thoi_gian_ket_thuc, s.gia_ve_co_ban,
+                    ph.ten_phong AS ten_phong,
+                    r.ten_rap AS ten_rap
+             FROM suatchieu s
+             JOIN phongchieu ph ON ph.id = s.phong_id
+             JOIN rapchieu r ON r.id = ph.rap_id
+             WHERE s.phim_id = :movie_id
+               AND s.thoi_gian_bat_dau > NOW()
+             ORDER BY s.thoi_gian_bat_dau"
         );
 
         $statement->execute(['movie_id' => $movieId]);
@@ -48,7 +52,7 @@ final class BookingModel
                             AND d.trang_thai_thanh_toan <> 'DaHuy'
                         ) THEN 'BOOKED'
 
-                        WHEN :user_id > 0 AND EXISTS (
+                        WHEN EXISTS (
                             SELECT 1
                             FROM ghedanggiu gd
                             WHERE gd.ghe_id = g.id

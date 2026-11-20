@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="vi">
 <head>
@@ -16,27 +15,28 @@
     <header class="site-header">
         <div class="header-inner">
             <a class="brand" href="index.php">
-                <span class="brand-icon">
-                    <i class="fa-solid fa-film"></i>
-                </span>
+                <span class="brand-icon">C</span>
                 <span>
                     <span class="brand-name">CINESTAR<span>.</span></span>
-                    <small>YOUR CINEMA EXPERIENCE</small>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
                 </span>
             </a>
 
             <nav class="main-nav" aria-label="Điều hướng chính">
                 <a href="index.php">
-                    <i class="fa-solid fa-house"></i> Trang chủ
+                    <i class="fa-solid fa-house"></i> Trang Chủ
                 </a>
                 <a href="movies.php">
-                    <i class="fa-solid fa-clapperboard"></i> Phim
+                    <i class="fa-solid fa-film"></i> Phim Đang Chiếu
                 </a>
                 <a href="booking.php" class="active">
-                    <i class="fa-solid fa-ticket"></i> Đặt vé
+                    <i class="fa-solid fa-ticket"></i> Đặt Vé
                 </a>
                 <a href="history.php">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử vé
+                    <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Vé
+                </a>
+                <a href="admin/index.php">
+                    <i class="fa-solid fa-user-shield"></i> Trang Admin
                 </a>
             </nav>
 
@@ -44,50 +44,167 @@
         </div>
     </header>
 
-    <main class="booking-page">
+    <main class="booking-page booking-target">
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
-        <div class="section-heading booking-heading">
-            <div>
-                <span class="section-eyebrow">CINESTAR BOOKING</span>
-                <h1>Đặt vé xem phim</h1>
-                <p>Chọn phim, suất chiếu và vị trí ghế yêu thích của bạn.</p>
-            </div>
-        </div>
-
-        <section class="booking-filter-panel glass-panel">
+        <!-- Thanh chọn phim (giống ảnh chốt) -->
+        <section class="booking-movie-bar glass-panel">
             <label for="movie">
-                <span><i class="fa-solid fa-film"></i> Chọn phim</span>
-                <select id="movie">
-                    <option value="">Đang tải danh sách phim...</option>
-                </select>
+                <i class="fa-solid fa-clapperboard"></i>
+                CHỌN PHIM ĐANG CHIẾU:
             </label>
-
-            <label for="showtime">
-                <span><i class="fa-regular fa-clock"></i> Chọn suất chiếu</span>
-                <select id="showtime" disabled>
-                    <option value="">Chọn phim trước</option>
-                </select>
-            </label>
+            <select id="movie">
+                <option value="">Đang tải danh sách phim...</option>
+            </select>
         </section>
 
-        <div class="booking-layout">
-            <section class="card booking-seat-card">
-                <div class="booking-card-heading">
-                    <div>
-                        <span class="section-eyebrow">STEP 01</span>
-                        <h2>Chọn ghế ngồi</h2>
-                    </div>
-                    <span class="booking-limit">
-                        <i class="fa-solid fa-users"></i>
-                        Tối đa 8 ghế
+        <!-- Hero chi tiết phim -->
+        <section id="movieHero" class="booking-hero card" hidden>
+            <div class="booking-hero-poster">
+                <img id="moviePoster" src="" alt="" loading="lazy">
+                <span id="movieAgeBadge" class="age-badge" hidden></span>
+            </div>
+
+            <div class="booking-hero-info">
+                <div id="movieGenres" class="booking-hero-genres"></div>
+                <h1 id="movieTitle"></h1>
+
+                <div class="booking-hero-meta">
+                    <span id="movieImdb" class="booking-meta-imdb" hidden>
+                        <i class="fa-solid fa-star"></i> <span></span>
                     </span>
+                    <span id="movieDuration" class="booking-meta-chip" hidden>
+                        <i class="fa-regular fa-clock"></i> <span></span>
+                    </span>
+                    <span id="movieAge" class="booking-meta-age" hidden></span>
+                </div>
+
+                <p id="movieDesc" class="booking-hero-desc"></p>
+                <button id="movieDescToggle" type="button" class="booking-desc-toggle" hidden>
+                    XEM THÊM <i class="fa-solid fa-chevron-down"></i>
+                </button>
+
+                <div class="booking-hero-credits">
+                    <div>
+                        <small>Đạo diễn:</small>
+                        <strong id="movieDirector">—</strong>
+                    </div>
+                    <div>
+                        <small>Biên kịch:</small>
+                        <strong id="movieWriters">—</strong>
+                    </div>
+                    <div>
+                        <small>Diễn viên chính:</small>
+                        <strong id="movieStars">—</strong>
+                    </div>
+                </div>
+
+                <a id="movieTrailer" class="booking-trailer" href="#" target="_blank" rel="noopener" hidden>
+                    <i class="fa-brands fa-youtube"></i> XEM TRAILER
+                </a>
+            </div>
+        </section>
+
+        <!-- Chọn ngày / giờ / định dạng / cụm rạp -->
+        <section class="booking-datebar glass-panel">
+            <div class="booking-date-picker">
+                <span class="booking-date-label">CHỌN NGÀY:</span>
+                <button id="datePrev" type="button" class="booking-date-nav" aria-label="Ngày trước">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div id="dateStrip" class="booking-date-strip" role="tablist" aria-label="Chọn ngày chiếu"></div>
+                <button id="dateNext" type="button" class="booking-date-nav" aria-label="Ngày sau">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="booking-showtime-filters">
+                <label>
+                    <span>GIỜ CHIẾU</span>
+                    <select id="showtimeTime" disabled>
+                        <option value="">Chọn ngày trước</option>
+                    </select>
+                </label>
+                <label>
+                    <span>ĐỊNH DẠNG</span>
+                    <select id="formatSelect" disabled>
+                        <option value="">—</option>
+                    </select>
+                </label>
+                <label>
+                    <span>CỤM RẠP CINESTAR</span>
+                    <select id="cinemaSelect" disabled>
+                        <option value="">Tất cả rạp</option>
+                    </select>
+                </label>
+            </div>
+
+            <!-- Giữ lại select gốc (ẩn) để logic cũ / các hàm khác vẫn dùng được -->
+            <select id="showtime" hidden aria-hidden="true" tabindex="-1"></select>
+        </section>
+
+        <div class="booking-target-layout">
+            <!-- Cột trái: thông tin vé đặt -->
+            <aside class="booking-ticket card">
+                <div class="booking-ticket-head">
+                    <h2><i class="fa-solid fa-ticket"></i> THÔNG TIN VÉ ĐẶT</h2>
+                    <span id="ticketFormat" class="booking-ticket-format" hidden></span>
+                </div>
+
+                <dl class="booking-ticket-rows">
+                    <div>
+                        <dt>Phim:</dt>
+                        <dd id="ticketMovie">—</dd>
+                    </div>
+                    <div>
+                        <dt>Suất chiếu:</dt>
+                        <dd id="ticketShowtime">—</dd>
+                    </div>
+                    <div>
+                        <dt>Rạp chiếu:</dt>
+                        <dd id="ticketCinema">—</dd>
+                    </div>
+                    <div>
+                        <dt>Ghế đã chọn:</dt>
+                        <dd id="ticketSeats" class="booking-ticket-seats">Chưa chọn ghế</dd>
+                    </div>
+                </dl>
+
+                <div class="booking-ticket-total">
+                    <div>
+                        <span>TỔNG TIỀN PHẢI THU</span>
+                        <small id="ticketCount">(0 ghế, 0 dịch vụ)</small>
+                    </div>
+                    <strong id="bill">0 VNĐ</strong>
+                </div>
+
+                <button id="fnbToggle" type="button" class="booking-fnb-toggle">
+                    <i class="fa-solid fa-popcorn"></i>
+                    THÊM BỎNG NGÔ &amp; NƯỚC NGỌT
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+
+                <div id="fnbPanel" class="booking-fnb-panel" hidden>
+                    <div id="fnb" class="fnb-list">
+                        <p class="booking-placeholder">Đang tải danh sách bắp nước...</p>
+                    </div>
+                </div>
+
+                <button id="checkout" class="booking-checkout booking-pay" disabled>
+                    THANH TOÁN ĐẶT VÉ
+                </button>
+            </aside>
+
+            <!-- Cột phải: sơ đồ ghế -->
+            <section class="card booking-seat-card">
+                <div class="booking-seat-title">
+                    <h2>SƠ ĐỒ CHỌN GHẾ NGỒI</h2>
+                    <p>Vui lòng chọn ghế phù hợp từ sơ đồ phòng chiếu bên dưới</p>
                 </div>
 
                 <div class="screen-area">
                     <div class="screen-light"></div>
                     <div class="screen">MÀN HÌNH</div>
-                    <p>Vị trí màn hình chiếu</p>
                 </div>
 
                 <div class="seat-scroll">
@@ -98,71 +215,29 @@
                     </div>
                 </div>
 
-                <div class="seat-legend">
+                <div class="seat-legend booking-seat-legend">
                     <div class="legend-item">
                         <span class="legend-seat available"></span>
-                        <span>Còn trống</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-seat selected"></span>
-                        <span>Đang chọn</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-seat booked"></span>
-                        <span>Đã đặt</span>
+                        <span>Ghế Thường (<span id="legendStandardPrice">90k</span>)</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-seat vip"></span>
-                        <span>Ghế VIP</span>
+                        <span>Ghế VIP (<span id="legendVipPrice">110k</span>)</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-seat couple"></span>
-                        <span>Ghế Couple</span>
+                        <span>Ghế Đôi (<span id="legendCouplePrice">200k</span>)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-seat selected"></span>
+                        <span>Đã Chọn</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-seat booked"></span>
+                        <span>Đã Có Người</span>
                     </div>
                 </div>
-
-                <p class="booking-note">
-                    <i class="fa-solid fa-circle-info"></i>
-                    Giá ghế được tính theo loại ghế và giá cơ bản của suất chiếu.
-                </p>
             </section>
-
-            <aside class="booking-summary">
-                <section class="card">
-                    <div class="booking-card-heading">
-                        <div>
-                            <span class="section-eyebrow">STEP 02</span>
-                            <h2>Bắp nước</h2>
-                        </div>
-                        <i class="fa-solid fa-popcorn booking-heading-icon"></i>
-                    </div>
-
-                    <div id="fnb" class="fnb-list">
-                        <p class="booking-placeholder">
-                            Đang tải danh sách bắp nước...
-                        </p>
-                    </div>
-                </section>
-
-                <section class="card booking-total-card">
-                    <span class="section-eyebrow">ORDER SUMMARY</span>
-                    <h2>Thông tin thanh toán</h2>
-
-                    <div class="booking-total-row">
-                        <span>Tạm tính</span>
-                        <strong id="bill">0 VNĐ</strong>
-                    </div>
-
-                    <p class="booking-payment-note">
-                        Thanh toán demo của đồ án CineStar.
-                    </p>
-
-                    <button id="checkout" class="booking-checkout" disabled>
-                        <i class="fa-solid fa-ticket"></i>
-                        Đặt vé ngay
-                    </button>
-                </section>
-            </aside>
         </div>
     </main>
 
