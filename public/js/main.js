@@ -275,9 +275,6 @@ function setupMovieSearch(movies) {
 
     render();
 }
-
-// Trang đích sau khi đăng nhập: lấy từ ?next=, chỉ chấp nhận đường dẫn
-// tương đối trong site (chống open-redirect). Mặc định về trang chủ.
 function returnPage() {
     const next = new URLSearchParams(location.search).get('next') || '';
 
@@ -294,8 +291,6 @@ function returnPage() {
     return 'index.php';
 }
 
-// Trang yêu cầu đăng nhập (lịch sử, chi tiết đơn, tài khoản):
-// chưa đăng nhập thì chuyển sang login và giữ lại trang hiện tại.
 async function requireUser() {
     let user = null;
 

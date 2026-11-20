@@ -69,7 +69,11 @@ async function loadHistory(container) {
                                 <span class="order-time">${esc(formatDateTime(order.createdAt))}</span>
                                 ${order.status === 'DaHuy' ? '<span class="order-cancelled">Đã hủy</span>' : ''}
                             </p>
-                            <h2 class="order-title">${esc(order.movie)}</h2>
+                            <h2 class="order-title">
+                                <a class="order-title-link" href="order-detail.php?id=${encodeURIComponent(order.id)}">
+                                    ${esc(order.movie)}
+                                </a>
+                            </h2>
                             <p class="order-line">
                                 <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                                 ${esc(order.cinema || '—')} | ${esc(formatShowtime(order.showtime))}
@@ -85,9 +89,9 @@ async function loadHistory(container) {
                             <p class="order-total-label">TỔNG TIỀN ĐÃ TRẢ</p>
                             <p class="order-total">${money(order.total)}</p>
                             <div class="order-actions">
-                                <a class="button" href="order-detail.php?id=${encodeURIComponent(order.id)}">
+                                <button type="button" class="button" data-qr-order="${order.id}" data-qr-code="${esc(order.code)}">
                                     <i class="fa-solid fa-qrcode" aria-hidden="true"></i> Xem QR Vé
-                                </a>
+                                </button>
                                 ${order.status !== 'DaHuy' ? `
                                     <button type="button" class="button danger-button" data-cancel-order="${order.id}">
                                         Hủy Vé
@@ -104,6 +108,12 @@ async function loadHistory(container) {
                     cancelOrder(button.dataset.cancelOrder, button);
                 });
             });
+
+            container.querySelectorAll('[data-qr-order]').forEach(button => {
+                button.addEventListener('click', () => {
+                    openQrModal(button.dataset.qrOrder, button.dataset.qrCode);
+                });
+            });
         }
 
         search.addEventListener('input', render);
@@ -113,6 +123,77 @@ async function loadHistory(container) {
         message(error.message, true);
     }
 }
+
+// Modal mã QR vào rạp (Hình 6.1.3.6 trong báo cáo).
+function openQrModal(orderId, orderCode) {
+    const modal = $('#qr-modal');
+    const body = $('#qr-modal-body');
+
+    if (!modal || !body) {
+        location.href = `order-detail.php?id=${encodeURIComponent(orderId)}`;
+        return;
+    }
+
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    body.innerHTML = 'Đang tải mã vé…';
+
+    api(`/order?order_id=${encodeURIComponent(orderId)}`).then(order => {
+        const tickets = (order.tickets || []).filter(ticket => ticket.ma_qr_code);
+
+        if (!tickets.length) {
+            body.innerHTML = '<p>Đơn này chưa có mã vé.</p>';
+            return;
+        }
+
+        const single = tickets.length === 1;
+
+        body.innerHTML = `
+            <div class="qr-modal-tickets">
+                ${tickets.map(ticket => `
+                    <figure class="qr-modal-ticket">
+                        <span class="qr-modal-qr">
+                            <img src="${qrImageUrl(ticket.ma_qr_code, single ? 200 : 140)}"
+                                alt="Mã QR vé ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}"
+                                width="${single ? 200 : 140}" height="${single ? 200 : 140}">
+                        </span>
+                        <figcaption>Ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}</figcaption>
+                    </figure>
+                `).join('')}
+            </div>
+            <p class="qr-modal-code">${esc(orderCode || order.ma_don_hang || '')}</p>
+            <p class="qr-modal-note">Vui lòng xuất trình mã QR này tại quầy soát vé CineStar</p>
+            <a class="qr-modal-detail" href="order-detail.php?id=${encodeURIComponent(orderId)}">
+                Xem chi tiết đơn →
+            </a>
+        `;
+    }).catch(error => {
+        body.innerHTML = `<p>Không tải được mã vé: ${esc(error.message)}</p>`;
+    });
+}
+
+function closeQrModal() {
+    const modal = $('#qr-modal');
+
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = true;
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('click', event => {
+    if (event.target.closest('[data-close-qr]')) {
+        closeQrModal();
+    }
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeQrModal();
+    }
+});
 
 async function loadOrderDetail(container) {
     const orderId = new URLSearchParams(location.search).get('id');
@@ -133,48 +214,65 @@ async function loadOrderDetail(container) {
         const concessions = order.concessions || [];
 
         container.innerHTML = `
-            <h2>${esc(order.ten_phim)}</h2>
-            <p>Mã đơn: ${esc(order.ma_don_hang)}</p>
-            <p>Rạp: ${esc(order.ten_rap || '—')}${order.ten_phong ? ' · ' + esc(order.ten_phong) : ''}</p>
-            ${order.dia_chi ? `<p>Địa chỉ: ${esc(order.dia_chi)}</p>` : ''}
-            <p>Suất chiếu: ${esc(formatDate(order.thoi_gian_bat_dau))}</p>
-            <p>Ngày đặt: ${esc(formatDate(order.thoi_gian_dat))}</p>
-            <p>Trạng thái: ${esc(statusText(order.trang_thai_thanh_toan))}</p>
-            <p>Phương thức: ${esc(order.phuong_thuc_thanh_toan)}</p>
+            <div class="detail-head">
+                <div>
+                    <p class="order-meta">
+                        <span class="order-code">#${esc(order.ma_don_hang)}</span>
+                        <span class="order-time">${esc(formatDateTime(order.thoi_gian_dat))}</span>
+                        ${order.trang_thai_thanh_toan === 'DaHuy' ? '<span class="order-cancelled">Đã hủy</span>' : ''}
+                    </p>
+                    <h2 class="order-title">${esc(order.ten_phim)}</h2>
+                    <p class="order-line">
+                        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                        ${esc(order.ten_rap || '—')} | ${esc(formatShowtime(order.thoi_gian_bat_dau))}
+                    </p>
+                    ${order.dia_chi ? `<p class="order-line order-line-muted">Địa chỉ: ${esc(order.dia_chi)}</p>` : ''}
+                    <p class="order-line order-line-muted">
+                        ${order.ten_phong ? `${esc(order.ten_phong)} · ` : ''}Thanh toán: ${esc(order.phuong_thuc_thanh_toan)}
+                        · ${esc(statusText(order.trang_thai_thanh_toan))}
+                    </p>
+                </div>
+                <div class="order-side">
+                    <p class="order-total-label">TỔNG TIỀN ĐÃ TRẢ</p>
+                    <p class="order-total">${money(order.tong_tien)}</p>
+                </div>
+            </div>
 
-            <h3>Vé</h3>
+            <h3 class="detail-section-title">Vé</h3>
             ${tickets.length
                 ? `<ul class="ticket-list">${tickets.map(ticket => `
                     <li class="ticket-item">
-                        <div>
-                            Ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}
-                            (${esc(ticket.loai_ghe)}) · ${money(ticket.gia_ve)}
-                            <br>
-                            Mã vé: <code>${esc(ticket.ma_qr_code || 'Chưa có mã')}</code>
+                        <div class="ticket-info">
+                            <span class="ticket-seat">
+                                Ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}
+                                <span class="ticket-type">${esc(ticket.loai_ghe)}</span>
+                            </span>
+                            <span class="ticket-price">${money(ticket.gia_ve)}</span>
+                            <code class="ticket-code" title="${esc(ticket.ma_qr_code || '')}">
+                                Mã vé: ${esc(ticket.ma_qr_code ? String(ticket.ma_qr_code).slice(0, 12) + '…' : 'Chưa có mã')}
+                            </code>
                             ${ticket.thoi_gian_su_dung
-                                ? `<br>Đã sử dụng: ${esc(formatDate(ticket.thoi_gian_su_dung))}`
+                                ? `<span class="ticket-used">Đã sử dụng: ${esc(formatDate(ticket.thoi_gian_su_dung))}</span>`
                                 : ''}
                         </div>
                         ${ticket.ma_qr_code ? `
-                            <img class="ticket-qr" src="${qrImageUrl(ticket.ma_qr_code)}"
+                            <img class="ticket-qr" src="${qrImageUrl(ticket.ma_qr_code, 140)}"
                                 alt="Mã QR vé ghế ${esc(ticket.hang_ghe)}${esc(ticket.so_thu_tu)}"
-                                width="160" height="160" loading="lazy">
+                                width="140" height="140" loading="lazy">
                         ` : ''}
                     </li>
                 `).join('')}</ul>`
                 : '<p>Đơn chưa có vé.</p>'}
 
-            <h3>Bắp nước</h3>
+            <h3 class="detail-section-title">Bắp nước</h3>
             ${concessions.length
-                ? `<ul>${concessions.map(item => `
+                ? `<ul class="concession-list">${concessions.map(item => `
                     <li>
                         ${esc(item.ten_mon)} · SL ${esc(item.so_luong)}
                         · ${money(Number(item.gia_tien) * Number(item.so_luong))}
                     </li>
                 `).join('')}</ul>`
                 : '<p>Đơn không có bắp nước.</p>'}
-
-            <p><strong>Tổng tiền: ${money(order.tong_tien)}</strong></p>
 
             ${order.trang_thai_thanh_toan !== 'DaHuy' ? `
                 <button type="button" class="button danger-button" data-cancel-order="${order.id}">
