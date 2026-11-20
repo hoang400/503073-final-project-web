@@ -757,7 +757,7 @@ async function openSeatMap(roomId, roomName, cinemaId) {
     
     document.getElementById('roomsTable').closest('article').style.display = 'none';
     document.getElementById('roomsEmptyState').style.display = 'none';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'none';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'none';
     document.getElementById('seatMapSection').style.display = 'block';
     
     document.getElementById('seatMapTitle').textContent = `Sơ đồ ghế - ${esc(roomName)}`;
@@ -768,7 +768,7 @@ async function openSeatMap(roomId, roomName, cinemaId) {
 function backToRooms() {
     document.getElementById('roomsTable').closest('article').style.display = 'block';
     document.getElementById('roomsEmptyState').style.display = 'block';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'block';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'block';
     document.getElementById('seatMapSection').style.display = 'none';
     currentRoomId = null;
     currentRoomCinemaId = null;
@@ -978,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function backToRooms() {
     document.getElementById('roomsTable').closest('article').style.display = 'block';
     document.getElementById('roomsEmptyState').style.display = 'block';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'block';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'block';
     document.getElementById('seatMapSection').style.display = 'none';
     currentRoomId = null;
     currentRoomCinemaId = null;

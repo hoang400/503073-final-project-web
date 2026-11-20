@@ -41,9 +41,10 @@
             <div id="account" class="account-area"></div>
         </div>
     </header>
-    <main>
+    <main class="profile-page">
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         <h1>Tài khoản của bạn</h1>
+
         <div class="two-columns">
             <form id="profile-form" class="card">
                 <h2>Thông tin cá nhân</h2><label>Họ và tên<input name="name" type="text" required id="profile-name"

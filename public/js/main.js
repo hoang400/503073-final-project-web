@@ -327,11 +327,14 @@ async function header() {
 
     const user = await api('/auth/me');
 
+    // Trang admin chỉ hiện tên người dùng (theo yêu cầu bỏ icon ở giao diện admin)
+    const isAdminPage = window.location.pathname.includes('/admin/');
+
     account.innerHTML = user
         ? `
             <a href="${SITE_BASE}profile.php" class="account-user">
-                <i class="fa-solid fa-circle-user"></i>
-                ${esc(user.name)}
+                ${isAdminPage ? '' : '<i class="fa-solid fa-circle-user"></i>'}
+                <span class="account-user-name">${esc(user.name)}</span>
             </a>
 
             <button id="logout" type="button" class="account-button">

@@ -3311,6 +3311,26 @@ button:disabled {
 .admin-filters label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
 .admin-filters select { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; font-size: 14px; color: #fff; min-width: 200px; cursor: pointer; }
 .admin-filters select:focus { border-color: #38bdf8; outline: none; }
+
+/* Trang hồ sơ: khung nội dung căn giữa (như trang lịch sử / chi tiết đơn) */
+.profile-page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 40px; }
+.profile-page h1 { margin-bottom: 24px; }
+.profile-page form h2 { margin-bottom: 20px; }
+.profile-page form label { display: block; margin-bottom: 16px; font-size: 12px; font-weight: 700; color: #94a3b8; }
+.profile-page form input { display: block; width: 100%; margin-top: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; font-size: 14px; color: #fff; }
+.profile-page form input:focus { border-color: #38bdf8; outline: none; }
+.profile-page form input[readonly] { color: #94a3b8; }
+.profile-page form > button { width: 100%; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 800; letter-spacing: .5px; cursor: pointer; }
+.profile-page form > button:hover { filter: brightness(1.12); }
+.profile-page form > button:disabled { opacity: .6; cursor: default; }
+@media (max-width: 768px) {
+    .profile-page { padding: 24px 16px; }
+    .two-columns { grid-template-columns: 1fr; }
+}
+
+/* Tên người dùng ở header (giữ ellipsis khi dùng flex) */
+.account-user { display: inline-flex; align-items: center; gap: 8px; }
+.account-user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-subnav a { color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; }
 .admin-subnav a:hover { color: #fff; background: rgba(148, 163, 184, .12); }
 .admin-subnav a.active { color: #fff; background: #1d4ed8; }
