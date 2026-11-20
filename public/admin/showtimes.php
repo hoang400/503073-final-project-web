@@ -5,26 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Quản Lý Suất Chiếu | CineStar Admin</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
-    <header>
-        <a class="brand" href="../index.php">CINESTAR<span>.</span></a>
-        <nav aria-label="Admin navigation">
-            <a href="index.php">Dashboard</a>
-            <a href="movies.php">Phim</a>
-            <a href="cinemas.php">Rạp</a>
-            <a href="rooms.php">Phòng & Ghế</a>
-            <a href="showtimes.php" class="active">Suất chiếu</a>
-            <a href="concessions.php">Bắp nước</a>
-            <a href="bookings.php">Đơn hàng</a>
-            <a href="reports.php">Báo cáo</a>
-        </nav>
-        <div id="account"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="../index.php">
+                <span class="brand-icon">C</span>
+                <span>
+                    <span class="brand-name">CINESTAR<span>.</span></span>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
+                </span>
+            </a>
+            <nav class="main-nav" aria-label="Admin navigation">
+                <a href="index.php">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+                <a href="movies.php">
+                    <i class="fa-solid fa-film"></i> Phim
+                </a>
+                <a href="cinemas.php">
+                    <i class="fa-solid fa-building"></i> Rạp
+                </a>
+                <a href="rooms.php">
+                    <i class="fa-solid fa-door-open"></i> Phòng & Ghế
+                </a>
+                <a href="showtimes.php" class="active">
+                    <i class="fa-solid fa-clock"></i> Suất chiếu
+                </a>
+                <a href="concessions.php">
+                    <i class="fa-solid fa-burger"></i> Bắp nước
+                </a>
+                <a href="bookings.php">
+                    <i class="fa-solid fa-ticket"></i> Đơn hàng
+                </a>
+                <a href="reports.php">
+                    <i class="fa-solid fa-chart-line"></i> Báo cáo
+                </a>
+            </nav>
+            <div class="account-area">
+                <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Mode</span>
+                <div id="account"></div>
+            </div>
+        </div>
     </header>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+        <div class="admin-page-head">
             <h1>Quản Lý Suất Chiếu</h1>
             <button id="addShowtimeBtn" class="button">+ Thêm suất chiếu</button>
         </div>
@@ -52,17 +80,17 @@
 
         <!-- Showtimes Table -->
         <article class="card">
-            <div style="overflow-x:auto;">
-                <table id="showtimesTable" style="width:100%; border-collapse:collapse;">
+            <div class="admin-table-wrap">
+                <table id="showtimesTable" class="admin-table">
                     <thead>
-                        <tr style="border-bottom:1px solid #334155; text-align:left;">
-                            <th style="padding:12px; width:60px;">ID</th>
-                            <th style="padding:12px;">Phim</th>
-                            <th style="padding:12px;">Rạp / Phòng</th>
-                            <th style="padding:12px; width:180px;">Bắt đầu</th>
-                            <th style="padding:12px; width:180px;">Kết thúc</th>
-                            <th style="padding:12px; width:120px;">Giá vé</th>
-                            <th style="padding:12px; width:160px;">Thao tác</th>
+                        <tr>
+                            <th style="width:60px;">ID</th>
+                            <th>Phim</th>
+                            <th>Rạp / Phòng</th>
+                            <th style="width:180px;">Bắt đầu</th>
+                            <th style="width:180px;">Kết thúc</th>
+                            <th style="width:120px;">Giá vé</th>
+                            <th style="width:160px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="showtimesBody"></tbody>
@@ -76,12 +104,12 @@
         <!-- Showtime Modal -->
         <div id="showtimeModal" class="modal-overlay" style="display:none;">
             <div class="modal" style="max-width:600px; width:90%;">
-                <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid #334155;">
+                <div class="modal-header">
                     <h2 id="showtimeModalTitle">Thêm suất chiếu</h2>
-                    <button id="closeShowtimeModal" class="button" style="background:transparent; color:#94a3b8;">×</button>
+                    <button id="closeShowtimeModal" class="modal-close">×</button>
                 </div>
                 <form id="showtimeForm">
-                    <div class="modal-body" style="padding:24px; display:grid; gap:16px;">
+                    <div class="modal-body">
                         <input type="hidden" name="id" id="showtimeId">
                         
                         <div>
@@ -109,9 +137,9 @@
                             <input type="number" name="gia_ve_co_ban" id="gia_ve_co_ban" required min="0" step="1000" style="width:100%;">
                         </div>
                     </div>
-                    <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px; border-top:1px solid #334155;">
-                        <button type="button" id="cancelShowtimeModal" class="button" style="background:transparent; color:#94a3b8;">Hủy</button>
-                        <button type="submit" class="button" id="showtimeSubmitBtn">Lưu</button>
+                    <div class="modal-footer">
+                        <button type="button" id="cancelShowtimeModal" class="button btn-ghost">Hủy</button>
+                        <button type="submit" class="btn-gradient" id="showtimeSubmitBtn">Lưu</button>
                     </div>
                 </form>
             </div>
@@ -120,6 +148,6 @@
     <footer>© 2026 CineStar Admin</footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/admin.js?v=2"></script>
 </body>
 </html>

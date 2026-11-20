@@ -8,25 +8,21 @@ async function loadDashboard() {
     if (dateTo) params.append('date_to', dateTo);
     
     try {
-        const [summary, byDate, topMovies] = await Promise.all([
-            api(`/admin/reports?${params.toString()}`),
-            api(`/admin/reports?${params.toString()}&by_date=1`),
-            api(`/admin/reports?${params.toString()}&top_movies=1`)
-        ]);
-        
-        renderSummary(summary);
-        renderChart(byDate);
-        renderTopMovies(topMovies);
+        // /admin/reports trả cả 3 khối (summary, by_date, top_movies) trong 1 lần gọi
+        const data = await api(`/admin/reports?${params.toString()}`);
+
+        renderDashboardSummary(data.summary || {});
+        renderChart(data.by_date || []);
+        renderTopMovies(data.top_movies || []);
     } catch (e) {
         message(e.message, true);
     }
 }
 
-function renderSummary(data) {
-    document.getElementById('statOrders').textContent = data.order_count?.toLocaleString('vi-VN') || '0';
-    document.getElementById('statTicketRev').textContent = (data.ticket_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('statConcessionRev').textContent = (data.concession_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('statTickets').textContent = data.ticket_count?.toLocaleString('vi-VN') || '0';
+function renderDashboardSummary(data) {
+    document.getElementById('statTotalRevenue').textContent = (data.total_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
+    document.getElementById('statOrders').textContent = (data.order_count || 0).toLocaleString('vi-VN') + ' Đơn vé';
+    document.getElementById('statMoviesShowing').textContent = (data.movies_showing || 0).toLocaleString('vi-VN') + ' Phim';
 }
 
 let revenueChart = null;
@@ -138,28 +134,22 @@ function renderMoviesTable(movies) {
     };
     
     tbody.innerHTML = movies.map(m => `
-        <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:12px; font-family:monospace;">${m.id}</td>
-            <td style="padding:12px;">
-                ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" style="width:60px; height:90px; object-fit:cover; border-radius:4px;">` : '<span style="color:#94a3b8;">Không có</span>'}
+        <tr>
+            <td>
+                ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" class="poster-thumb">` : '<span class="movie-sub">Không có</span>'}
             </td>
-            <td style="padding:12px; max-width:200px;">
+            <td>
                 <strong>${esc(m.title)}</strong>
                 <br>
-                <small style="color:#94a3b8;">
-                    ${esc(m.director || 'Chưa có đạo diễn')}
-                    ${m.imdb !== null && m.imdb !== undefined
-                        ? ` · IMDb ${esc(String(m.imdb))}/10`
-                        : ''}
-                </small>
+                <small class="movie-sub">${esc(m.genre)}</small>
             </td>
-            <td style="padding:12px; color:#94a3b8; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(m.genre)}</td>
-            <td style="padding:12px;">${m.duration} phút</td>
-            <td style="padding:12px;">${statusLabels[m.status] || m.status}</td>
-            <td style="padding:12px;">
+            <td>${m.duration} phút</td>
+            <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
+            <td>${statusLabels[m.status] || m.status}</td>
+            <td>
                 <div style="display:flex; gap:8px;">
-                    <button class="button edit-btn" data-id="${m.id}" style="padding:6px 12px; font-size:12px;">Sửa</button>
-                    <button class="button delete-btn" data-id="${m.id}" data-title="${esc(m.title)}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Xóa</button>
+                    <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
+                    <button class="button btn-sm btn-delete delete-btn" data-id="${m.id}" data-title="${esc(m.title)}">Xóa</button>
                 </div>
             </td>
         </tr>
@@ -191,11 +181,11 @@ function openMovieModal(id = null) {
     
     if (id) {
         title.textContent = 'Sửa phim';
-        submitBtn.textContent = 'Cập nhật';
+        submitBtn.textContent = 'CẬP NHẬT PHIM';
         loadMovieForEdit(id);
     } else {
         title.textContent = 'Thêm phim mới';
-        submitBtn.textContent = 'Thêm';
+        submitBtn.textContent = 'LƯU THÔNG TIN PHIM';
     }
     
     modal.style.display = 'flex';
@@ -1665,16 +1655,17 @@ function renderBookingsTable(bookings) {
                 ${new Date(b.showtime).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
                 <br><span style="color:#94a3b8; font-size:12px;">${esc(b.room)} - ${esc(b.cinema)}</span>
             </td>
+            <td><span class="seats-badge">${esc(b.seats || '—')}</span></td>
             <td style="padding:12px; text-align:right;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
             <td style="padding:12px;">${statusLabels[b.payment_status] || b.payment_status}</td>
             <td style="padding:12px;">
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button class="button view-detail-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px;">Xem chi tiết</button>
+                    <button class="button btn-sm view-detail-btn" data-id="${b.id}">Xem chi tiết</button>
                     ${b.payment_status === 'ChuaThanhToan' ? `
-                        <button class="button confirm-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#22c55e;">Xác nhận TT</button>
-                        <button class="button cancel-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Hủy</button>
+                        <button class="button btn-sm btn-confirm confirm-booking-btn" data-id="${b.id}">Xác nhận TT</button>
+                        <button class="button btn-sm btn-delete cancel-booking-btn" data-id="${b.id}">Hủy</button>
                     ` : b.payment_status === 'DaThanhToan' ? `
-                        <button class="button cancel-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Hủy</button>
+                        <button class="button btn-sm btn-delete cancel-booking-btn" data-id="${b.id}">Hủy</button>
                     ` : ''}
                 </div>
             </td>
@@ -1953,17 +1944,14 @@ async function loadReports() {
     if (dateTo) params.append('date_to', dateTo);
     
     try {
-        const [summary, byDate, topMovies] = await Promise.all([
-            api(`/admin/reports?${params.toString()}`),
-            api(`/admin/reports?${params.toString()}&by_date=1`),
-            api(`/admin/reports?${params.toString()}&top_movies=1`)
-        ]);
-        
-        renderSummary(summary);
-        renderDailyRevenueChart(summary.by_date || []);
-        renderTopMoviesChart(summary.top_movies || []);
-        renderDailyRevenueTable(summary.by_date || []);
-        renderTopMoviesTable(summary.top_movies || []);
+        // /admin/reports trả cả 3 khối (summary, by_date, top_movies) trong 1 lần gọi
+        const data = await api(`/admin/reports?${params.toString()}`);
+
+        renderSummary(data.summary || {});
+        renderDailyRevenueChart(data.by_date || []);
+        renderTopMoviesChart(data.top_movies || []);
+        renderDailyRevenueTable(data.by_date || []);
+        renderTopMoviesTable(data.top_movies || []);
     } catch (e) {
         message(e.message, true);
     }

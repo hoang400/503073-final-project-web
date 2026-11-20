@@ -564,7 +564,10 @@ final class AdminModel
         $pdo = Database::connection();
         $sql = "SELECT d.id, d.ma_don_hang, d.tong_tien, d.phuong_thuc_thanh_toan, d.trang_thai_thanh_toan, d.thoi_gian_dat,
                        u.ho_ten as khach_hang, u.email,
-                       p.ten_phim, s.thoi_gian_bat_dau, ph.ten_phong, r.ten_rap
+                       p.ten_phim, s.thoi_gian_bat_dau, ph.ten_phong, r.ten_rap,
+                       (SELECT GROUP_CONCAT(CONCAT(g.hang_ghe, g.so_thu_tu) ORDER BY g.hang_ghe, g.so_thu_tu SEPARATOR ', ')
+                        FROM chitietve cv JOIN ghe g ON g.id = cv.ghe_id
+                        WHERE cv.dat_ve_id = d.id) AS ghe_da_chon
                 FROM datve d
                 JOIN nguoidung u ON u.id = d.user_id
                 JOIN suatchieu s ON s.id = d.suat_chieu_id
@@ -774,12 +777,18 @@ final class AdminModel
         $stmt->execute($params);
         $ticketCount = (int) $stmt->fetchColumn();
 
+        // Số phim đang chiếu (số liệu hiện tại, không lọc theo ngày)
+        $moviesShowing = (int) Database::connection()
+            ->query("SELECT COUNT(*) FROM phim WHERE trang_thai = 'DANG_CHIEU'")
+            ->fetchColumn();
+
         return [
             'total_revenue' => $totalRevenue,
             'ticket_revenue' => $ticketRevenue,
             'concession_revenue' => $concessionRevenue,
             'order_count' => $orderCount,
             'ticket_count' => $ticketCount,
+            'movies_showing' => $moviesShowing,
         ];
     }
 

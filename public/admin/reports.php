@@ -5,27 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Báo Cáo Doanh Thu | CineStar Admin</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <a class="brand" href="../index.php">CINESTAR<span>.</span></a>
-        <nav aria-label="Admin navigation">
-            <a href="index.php">Dashboard</a>
-            <a href="movies.php">Phim</a>
-            <a href="cinemas.php">Rạp</a>
-            <a href="rooms.php">Phòng & Ghế</a>
-            <a href="showtimes.php">Suất chiếu</a>
-            <a href="concessions.php">Bắp nước</a>
-            <a href="bookings.php">Đơn hàng</a>
-            <a href="reports.php" class="active">Báo cáo</a>
-        </nav>
-        <div id="account"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="../index.php">
+                <span class="brand-icon">C</span>
+                <span>
+                    <span class="brand-name">CINESTAR<span>.</span></span>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
+                </span>
+            </a>
+            <nav class="main-nav" aria-label="Admin navigation">
+                <a href="index.php">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+                <a href="movies.php">
+                    <i class="fa-solid fa-film"></i> Phim
+                </a>
+                <a href="cinemas.php">
+                    <i class="fa-solid fa-building"></i> Rạp
+                </a>
+                <a href="rooms.php">
+                    <i class="fa-solid fa-door-open"></i> Phòng & Ghế
+                </a>
+                <a href="showtimes.php">
+                    <i class="fa-solid fa-clock"></i> Suất chiếu
+                </a>
+                <a href="concessions.php">
+                    <i class="fa-solid fa-burger"></i> Bắp nước
+                </a>
+                <a href="bookings.php">
+                    <i class="fa-solid fa-ticket"></i> Đơn hàng
+                </a>
+                <a href="reports.php" class="active">
+                    <i class="fa-solid fa-chart-line"></i> Báo cáo
+                </a>
+            </nav>
+            <div class="account-area">
+                <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Mode</span>
+                <div id="account"></div>
+            </div>
+        </div>
     </header>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+        <div class="admin-page-head">
             <h1>Báo Cáo Doanh Thu</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <label style="font-size:13px; color:#94a3b8;">
@@ -42,40 +70,40 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="dashboard-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:32px;">
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#22c55e;">💰</div>
+        <div class="admin-stat-grid">
+            <article class="card admin-stat-card">
+                <div class="admin-stat-icon" style="background:#22c55e;">💰</div>
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Tổng doanh thu</p>
-                    <h2 id="totalRevenue" style="margin:8px 0 0; font-size:28px;">0 VNĐ</h2>
+                    <p class="admin-stat-label">Tổng doanh thu</p>
+                    <h2 class="admin-stat-value" id="totalRevenue">0 VNĐ</h2>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#3b82f6;">🎫</div>
+            <article class="card admin-stat-card">
+                <div class="admin-stat-icon" style="background:#3b82f6;">🎫</div>
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Doanh thu vé</p>
-                    <h2 id="ticketRevenue" style="margin:8px 0 0; font-size:28px;">0 VNĐ</h2>
+                    <p class="admin-stat-label">Doanh thu vé</p>
+                    <h2 class="admin-stat-value" id="ticketRevenue">0 VNĐ</h2>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#f59e0b;">🍿</div>
+            <article class="card admin-stat-card">
+                <div class="admin-stat-icon" style="background:#f59e0b;">🍿</div>
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Doanh thu bắp nước</p>
-                    <h2 id="concessionRevenue" style="margin:8px 0 0; font-size:28px;">0 VNĐ</h2>
+                    <p class="admin-stat-label">Doanh thu bắp nước</p>
+                    <h2 class="admin-stat-value" id="concessionRevenue">0 VNĐ</h2>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#a855f7;">📦</div>
+            <article class="card admin-stat-card">
+                <div class="admin-stat-icon" style="background:#a855f7;">📦</div>
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Số đơn hàng</p>
-                    <h2 id="orderCount" style="margin:8px 0 0; font-size:28px;">0</h2>
+                    <p class="admin-stat-label">Số đơn hàng</p>
+                    <h2 class="admin-stat-value" id="orderCount">0</h2>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#ec4899;">🎟️</div>
+            <article class="card admin-stat-card">
+                <div class="admin-stat-icon" style="background:#ec4899;">🎟️</div>
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Vé đã bán</p>
-                    <h2 id="ticketCount" style="margin:8px 0 0; font-size:28px;">0</h2>
+                    <p class="admin-stat-label">Vé đã bán</p>
+                    <h2 class="admin-stat-value" id="ticketCount">0</h2>
                 </div>
             </article>
         </div>
@@ -96,16 +124,16 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
             <article class="card">
                 <h2>Doanh Thu Theo Ngày (Chi Tiết)</h2>
-                <div style="overflow-x:auto;">
-                    <table id="dailyRevenueTable" style="width:100%; border-collapse:collapse; font-size:13px;">
+                <div class="admin-table-wrap">
+                    <table id="dailyRevenueTable" class="admin-table">
                         <thead>
-                            <tr style="border-bottom:1px solid #334155; text-align:left;">
-                                <th style="padding:10px;">Ngày</th>
-                                <th style="padding:10px; text-align:right;">Đơn</th>
-                                <th style="padding:10px; text-align:right;">Vé</th>
-                                <th style="padding:10px; text-align:right;">Vé (VNĐ)</th>
-                                <th style="padding:10px; text-align:right;">Bắp (VNĐ)</th>
-                                <th style="padding:10px; text-align:right;">Tổng (VNĐ)</th>
+                            <tr>
+                                <th>Ngày</th>
+                                <th style="text-align:right;">Đơn</th>
+                                <th style="text-align:right;">Vé</th>
+                                <th style="text-align:right;">Vé (VNĐ)</th>
+                                <th style="text-align:right;">Bắp (VNĐ)</th>
+                                <th style="text-align:right;">Tổng (VNĐ)</th>
                             </tr>
                         </thead>
                         <tbody id="dailyRevenueBody"></tbody>
@@ -114,14 +142,14 @@
             </article>
             <article class="card">
                 <h2>Top Phim Theo Doanh Thu</h2>
-                <div style="overflow-x:auto;">
-                    <table id="topMoviesTable" style="width:100%; border-collapse:collapse; font-size:13px;">
+                <div class="admin-table-wrap">
+                    <table id="topMoviesTable" class="admin-table">
                         <thead>
-                            <tr style="border-bottom:1px solid #334155; text-align:left;">
-                                <th style="padding:10px;">Phim</th>
-                                <th style="padding:10px; text-align:center;">Đơn</th>
-                                <th style="padding:10px; text-align:center;">Vé</th>
-                                <th style="padding:10px; text-align:right;">Doanh thu (VNĐ)</th>
+                            <tr>
+                                <th>Phim</th>
+                                <th style="text-align:center;">Đơn</th>
+                                <th style="text-align:center;">Vé</th>
+                                <th style="text-align:right;">Doanh thu (VNĐ)</th>
                             </tr>
                         </thead>
                         <tbody id="topMoviesBody"></tbody>
@@ -133,6 +161,6 @@
     <footer>© 2026 CineStar Admin</footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/admin.js?v=2"></script>
 </body>
 </html>

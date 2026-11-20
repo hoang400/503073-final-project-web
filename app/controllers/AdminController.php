@@ -881,6 +881,7 @@ final class AdminController
             'showtime' => $row['thoi_gian_bat_dau'],
             'room' => $row['ten_phong'],
             'cinema' => $row['ten_rap'],
+            'seats' => $row['ghe_da_chon'] ?? '',
         ], $bookings);
 
         jsonResponse(['ok' => true, 'data' => $data]);

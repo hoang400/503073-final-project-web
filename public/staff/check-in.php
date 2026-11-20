@@ -5,15 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Soát Vé - Nhân Viên | CineStar</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
-    <header>
-        <a class="brand" href="../index.php">CINESTAR<span>.</span></a>
-        <nav aria-label="Staff navigation">
-            <span style="color:#f59e0b; font-weight:bold;">👮 NHÂN VIÊN</span>
-            <a href="../index.php">Trang chủ</a>
-        </nav>
-        <div id="account"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="../index.php">
+                <span class="brand-icon">C</span>
+                <span>
+                    <span class="brand-name">CINESTAR<span>.</span></span>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
+                </span>
+            </a>
+            <nav class="main-nav" aria-label="Staff navigation">
+                <a href="../index.php">
+                    <i class="fa-solid fa-house"></i> Trang Chủ
+                </a>
+            </nav>
+            <div class="account-area">
+                <span class="staff-badge"><i class="fa-solid fa-user-check"></i> Nhân viên</span>
+                <div id="account"></div>
+            </div>
+        </div>
     </header>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
