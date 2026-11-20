@@ -184,7 +184,6 @@
             </div>
         </div>
     </main>
-    <footer>© 2026 CineStar Admin</footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/admin.js?v=3"></script>
