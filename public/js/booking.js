@@ -173,9 +173,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedSeatDetails = [];
     }
 
-    // Đếm ngược thời gian giữ ghế (báo cáo Ch.4.3.3): /holds trả về
-    // expiresAt, hiển thị còn lại bao lâu để thanh toán. Hết hạn thì
-    // báo và tải lại sơ đồ ghế để người dùng chọn lại.
     function stopHoldCountdown() {
         if (holdTimer) {
             clearInterval(holdTimer);
@@ -217,8 +214,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         holdTimer = setInterval(tick, 1000);
     }
 
-    // Modal VietQR (báo cáo 6.1.3.4): sau khi /checkout tạo đơn thành
-    // công, hiện mã QR + mã đơn + tổng tiền thay vì chuyển trang ngay.
     function openVietqrModal(order) {
         const modal = document.getElementById('vietqrModal');
         if (!modal || !order) return;
@@ -892,10 +887,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             stopHoldCountdown();
             message(error.message, true);
-            // Lỗi trước đây chỉ hiện ở notice trên đầu trang nên nhìn như "không có gì xảy ra".
             document.getElementById('notice')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Ghế có thể đã bị người khác giữ/bán trong lúc xử lý:
-            // tải lại sơ đồ để trạng thái ghế đúng với server.
             loadSeats();
             checkoutButton.disabled = false;
             checkoutButton.textContent = 'THANH TOÁN ĐẶT VÉ';

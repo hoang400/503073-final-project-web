@@ -62,28 +62,38 @@ async function loadHistory(container) {
 
             container.innerHTML = filtered.length
                 ? filtered.map(order => `
-                    <article class="card order">
-                        <h2>${esc(order.movie)}</h2>
-                        <p>Mã đơn: ${esc(order.code)}</p>
-                        <p>Rạp: ${esc(order.cinema || '—')}${order.room ? ' · Phòng ' + esc(order.room) : ''}</p>
-                        ${order.address ? `<p>Địa chỉ: ${esc(order.address)}</p>` : ''}
-                        ${order.seats ? `<p>Ghế: ${esc(order.seats)}</p>` : ''}
-                        <p>Suất chiếu: ${esc(formatDate(order.showtime))}</p>
-                        <p>Ngày đặt: ${esc(formatDate(order.createdAt))}</p>
-                        <p>Trạng thái: ${esc(statusText(order.status))}</p>
-                        <p>Tổng tiền: ${money(order.total)}</p>
-                        <div class="order-actions">
-                            <a class="button" href="order-detail.php?id=${encodeURIComponent(order.id)}">
-                                Xem chi tiết
-                            </a>
-                            <a class="button secondary-button" href="order-detail.php?id=${encodeURIComponent(order.id)}">
-                                <i class="fa-solid fa-qrcode"></i> Xem QR vé
-                            </a>
-                            ${order.status !== 'DaHuy' ? `
-                                <button type="button" class="button danger-button" data-cancel-order="${order.id}">
-                                    Hủy vé
-                                </button>
+                    <article class="order-card">
+                        <div class="order-main">
+                            <p class="order-meta">
+                                <span class="order-code">#${esc(order.code)}</span>
+                                <span class="order-time">${esc(formatDateTime(order.createdAt))}</span>
+                                ${order.status === 'DaHuy' ? '<span class="order-cancelled">Đã hủy</span>' : ''}
+                            </p>
+                            <h2 class="order-title">${esc(order.movie)}</h2>
+                            <p class="order-line">
+                                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                                ${esc(order.cinema || '—')} | ${esc(formatShowtime(order.showtime))}
+                            </p>
+                            ${order.seats ? `
+                                <p class="order-line">
+                                    <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+                                    Ghế: ${esc(order.seats)}
+                                </p>
                             ` : ''}
+                        </div>
+                        <div class="order-side">
+                            <p class="order-total-label">TỔNG TIỀN ĐÃ TRẢ</p>
+                            <p class="order-total">${money(order.total)}</p>
+                            <div class="order-actions">
+                                <a class="button" href="order-detail.php?id=${encodeURIComponent(order.id)}">
+                                    <i class="fa-solid fa-qrcode" aria-hidden="true"></i> Xem QR Vé
+                                </a>
+                                ${order.status !== 'DaHuy' ? `
+                                    <button type="button" class="button danger-button" data-cancel-order="${order.id}">
+                                        Hủy Vé
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     </article>
                 `).join('')
@@ -125,7 +135,7 @@ async function loadOrderDetail(container) {
         container.innerHTML = `
             <h2>${esc(order.ten_phim)}</h2>
             <p>Mã đơn: ${esc(order.ma_don_hang)}</p>
-            <p>Rạp: ${esc(order.ten_rap || '—')}${order.ten_phong ? ' · Phòng ' + esc(order.ten_phong) : ''}</p>
+            <p>Rạp: ${esc(order.ten_rap || '—')}${order.ten_phong ? ' · ' + esc(order.ten_phong) : ''}</p>
             ${order.dia_chi ? `<p>Địa chỉ: ${esc(order.dia_chi)}</p>` : ''}
             <p>Suất chiếu: ${esc(formatDate(order.thoi_gian_bat_dau))}</p>
             <p>Ngày đặt: ${esc(formatDate(order.thoi_gian_dat))}</p>
@@ -184,6 +194,16 @@ async function loadOrderDetail(container) {
     }
 }
 
+function parseDate(value) {
+    if (!value) {
+        return null;
+    }
+
+    const date = new Date(String(value).replace(' ', 'T'));
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function formatDate(value) {
     if (!value) {
         return '';
@@ -194,6 +214,34 @@ function formatDate(value) {
     return Number.isNaN(date.getTime())
         ? String(value)
         : date.toLocaleString('vi-VN');
+}
+
+// 12:37:13 18/11/2026 — dùng cho mã đơn ở danh sách lịch sử.
+function formatDateTime(value) {
+    const date = parseDate(value);
+
+    if (!date) {
+        return String(value || '');
+    }
+
+    const pad = number => String(number).padStart(2, '0');
+
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+        + ` ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+}
+
+// 19:30 - 18/11/2026 — dùng cho dòng rạp + suất chiếu ở danh sách lịch sử.
+function formatShowtime(value) {
+    const date = parseDate(value);
+
+    if (!date) {
+        return String(value || '');
+    }
+
+    const pad = number => String(number).padStart(2, '0');
+
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+        + ` - ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
 function statusText(status) {
