@@ -297,6 +297,6 @@
 
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/booking.js?v=7"></script>
+    <script src="js/booking.js?v=8"></script>
 </body>
 </html>

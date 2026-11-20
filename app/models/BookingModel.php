@@ -301,14 +301,14 @@ final class BookingModel
             $seatPriceQuery->execute(array_merge([$showtimeId], $seatIds));
             $seatPrices = $seatPriceQuery->fetchAll(PDO::FETCH_KEY_PAIR);
 
-            $multiplier = ['Thuong' => 1.0, 'VIP' => 1.2, 'Couple' => 1.5];
+            // Giá vé cố định theo loại ghế (không nhân với giá cơ sở của suất chiếu)
+            $fixedPrices = ['Thuong' => 90000, 'VIP' => 110000, 'Couple' => 200000];
             $totalCents = 0;
             $seatPriceMap = [];
 
             foreach ($seatIds as $seatId) {
-                $basePrice = (float) $showtime['gia_ve_co_ban'];
                 $loaiGhe = $seatPrices[$seatId] ?? 'Thuong';
-                $price = $basePrice * ($multiplier[$loaiGhe] ?? 1.0);
+                $price = $fixedPrices[$loaiGhe] ?? 90000;
                 $priceCents = (int) round($price * 100);
                 $totalCents += $priceCents;
                 $seatPriceMap[$seatId] = number_format($priceCents / 100, 2, '.', '');

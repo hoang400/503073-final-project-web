@@ -1,6 +1,3 @@
--- CineStar Sample Data - FIXED
--- Chạy sau schema.sql: mysql -u root -p cinestar < database/seed.sql
-
 USE cinestar;
 
 SET NAMES utf8mb4;
@@ -35,42 +32,49 @@ INSERT INTO `phongchieu` (`rap_id`, `ten_phong`, `loai_phong`) VALUES
 (3, 'Phòng 1', '2D'), (3, 'Phòng 2', '4DX'),
 (4, 'Phòng 1', '2D'), (4, 'Phòng 2', '3D'), (4, 'Phòng 3', 'IMAX');
 
--- GHẾ (Procedure tạo 650 ghế cho 10 phòng: hàng A-F x 10 ghế, hàng G 5 ghế đôi)
 DELIMITER $$
+
 CREATE PROCEDURE seed_seats()
 BEGIN
     DECLARE v_phong_id INT UNSIGNED DEFAULT 1;
     DECLARE v_hang CHAR(1);
     DECLARE v_so INT UNSIGNED;
-    DECLARE v_max INT UNSIGNED;
     DECLARE v_loai VARCHAR(50);
-    
+
     WHILE v_phong_id <= 10 DO
         SET v_hang = 'A';
+
         WHILE v_hang <= 'G' DO
             SET v_so = 1;
-            SET v_max = IF(v_hang = 'G', 5, 10);
-            WHILE v_so <= v_max DO
-                IF v_hang IN ('A','B') THEN
+
+            WHILE v_so <= 12 DO
+                IF v_hang IN ('D','E','F','G') THEN
                     SET v_loai = 'VIP';
-                ELSEIF v_hang = 'G' THEN
-                    SET v_loai = 'Couple';
-                ELSEIF v_hang = 'E' AND v_so % 2 = 0 THEN
-                    SET v_loai = 'Couple';
                 ELSE
                     SET v_loai = 'Thuong';
                 END IF;
-                
+
                 INSERT INTO `ghe` (`phong_id`, `hang_ghe`, `so_thu_tu`, `loai_ghe`)
                 VALUES (v_phong_id, v_hang, v_so, v_loai);
-                
+
                 SET v_so = v_so + 1;
             END WHILE;
+
             SET v_hang = CHAR(ORD(v_hang) + 1);
         END WHILE;
+
+        -- Hàng H: 6 ghế đôi
+        SET v_so = 1;
+        WHILE v_so <= 6 DO
+            INSERT INTO `ghe` (`phong_id`, `hang_ghe`, `so_thu_tu`, `loai_ghe`)
+            VALUES (v_phong_id, 'H', v_so, 'Couple');
+            SET v_so = v_so + 1;
+        END WHILE;
+
         SET v_phong_id = v_phong_id + 1;
     END WHILE;
 END$$
+
 DELIMITER ;
 
 CALL seed_seats();
@@ -80,11 +84,7 @@ DROP PROCEDURE seed_seats;
 -- PHIM
 -- ============================================
 
--- ============================================
--- PHIM - DỮ LIỆU TỪ FRONTEND ZIP
--- Thứ tự phim được giữ nguyên để khớp phim_id 1-4
--- trong các suất chiếu bên dưới.
--- ============================================
+
 INSERT INTO `phim` (
     `ten_phim`,
     `ten_ngan`,
@@ -201,7 +201,9 @@ INSERT INTO `bapnuoc` (`ten_mon`, `loai`, `don_gia`, `hinh_anh`, `trang_thai`) V
 ('Nước suối', 'Nuoc', 15000, 'https://example.com/nuoc_suoi.jpg', 1),
 ('Combo 1 (Bắp vừa + 2 nước)', 'Combo', 120000, 'https://example.com/combo1.jpg', 1),
 ('Combo 2 (Bắp lớn + 2 nước + 1 bắp phô mai)', 'Combo', 180000, 'https://example.com/combo2.jpg', 1),
-('Combo 3 (2 Bắp vừa + 3 nước)', 'Combo', 220000, 'https://example.com/combo3.jpg', 1);
+('Combo 3 (2 Bắp vừa + 3 nước)', 'Combo', 220000, 'https://example.com/combo3.jpg', 1),
+('Combo Solo (1 bắp + 1 nước)', 'Combo', 79000, 'https://example.com/combo_solo.jpg', 1),
+('Combo Couple (2 bắp + 2 nước)', 'Combo', 109000, 'https://example.com/combo_couple.jpg', 1);
 
 -- ============================================
 -- SUẤT CHIẾU (SỬA LỖI DATE_ADD - DÙNG HOUR_MINUTE)

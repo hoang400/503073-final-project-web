@@ -1,10 +1,6 @@
-// Booking page — layout giống ảnh chốt của nhóm.
-// API giữ nguyên như bản cũ: /movies, /showtimes, /seats,
-// /concessions, /holds, /checkout. Chỉ thay đổi cách hiển thị.
-
 document.addEventListener('DOMContentLoaded', async () => {
     const movieSelect = $('#movie');
-    const showtimeSelect = $('#showtime'); // select ẩn, giữ để đồng bộ id suất chiếu
+    const showtimeSelect = $('#showtime'); 
     const timeSelect = $('#showtimeTime');
     const formatSelect = $('#formatSelect');
     const cinemaSelect = $('#cinemaSelect');
@@ -23,22 +19,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     let showtimes = []; // tất cả suất chiếu của phim đang chọn
     let movies = [];
     let concessions = [];
-    let basePrice = 0;
     let user;
 
-    // Ngày đang chọn (YYYY-MM-DD, giờ địa phương) + cửa sổ 7 ngày
+
     let selectedDate = '';
     let dateOffset = 0;
 
-    const seatMultipliers = {
-        Thuong: 1,
-        VIP: 1.2,
-        Couple: 1.5,
+
+    const seatPrices = {
+        Thuong: 90000,
+        VIP: 110000,
+        Couple: 200000,
     };
 
     function seatPrice(seat) {
-        const multiplier = seatMultipliers[seat.type] || 1;
-        return basePrice * multiplier;
+        return seatPrices[seat.type] || 90000;
     }
 
     function getSelectedSeatTotal() {
@@ -87,9 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const std = document.getElementById('legendStandardPrice');
         const vip = document.getElementById('legendVipPrice');
         const cpl = document.getElementById('legendCouplePrice');
-        if (std) std.textContent = shortMoney(basePrice * 1);
-        if (vip) vip.textContent = shortMoney(basePrice * 1.2);
-        if (cpl) cpl.textContent = shortMoney(basePrice * 1.5);
+        if (std) std.textContent = shortMoney(90000);
+        if (vip) vip.textContent = shortMoney(110000);
+        if (cpl) cpl.textContent = shortMoney(200000);
     }
 
     function selectedMovie() {
@@ -476,7 +471,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         seatsContainer.innerHTML = `
             <p class="booking-placeholder">Chọn suất chiếu để xem sơ đồ ghế.</p>
         `;
-        basePrice = 0;
         resetSelectedSeats();
         updateBill();
     }
@@ -672,8 +666,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateBill();
             return;
         }
-
-        basePrice = Number(showtime.basePrice);
 
         try {
             const seats = await api(
