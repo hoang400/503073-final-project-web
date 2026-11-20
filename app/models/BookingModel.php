@@ -6,12 +6,17 @@ final class BookingModel
     public function findShowtimes(int $movieId): array
     {
         $statement = Database::connection()->prepare(
-            "SELECT id, phim_id, phong_id, thoi_gian_bat_dau,
-                    thoi_gian_ket_thuc, gia_ve_co_ban
-             FROM suatchieu
-             WHERE phim_id = :movie_id
-               AND thoi_gian_bat_dau > NOW()
-             ORDER BY thoi_gian_bat_dau"
+            "SELECT s.id, s.phim_id, s.phong_id, s.thoi_gian_bat_dau,
+                    s.thoi_gian_ket_thuc, s.gia_ve_co_ban,
+                    ph.ten_phong AS ten_phong,
+                    ph.loai_phong AS loai_phong,
+                    r.ten_rap AS ten_rap
+             FROM suatchieu s
+             JOIN phongchieu ph ON ph.id = s.phong_id
+             JOIN rapchieu r ON r.id = ph.rap_id
+             WHERE s.phim_id = :movie_id
+               AND s.thoi_gian_bat_dau > NOW()
+             ORDER BY s.thoi_gian_bat_dau"
         );
 
         $statement->execute(['movie_id' => $movieId]);
@@ -48,7 +53,7 @@ final class BookingModel
                             AND d.trang_thai_thanh_toan <> 'DaHuy'
                         ) THEN 'BOOKED'
 
-                        WHEN :user_id > 0 AND EXISTS (
+                        WHEN EXISTS (
                             SELECT 1
                             FROM ghedanggiu gd
                             WHERE gd.ghe_id = g.id
@@ -164,9 +169,10 @@ final class BookingModel
                 'DELETE FROM ghedanggiu WHERE suat_chieu_id = ? AND user_id = ?'
             );
             $delOld->execute([$showtimeId, $userId]);
-
-            // Insert holds mới (hết hạn 10 phút)
-            $expiresAt = (new DateTime())->modify('+10 minutes')->format('Y-m-d H:i:s');
+            $expiresAtRow = $pdo->query(
+                'SELECT DATE_ADD(NOW(), INTERVAL 5 MINUTE) AS expires_at'
+            )->fetch();
+            $expiresAt = $expiresAtRow['expires_at'];
             $insertHold = $pdo->prepare(
                 'INSERT INTO ghedanggiu (suat_chieu_id, ghe_id, user_id, expires_at)
                 VALUES (:showtime_id, :seat_id, :user_id, :expires_at)'
@@ -287,7 +293,7 @@ final class BookingModel
 
             // Lấy loại ghế để tính giá
             $seatPriceQuery = $pdo->prepare(
-                "SELECT g.id, g.loai_ghe, s.gia_ve_co_ban
+                "SELECT g.id, g.loai_ghe
                  FROM ghe g
                  JOIN suatchieu s ON s.phong_id = g.phong_id
                  WHERE s.id = ? AND g.id IN ($marks)"
@@ -295,14 +301,14 @@ final class BookingModel
             $seatPriceQuery->execute(array_merge([$showtimeId], $seatIds));
             $seatPrices = $seatPriceQuery->fetchAll(PDO::FETCH_KEY_PAIR);
 
-            $multiplier = ['Thuong' => 1.0, 'VIP' => 1.2, 'Couple' => 1.5];
+            // Giá vé cố định theo loại ghế (không nhân với giá cơ sở của suất chiếu)
+            $fixedPrices = ['Thuong' => 90000, 'VIP' => 110000, 'Couple' => 200000];
             $totalCents = 0;
             $seatPriceMap = [];
 
             foreach ($seatIds as $seatId) {
-                $basePrice = (float) $showtime['gia_ve_co_ban'];
                 $loaiGhe = $seatPrices[$seatId] ?? 'Thuong';
-                $price = $basePrice * ($multiplier[$loaiGhe] ?? 1.0);
+                $price = $fixedPrices[$loaiGhe] ?? 90000;
                 $priceCents = (int) round($price * 100);
                 $totalCents += $priceCents;
                 $seatPriceMap[$seatId] = number_format($priceCents / 100, 2, '.', '');

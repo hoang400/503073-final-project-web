@@ -8,25 +8,21 @@ async function loadDashboard() {
     if (dateTo) params.append('date_to', dateTo);
     
     try {
-        const [summary, byDate, topMovies] = await Promise.all([
-            api(`/admin/reports?${params.toString()}`),
-            api(`/admin/reports?${params.toString()}&by_date=1`),
-            api(`/admin/reports?${params.toString()}&top_movies=1`)
-        ]);
-        
-        renderSummary(summary);
-        renderChart(byDate);
-        renderTopMovies(topMovies);
+        // /admin/reports trả cả 3 khối (summary, by_date, top_movies) trong 1 lần gọi
+        const data = await api(`/admin/reports?${params.toString()}`);
+
+        renderDashboardSummary(data.summary || {});
+        renderChart(data.by_date || []);
+        renderTopMovies(data.top_movies || []);
     } catch (e) {
         message(e.message, true);
     }
 }
 
-function renderSummary(data) {
-    document.getElementById('statOrders').textContent = data.order_count?.toLocaleString('vi-VN') || '0';
-    document.getElementById('statTicketRev').textContent = (data.ticket_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('statConcessionRev').textContent = (data.concession_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('statTickets').textContent = data.ticket_count?.toLocaleString('vi-VN') || '0';
+function renderDashboardSummary(data) {
+    document.getElementById('statTotalRevenue').textContent = (data.total_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
+    document.getElementById('statOrders').textContent = (data.order_count || 0).toLocaleString('vi-VN') + ' Đơn vé';
+    document.getElementById('statMoviesShowing').textContent = (data.movies_showing || 0).toLocaleString('vi-VN') + ' Phim';
 }
 
 let revenueChart = null;
@@ -74,23 +70,15 @@ function renderTopMovies(data) {
     `).join('') || '<tr><td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">Chưa có dữ liệu</td></tr>';
 }
 
-// Filter handlers
+// Dashboard (theo báo cáo 6.2): tải thống kê tổng, không lọc theo ngày
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('filterBtn')) {
-        document.getElementById('filterBtn').addEventListener('click', loadDashboard);
-        
-        // Set default dates (last 7 days)
-        const today = new Date();
-        const weekAgo = new Date(today.getTime() - 7*24*60*60*1000);
-        document.getElementById('dateTo').value = today.toISOString().split('T')[0];
-        document.getElementById('dateFrom').value = weekAgo.toISOString().split('T')[0];
-        
+    if (document.getElementById('statTotalRevenue')) {
         loadDashboard();
     }
 });
 
 // Export for other pages
-window.AdminDashboard = { loadDashboard, renderSummary, renderChart, renderTopMovies };
+window.AdminDashboard = { loadDashboard, renderChart, renderTopMovies };
 
 // ============================================
 // MOVIES MANAGEMENT
@@ -118,8 +106,10 @@ async function loadMoviesAdmin() {
 
 function renderMoviesTable(movies) {
     const tbody = document.getElementById('moviesBody');
-    const emptyState = document.getElementById('emptyState');
+    const emptyState = document.getElementById('moviesEmptyState');
     const table = document.getElementById('moviesTable');
+
+    if (!tbody) return;
     
     if (!movies || movies.length === 0) {
         tbody.innerHTML = '';
@@ -131,35 +121,22 @@ function renderMoviesTable(movies) {
     table.style.display = 'table';
     emptyState.style.display = 'none';
     
-    const statusLabels = {
-        'DANG_CHIEU': '<span style="background:#22c55e; color:#052e16; padding:4px 8px; border-radius:4px; font-size:11px;">Đang chiếu</span>',
-        'SAP_CHIEU': '<span style="background:#3b82f6; color:#1e3a5f; padding:4px 8px; border-radius:4px; font-size:11px;">Sắp chiếu</span>',
-        'NGUNG_CHIEU': '<span style="background:#ef4444; color:#450a0a; padding:4px 8px; border-radius:4px; font-size:11px;">Ngưng chiếu</span>',
-    };
-    
     tbody.innerHTML = movies.map(m => `
-        <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:12px; font-family:monospace;">${m.id}</td>
-            <td style="padding:12px;">
-                ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" style="width:60px; height:90px; object-fit:cover; border-radius:4px;">` : '<span style="color:#94a3b8;">Không có</span>'}
+        <tr>
+            <td>
+                ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" class="poster-thumb">` : '<span class="movie-sub">Không có</span>'}
             </td>
-            <td style="padding:12px; max-width:200px;">
+            <td>
                 <strong>${esc(m.title)}</strong>
                 <br>
-                <small style="color:#94a3b8;">
-                    ${esc(m.director || 'Chưa có đạo diễn')}
-                    ${m.imdb !== null && m.imdb !== undefined
-                        ? ` · IMDb ${esc(String(m.imdb))}/10`
-                        : ''}
-                </small>
+                <small style="color:#38bdf8; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.5px;">${esc(m.genre)}</small>
             </td>
-            <td style="padding:12px; color:#94a3b8; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(m.genre)}</td>
-            <td style="padding:12px;">${m.duration} phút</td>
-            <td style="padding:12px;">${statusLabels[m.status] || m.status}</td>
-            <td style="padding:12px;">
-                <div style="display:flex; gap:8px;">
-                    <button class="button edit-btn" data-id="${m.id}" style="padding:6px 12px; font-size:12px;">Sửa</button>
-                    <button class="button delete-btn" data-id="${m.id}" data-title="${esc(m.title)}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Xóa</button>
+            <td>${m.duration} phút</td>
+            <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
+            <td style="text-align:center;">
+                <div style="display:flex; gap:8px; justify-content:center;">
+                    <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
+                    <button class="button btn-sm btn-delete delete-btn" data-id="${m.id}" data-title="${esc(m.title)}">Xóa</button>
                 </div>
             </td>
         </tr>
@@ -189,13 +166,14 @@ function openMovieModal(id = null) {
     preview.innerHTML = '';
     document.getElementById('movieId').value = '';
     
+    // Nút lưu luôn là "LƯU THÔNG TIN PHIM" như file mẫu; chỉ tiêu đề đổi khi sửa
+    submitBtn.textContent = 'LƯU THÔNG TIN PHIM';
+
     if (id) {
-        title.textContent = 'Sửa phim';
-        submitBtn.textContent = 'Cập nhật';
+        title.textContent = 'Cập nhật thông tin phim';
         loadMovieForEdit(id);
     } else {
         title.textContent = 'Thêm phim mới';
-        submitBtn.textContent = 'Thêm';
     }
     
     modal.style.display = 'flex';
@@ -211,42 +189,52 @@ const isEditing = Boolean(editingMovieId);
 async function loadMovieForEdit(id) {
     try {
         const movie = await api(`/admin/movies/${id}`);
+
         document.getElementById('movieId').value = movie.id;
+
         document.getElementById('ten_ngan').value =
             movie.shortTitle || '';
-        document.getElementById('ten_hien_thi_dropdown').value =
-            movie.dropdownTitle || '';
+
         document.getElementById('do_tuoi').value =
             movie.ageTag || '';
-        document.getElementById('mo_ta_do_tuoi').value =
-            movie.ageDesc || '';
+
         document.getElementById('imdb').value =
             movie.imdb ?? '';
-        document.getElementById('dao_dien').value =
-            movie.director || '';
-        document.getElementById('bien_kich').value =
-            movie.writers || '';
-        document.getElementById('dien_vien').value =
-            movie.stars || '';
-        document.getElementById('ten_phim').value = movie.title;
-        document.getElementById('the_loai').value = movie.genre;
-        document.getElementById('thoi_luong').value = movie.duration;
-        document.getElementById('trang_thai').value = movie.status;
-        document.getElementById('poster_url').value = movie.poster_url || '';
-        document.getElementById('trailer_url').value = movie.trailer_url || '';
-        document.getElementById('mo_ta').value = movie.description || '';
-        
-        // Preview poster
+
+        document.getElementById('ten_phim').value =
+            movie.title || '';
+
+        document.getElementById('the_loai').value =
+            movie.genre || '';
+
+        document.getElementById('thoi_luong').value =
+            movie.duration ?? '';
+
+        document.getElementById('poster_url').value =
+            movie.poster_url || '';
+
+        document.getElementById('trailer_url').value =
+            movie.trailer_url || '';
+
         const preview = document.getElementById('posterPreview');
+
         if (movie.poster_url) {
-            preview.innerHTML = `<img src="${esc(movie.poster_url)}" alt="Preview" style="max-height:150px; border-radius:4px;">`;
+            preview.innerHTML = `
+                <img
+                    src="${esc(movie.poster_url)}"
+                    alt="Preview"
+                    style="max-height:150px; border-radius:4px;"
+                >
+            `;
+        } else {
+            preview.innerHTML = '';
         }
+
     } catch (e) {
         message(e.message, true);
         closeMovieModal();
     }
 }
-
 // Poster preview on URL change
 document.addEventListener('DOMContentLoaded', () => {
     const posterInput = document.getElementById('poster_url');
@@ -268,40 +256,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const btn = document.getElementById('submitBtn');
+
+            // Lưu trạng thái trước khi đóng modal
+            const wasEditing = Boolean(editingMovieId);
+
             btn.disabled = true;
             btn.textContent = 'Đang lưu...';
-            
+
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
-            
-            // Convert numeric fields
-            if (data.thoi_luong) data.thoi_luong = parseInt(data.thoi_luong);
-            
-            // Remove empty optional fields
-            Object.keys(data).forEach(k => {
-                if (data[k] === '' && !['ten_phim', 'the_loai', 'thoi_luong', 'trang_thai'].includes(k)) {
-                    delete data[k];
-                }
-            });
-            
+
+            // Form chỉ có 1 ô "Tên Ngắn (hiển thị Dropdown)" nên dùng
+            // luôn làm tên hiển thị trong danh sách chọn phim.
+            if (data.ten_ngan) {
+                data.ten_hien_thi_dropdown = data.ten_ngan;
+            }
+
+            // Ô trailer nhận ID YouTube (vd. dQw4w9WgXcQ) theo mẫu 6.2.2.
+            // Trang đặt vé dùng thẳng trailer_url làm href nên nếu nhập
+            // ID thì đổi thành link xem được.
+            if (
+                data.trailer_url
+                && !/^https?:\/\//i.test(data.trailer_url.trim())
+            ) {
+                data.trailer_url =
+                    'https://www.youtube.com/watch?v='
+                    + data.trailer_url.trim();
+            }
+
+            // Chuyển thời lượng thành số nguyên
+            if (data.thoi_luong) {
+                data.thoi_luong = parseInt(data.thoi_luong, 10);
+            }
+
             try {
-                if (editingMovieId) {
-                    await api(`/admin/movies/${editingMovieId}`, 'PATCH', data);
+                if (wasEditing) {
+                    await api(
+                        `/admin/movies/${editingMovieId}`,
+                        'PATCH',
+                        data
+                    );
+
                     message('Cập nhật phim thành công!');
                 } else {
                     await api('/admin/movies', 'POST', data);
+
                     message('Thêm phim thành công!');
                 }
-                
+
                 closeMovieModal();
-                loadMoviesAdmin();
+                await loadMoviesAdmin();
+
             } catch (err) {
                 message(err.message, true);
+
             } finally {
                 btn.disabled = false;
-                btn.textContent = editingMovieId ? 'Cập nhật' : 'Thêm';
+                btn.textContent = 'LƯU THÔNG TIN PHIM';
             }
         });
     }
@@ -744,8 +757,7 @@ async function openSeatMap(roomId, roomName, cinemaId) {
     
     document.getElementById('roomsTable').closest('article').style.display = 'none';
     document.getElementById('roomsEmptyState').style.display = 'none';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'none';
-    document.getElementById('addRoomBtn').style.display = 'none';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'none';
     document.getElementById('seatMapSection').style.display = 'block';
     
     document.getElementById('seatMapTitle').textContent = `Sơ đồ ghế - ${esc(roomName)}`;
@@ -756,14 +768,16 @@ async function openSeatMap(roomId, roomName, cinemaId) {
 function backToRooms() {
     document.getElementById('roomsTable').closest('article').style.display = 'block';
     document.getElementById('roomsEmptyState').style.display = 'block';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'block';
-    document.getElementById('addRoomBtn').style.display = 'inline-block';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'block';
     document.getElementById('seatMapSection').style.display = 'none';
     currentRoomId = null;
     currentRoomCinemaId = null;
 }
 
 async function loadSeatMap(roomId) {
+    selectedSeatId = null;
+    const info = document.getElementById('selectedSeatInfo');
+    if (info) info.textContent = '';
     try {
         const seats = await api(`/admin/rooms/${roomId}/seats`);
         renderSeatMap(seats);
@@ -778,36 +792,48 @@ function renderSeatMap(seats) {
         container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "Tự động tạo ghế" hoặc thêm thủ công.</p>';
         return;
     }
-    
-    // Group by row
+
+    // Gom theo hàng, bố cục giống hệt trang đặt vé:
+    // nhãn hàng 2 bên, lối đi sau ghế 2 / 7 / 10, ghế Couple rộng gấp đôi.
     const rows = {};
     seats.forEach(s => {
         if (!rows[s.row]) rows[s.row] = [];
         rows[s.row].push(s);
     });
-    
-    const rowLabels = Object.keys(rows).sort();
-    
-    let html = '';
-    rowLabels.forEach(row => {
+
+    const rowLabels = Object.keys(rows).sort((a, b) =>
+        a.localeCompare(b, 'vi', { numeric: true })
+    );
+
+    container.innerHTML = rowLabels.map(row => {
         const rowSeats = rows[row].sort((a, b) => a.number - b.number);
-        html += `
-            <div class="seat-row" style="display:flex; align-items:center; gap:6px; margin:8px 0; min-width:540px;">
-                <b style="width:20px; text-align:right; color:#94a3b8;">${esc(row)}</b>
-                ${rowSeats.map(s => `
-                    <button type="button" class="seat ${s.type === 'VIP' ? 'vip' : ''} ${s.type === 'Couple' ? 'double' : ''} ${s.selected ? 'selected' : ''}" 
-                            data-seat-id="${s.id}" data-row="${esc(row)}" data-number="${s.number}" data-type="${s.type}"
-                            style="padding:0; width:${s.type === 'Couple' ? '76px' : '35px'}; height:32px; border:1px solid #475569; background:${s.type === 'VIP' ? '#312e81' : s.type === 'Couple' ? '#581c87' : '#1e293b'}; font-size:10px; flex-shrink:0;"
-                            title="Ghế ${esc(row)}${s.number} (${esc(s.type)})">
-                        ${esc(row)}${s.number}
-                    </button>
-                `).join('')}
+
+        const cells = [];
+        rowSeats.forEach((s, index) => {
+            const typeClass = s.type === 'VIP' ? 'vip' : s.type === 'Couple' ? 'couple' : 'standard';
+            cells.push(`
+                <button type="button" class="seat ${typeClass}"
+                        data-seat-id="${s.id}" data-row="${esc(row)}" data-number="${s.number}" data-type="${s.type}"
+                        title="Ghế ${esc(row)}${s.number} (${esc(s.type)})">
+                    ${esc(row)}${s.number}
+                </button>
+            `);
+
+            // Lối đi như trang đặt vé: hàng dài (>8 ghế) chừa khe sau ghế 2, 7, 10
+            if (rowSeats.length > 8 && [1, 6, 9].includes(index)) {
+                cells.push('<span class="seat-aisle" aria-hidden="true"></span>');
+            }
+        });
+
+        return `
+            <div class="seat-row">
+                <span class="seat-row-label">${esc(row)}</span>
+                <div class="seat-row-list">${cells.join('')}</div>
+                <span class="seat-row-label">${esc(row)}</span>
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
-    
+    }).join('');
+
     // Bind seat click events
     container.querySelectorAll('.seat').forEach(btn => {
         btn.addEventListener('click', () => handleSeatClick(btn));
@@ -815,28 +841,31 @@ function renderSeatMap(seats) {
 }
 
 let selectedSeatType = 'Thuong';
+let selectedSeatId = null;
 
 function handleSeatClick(btn) {
     const seatId = btn.dataset.seatId;
-    const isSelected = btn.classList.contains('selected');
-    
-    if (isSelected) {
-        // Deselect - delete seat
-        if (!confirm('Xóa ghế này?')) return;
+
+    // Bấm lại ghế đang chọn -> hỏi xóa ghế
+    if (selectedSeatId && String(selectedSeatId) === String(seatId)) {
+        if (!confirm(`Xóa ghế ${btn.dataset.row}${btn.dataset.number}?`)) return;
         deleteSeat(seatId);
-    } else {
-        // Select - change type or add new
-        // For existing seats, allow type change
-        // For empty spots, we don't have UI yet - just show info
-        document.getElementById('selectedSeatInfo').textContent = 
-            `Đã chọn: Ghế ${btn.dataset.row}${btn.dataset.number} (${btn.dataset.type})`;
+        return;
     }
+
+    // Chọn ghế: highlight + hiện thông tin (đổi loại ghế ở radio phía trên)
+    document.querySelectorAll('#seatMap .seat.selected').forEach(el => el.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedSeatId = seatId;
+    document.getElementById('selectedSeatInfo').textContent =
+        `Đã chọn: Ghế ${btn.dataset.row}${btn.dataset.number} (${btn.dataset.type}) — chọn loại ghế ở trên để đổi loại, bấm lại ghế để xóa`;
 }
 
 function deleteSeat(seatId) {
     api(`/admin/seats/${seatId}`, 'DELETE')
         .then(() => {
             message('Xóa ghế thành công!');
+            selectedSeatId = null;
             loadSeatMap(currentRoomId);
         })
         .catch(err => message(err.message, true));
@@ -874,11 +903,12 @@ document.addEventListener('DOMContentLoaded', () => {
             data.cols = parseInt(data.cols);
             
             try {
-                // Call admin model method to auto generate seats
-                // We'll need to add this endpoint or use a direct approach
-                // For now, show message
-                message('Chức năng đang phát triển. Hãy thêm ghế thủ công hoặc implement API auto-gen.');
+                if (!autoGenRoomId) throw new Error('Chưa chọn phòng.');
+                const roomId = autoGenRoomId;
+                await api(`/admin/rooms/${roomId}/seats/generate`, 'POST', data);
+                message('Đã tạo lại sơ đồ ghế!');
                 closeAutoGenModal();
+                loadSeatMap(roomId);
             } catch (err) {
                 message(err.message, true);
             } finally {
@@ -905,14 +935,46 @@ function closeAutoGenModal() {
 // Seat type radio handling
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[name="seatType"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
+        radio.addEventListener('change', async (e) => {
             selectedSeatType = e.target.value;
+            // Đang chọn 1 ghế -> đổi loại ghế đó luôn
+            if (selectedSeatId) {
+                try {
+                    await api(`/admin/seats/${selectedSeatId}`, 'PATCH', { loai_ghe: selectedSeatType });
+                    message('Đã đổi loại ghế!');
+                    selectedSeatId = null;
+                    await loadSeatMap(currentRoomId);
+                } catch (err) {
+                    message(err.message, true);
+                }
+            }
         });
     });
     
-    // Add seat button (placeholder)
-    document.getElementById('addSeatBtn')?.addEventListener('click', () => {
-        message('Chức năng thêm ghế thủ công đang phát triển. Hãy dùng "Tự động tạo ghế" hoặc implement thêm.');
+    // Add seat button: thêm 1 ghế sau ghế cuối của hàng cuối, loại theo radio đang chọn
+    document.getElementById('addSeatBtn')?.addEventListener('click', async () => {
+        if (!currentRoomId) return;
+        try {
+            const seats = await api(`/admin/rooms/${currentRoomId}/seats`);
+            let row = 'A';
+            let number = 1;
+            if (seats.length) {
+                const sorted = [...seats].sort((a, b) => a.row.localeCompare(b.row) || a.number - b.number);
+                const last = sorted[sorted.length - 1];
+                row = last.row;
+                number = last.number + 1;
+            }
+            await api(`/admin/rooms/${currentRoomId}/seats`, 'POST', {
+                phong_id: currentRoomId,
+                hang_ghe: row,
+                so_thu_tu: number,
+                loai_ghe: selectedSeatType,
+            });
+            message(`Đã thêm ghế ${row}${number} (${selectedSeatType})!`);
+            loadSeatMap(currentRoomId);
+        } catch (err) {
+            message(err.message, true);
+        }
     });
     
     // Auto gen seats button
@@ -928,8 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function backToRooms() {
     document.getElementById('roomsTable').closest('article').style.display = 'block';
     document.getElementById('roomsEmptyState').style.display = 'block';
-    document.getElementById('cinemaFilter').closest('.filters').style.display = 'block';
-    document.getElementById('addRoomBtn').style.display = 'inline-block';
+    document.getElementById('cinemaFilter').closest('.admin-filters').style.display = 'block';
     document.getElementById('seatMapSection').style.display = 'none';
     currentRoomId = null;
     currentRoomCinemaId = null;
@@ -940,7 +1001,6 @@ function backToRooms() {
 function initRoomsPage() {
     currentRoomsPage = 'rooms';
     
-    document.getElementById('addRoomBtn')?.addEventListener('click', () => openRoomModal());
     document.getElementById('cinemaFilter')?.addEventListener('change', loadRoomsAdmin);
     
     loadRoomsAdmin();
@@ -950,344 +1010,6 @@ function initRoomsPage() {
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('roomsTable')) {
         initRoomsPage();
-    }
-});
-
-// ============================================
-// SHOWTIMES MANAGEMENT
-// ============================================
-
-let currentShowtimesPage = 'showtimes';
-
-async function loadShowtimesAdmin() {
-    if (currentShowtimesPage !== 'showtimes') return;
-    
-    try {
-        const [showtimes, movies, rooms] = await Promise.all([
-            api('/admin/showtimes'),
-            api('/admin/movies'),
-            api('/admin/rooms')
-        ]);
-        
-        // Populate filters
-        const movieFilter = document.getElementById('movieFilter');
-        const roomFilter = document.getElementById('roomFilter');
-        
-        if (movieFilter) {
-            movieFilter.innerHTML = '<option value="">Tất cả phim</option>' + 
-                movies.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
-        }
-        
-        if (roomFilter) {
-            roomFilter.innerHTML = '<option value="">Tất cả phòng</option>' + 
-                rooms.map(r => `<option value="${r.id}">${esc(r.cinema_name)} - ${esc(r.name)} (${esc(r.type)})</option>`).join('');
-        }
-        
-        // Populate modal selects
-        const modalMovieSelect = document.getElementById('showtimeMovieId');
-        const modalRoomSelect = document.getElementById('showtimeRoomId');
-        
-        if (modalMovieSelect) {
-            modalMovieSelect.innerHTML = movies.map(m => `<option value="${m.id}">${esc(m.title)} (${m.duration} phút)</option>`).join('');
-        }
-        
-        if (modalRoomSelect) {
-            modalRoomSelect.innerHTML = rooms.map(r => `<option value="${r.id}">${esc(r.cinema_name)} - ${esc(r.name)} (${esc(r.type)})</option>`).join('');
-        }
-        
-        renderShowtimesTable(showtimes);
-    } catch (e) {
-        message(e.message, true);
-    }
-}
-
-function renderShowtimesTable(showtimes) {
-    const tbody = document.getElementById('showtimesBody');
-    const emptyState = document.getElementById('emptyState');
-    const table = document.getElementById('showtimesTable');
-    const movieFilter = document.getElementById('movieFilter');
-    const roomFilter = document.getElementById('roomFilter');
-    const dateFilter = document.getElementById('dateFilter');
-    
-    if (!showtimes || showtimes.length === 0) {
-        tbody.innerHTML = '';
-        table.style.display = 'none';
-        emptyState.style.display = 'block';
-        return;
-    }
-    
-    // Apply filters
-    const movieId = movieFilter?.value;
-    const roomId = roomFilter?.value;
-    const date = dateFilter?.value;
-    
-    let filtered = showtimes;
-    
-    if (movieId) filtered = filtered.filter(s => s.movie_id == movieId);
-    if (roomId) filtered = filtered.filter(s => s.room_id == roomId);
-    if (date) filtered = filtered.filter(s => s.start_time.startsWith(date));
-    
-    if (filtered.length === 0) {
-        tbody.innerHTML = '';
-        table.style.display = 'none';
-        emptyState.style.display = 'block';
-        emptyState.textContent = 'Không có suất chiếu phù hợp với bộ lọc';
-        return;
-    }
-    
-    table.style.display = 'table';
-    emptyState.style.display = 'none';
-    
-    tbody.innerHTML = filtered.map(s => {
-        const start = new Date(s.start_time);
-        const end = new Date(s.end_time);
-        
-        return `
-            <tr style="border-bottom:1px solid #334155;">
-                <td style="padding:12px; font-family:monospace;">${s.id}</td>
-                <td style="padding:12px;"><strong>${esc(s.movie_title)}</strong></td>
-                <td style="padding:12px;">
-                    ${esc(s.cinema_name)} / ${esc(s.room_name)}
-                    <br><span style="color:#94a3b8; font-size:12px;">${esc(s.type || '')}</span>
-                </td>
-                <td style="padding:12px;">
-                    ${start.toLocaleDateString('vi-VN')} ${start.toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'})}
-                </td>
-                <td style="padding:12px;">
-                    ${end.toLocaleDateString('vi-VN')} ${end.toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'})}
-                </td>
-                <td style="padding:12px; text-align:right;">
-                    ${(s.base_price || 0).toLocaleString('vi-VN')} VNĐ
-                </td>
-                <td style="padding:12px;">
-                    <div style="display:flex; gap:8px;">
-                        <button class="button edit-showtime-btn" data-id="${s.id}" style="padding:6px 12px; font-size:12px;">Sửa</button>
-                        <button class="button delete-showtime-btn" data-id="${s.id}" data-movie="${esc(s.movie_title)}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Xóa</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join('');
-    
-    // Bind events
-    tbody.querySelectorAll('.edit-showtime-btn').forEach(btn => {
-        btn.addEventListener('click', () => openShowtimeModal(btn.dataset.id));
-    });
-    tbody.querySelectorAll('.delete-showtime-btn').forEach(btn => {
-        btn.addEventListener('click', () => confirmDeleteShowtime(btn.dataset.id, btn.dataset.movie));
-    });
-}
-
-// Filters
-document.addEventListener('DOMContentLoaded', () => {
-    const movieFilter = document.getElementById('movieFilter');
-    const roomFilter = document.getElementById('roomFilter');
-    const dateFilter = document.getElementById('dateFilter');
-    const clearBtn = document.getElementById('clearFiltersBtn');
-    
-    [movieFilter, roomFilter, dateFilter].forEach(el => {
-        el?.addEventListener('change', () => {
-            // Reload with filters via API params
-            loadShowtimesAdminWithFilters();
-        });
-    });
-    
-    clearBtn?.addEventListener('click', () => {
-        document.getElementById('movieFilter').value = '';
-        document.getElementById('roomFilter').value = '';
-        document.getElementById('dateFilter').value = '';
-        loadShowtimesAdmin();
-    });
-});
-
-async function loadShowtimesAdminWithFilters() {
-    if (currentShowtimesPage !== 'showtimes') return;
-    
-    const movieId = document.getElementById('movieFilter')?.value;
-    const roomId = document.getElementById('roomFilter')?.value;
-    const date = document.getElementById('dateFilter')?.value;
-    
-    const params = new URLSearchParams();
-    if (movieId) params.append('movie_id', movieId);
-    if (roomId) params.append('room_id', roomId);
-    if (date) params.append('date', date);
-    
-    try {
-        const showtimes = await api(`/admin/showtimes?${params.toString()}`);
-        renderShowtimesTable(showtimes);
-    } catch (e) {
-        message(e.message, true);
-    }
-}
-
-// Modal handling
-let editingShowtimeId = null;
-
-function openShowtimeModal(id = null) {
-    editingShowtimeId = id;
-    const modal = document.getElementById('showtimeModal');
-    const form = document.getElementById('showtimeForm');
-    const title = document.getElementById('showtimeModalTitle');
-    const submitBtn = document.getElementById('showtimeSubmitBtn');
-    
-    form.reset();
-    document.getElementById('showtimeId').value = '';
-    
-    // Set default datetime to next hour
-    const now = new Date();
-    now.setMinutes(0, 0, 0);
-    now.setHours(now.getHours() + 1);
-    const defaultStart = now.toISOString().slice(0, 16);
-    now.setHours(now.getHours() + 2);
-    const defaultEnd = now.toISOString().slice(0, 16);
-    
-    document.getElementById('thoi_gian_bat_dau').value = defaultStart;
-    document.getElementById('thoi_gian_ket_thuc').value = defaultEnd;
-    
-    if (id) {
-        title.textContent = 'Sửa suất chiếu';
-        submitBtn.textContent = 'Cập nhật';
-        loadShowtimeForEdit(id);
-    } else {
-        title.textContent = 'Thêm suất chiếu';
-        submitBtn.textContent = 'Thêm';
-    }
-    
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeShowtimeModal() {
-    document.getElementById('showtimeModal').style.display = 'none';
-    document.body.style.overflow = '';
-    editingShowtimeId = null;
-}
-
-async function loadShowtimeForEdit(id) {
-    try {
-        const showtimes = await api('/admin/showtimes');
-        const showtime = showtimes.find(s => s.id == id);
-        
-        if (!showtime) throw new Error('Không tìm thấy suất chiếu');
-        
-        document.getElementById('showtimeId').value = showtime.id;
-        document.getElementById('showtimeMovieId').value = showtime.movie_id;
-        document.getElementById('showtimeRoomId').value = showtime.room_id;
-        document.getElementById('thoi_gian_bat_dau').value = showtime.start_time.slice(0, 16);
-        document.getElementById('thoi_gian_ket_thuc').value = showtime.end_time.slice(0, 16);
-        document.getElementById('gia_ve_co_ban').value = showtime.base_price;
-    } catch (e) {
-        message(e.message, true);
-        closeShowtimeModal();
-    }
-}
-
-// Form submit
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('showtimeForm');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btn = document.getElementById('showtimeSubmitBtn');
-            btn.disabled = true;
-            btn.textContent = 'Đang lưu...';
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            
-            // Convert numeric fields
-            data.phim_id = parseInt(data.phim_id);
-            data.phong_id = parseInt(data.phong_id);
-            data.gia_ve_co_ban = parseFloat(data.gia_ve_co_ban);
-            
-            // Validate times
-            const start = new Date(data.thoi_gian_bat_dau);
-            const end = new Date(data.thoi_gian_ket_thuc);
-            
-            if (end <= start) {
-                message('Thời gian kết thúc phải sau thời gian bắt đầu!', true);
-                btn.disabled = false;
-                btn.textContent = editingShowtimeId ? 'Cập nhật' : 'Thêm';
-                return;
-            }
-            
-            if (data.gia_ve_co_ban < 0) {
-                message('Giá vé không được âm!', true);
-                btn.disabled = false;
-                btn.textContent = editingShowtimeId ? 'Cập nhật' : 'Thêm';
-                return;
-            }
-            
-            try {
-                if (editingShowtimeId) {
-                    await api(`/admin/showtimes/${editingShowtimeId}`, 'PATCH', data);
-                    message('Cập nhật suất chiếu thành công!');
-                } else {
-                    await api('/admin/showtimes', 'POST', data);
-                    message('Thêm suất chiếu thành công!');
-                }
-                
-                closeShowtimeModal();
-                loadShowtimesAdmin();
-            } catch (err) {
-                // Handle conflict error specifically
-                if (err.message.includes('trùng lịch')) {
-                    message('Suất chiếu bị trùng lịch với suất khác trong cùng phòng!', true);
-                } else {
-                    message(err.message, true);
-                }
-            } finally {
-                btn.disabled = false;
-                btn.textContent = isEditing ? 'Cập nhật' : 'Thêm';
-            }
-        });
-    }
-    
-    // Modal close
-    document.getElementById('closeShowtimeModal')?.addEventListener('click', closeShowtimeModal);
-    document.getElementById('cancelShowtimeModal')?.addEventListener('click', closeShowtimeModal);
-    document.getElementById('showtimeModal')?.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeShowtimeModal();
-    });
-});
-
-function closeShowtimeModal() {
-    document.getElementById('showtimeModal').style.display = 'none';
-    document.body.style.overflow = '';
-    editingShowtimeId = null;
-}
-
-function confirmDeleteShowtime(id, movieTitle) {
-    if (!confirm(`Xóa suất chiếu của phim "${movieTitle}"?`)) return;
-    
-    api(`/admin/showtimes/${id}`, 'DELETE')
-        .then(() => {
-            message('Xóa suất chiếu thành công!');
-            loadShowtimesAdmin();
-        })
-        .catch(err => message(err.message, true));
-}
-
-// Initialize showtimes page
-function initShowtimesPage() {
-    currentShowtimesPage = 'showtimes';
-    
-    document.getElementById('addShowtimeBtn')?.addEventListener('click', () => openShowtimeModal());
-    document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
-        document.getElementById('movieFilter').value = '';
-        document.getElementById('roomFilter').value = '';
-        document.getElementById('dateFilter').value = '';
-        loadShowtimesAdmin();
-    });
-    
-    loadShowtimesAdmin();
-}
-
-// Auto-init if on showtimes page
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('showtimesTable')) {
-        initShowtimesPage();
     }
 });
 
@@ -1356,9 +1078,6 @@ function renderConcessionsTable(concessions) {
     tbody.innerHTML = filtered.map(c => `
         <tr style="border-bottom:1px solid #334155;">
             <td style="padding:12px; font-family:monospace;">${c.id}</td>
-            <td style="padding:12px; text-align:center;">
-                ${c.image ? `<img src="${esc(c.image)}" alt="" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">` : '<span style="color:#94a3b8;">Không có</span>'}
-            </td>
             <td style="padding:12px;"><strong>${esc(c.name)}</strong></td>
             <td style="padding:12px;">${typeLabels[c.type] || c.type}</td>
             <td style="padding:12px; text-align:right;">${(c.price || 0).toLocaleString('vi-VN')} VNĐ</td>
@@ -1390,10 +1109,8 @@ function openConcessionModal(id = null) {
     const form = document.getElementById('concessionForm');
     const title = document.getElementById('concessionModalTitle');
     const submitBtn = document.getElementById('concessionSubmitBtn');
-    const preview = document.getElementById('concessionImagePreview');
-    
+
     form.reset();
-    preview.innerHTML = '';
     document.getElementById('concessionId').value = '';
     
     if (id) {
@@ -1422,34 +1139,12 @@ async function loadConcessionForEdit(id) {
         document.getElementById('ten_mon').value = concession.name;
         document.getElementById('loai').value = concession.type;
         document.getElementById('don_gia').value = concession.price;
-        document.getElementById('hinh_anh').value = concession.image || '';
         document.getElementById('trang_thai').value = concession.status;
-        
-        // Preview image
-        const preview = document.getElementById('concessionImagePreview');
-        if (concession.image) {
-            preview.innerHTML = `<img src="${esc(concession.image)}" alt="Preview" style="max-height:150px; border-radius:4px;">`;
-        }
     } catch (e) {
         message(e.message, true);
         closeConcessionModal();
     }
 }
-
-// Image preview on URL change
-document.addEventListener('DOMContentLoaded', () => {
-    const imageInput = document.getElementById('hinh_anh');
-    if (imageInput) {
-        imageInput.addEventListener('input', (e) => {
-            const preview = document.getElementById('concessionImagePreview');
-            if (e.target.value) {
-                preview.innerHTML = `<img src="${esc(e.target.value)}" alt="Preview" style="max-height:150px; border-radius:4px;">`;
-            } else {
-                preview.innerHTML = '';
-            }
-        });
-    }
-});
 
 // Form submit
 document.addEventListener('DOMContentLoaded', () => {
@@ -1468,9 +1163,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Convert numeric fields
             data.don_gia = parseFloat(data.don_gia);
             data.trang_thai = parseInt(data.trang_thai);
-            
-            // Clean empty optional fields
-            if (!data.hinh_anh) delete data.hinh_anh;
             
             // Validate
             if (data.don_gia < 0) {
@@ -1513,21 +1205,6 @@ function closeConcessionModal() {
     document.body.style.overflow = '';
     editingConcessionId = null;
 }
-
-// Image preview on URL change
-document.addEventListener('DOMContentLoaded', () => {
-    const imageInput = document.getElementById('hinh_anh');
-    if (imageInput) {
-        imageInput.addEventListener('input', (e) => {
-            const preview = document.getElementById('concessionImagePreview');
-            if (e.target.value) {
-                preview.innerHTML = `<img src="${esc(e.target.value)}" alt="Preview" style="max-height:150px; border-radius:4px;">`;
-            } else {
-                preview.innerHTML = '';
-            }
-        });
-    }
-});
 
 // Filters
 document.addEventListener('DOMContentLoaded', () => {
@@ -1595,64 +1272,64 @@ async function loadBookingsAdmin() {
 
 function renderBookingsTable(bookings) {
     const tbody = document.getElementById('bookingsBody');
-    const emptyState = document.getElementById('emptyState');
+    const emptyState = document.getElementById('bookingsEmptyState');
     const table = document.getElementById('bookingsTable');
-    
+
+    if (!tbody) return;
+
     if (!bookings || bookings.length === 0) {
         tbody.innerHTML = '';
         table.style.display = 'none';
         emptyState.style.display = 'block';
         return;
     }
-    
+
     table.style.display = 'table';
     emptyState.style.display = 'none';
-    
-    const statusLabels = {
-        'ChuaThanhToan': '<span style="background:#f59e0b; color:#451a03; padding:4px 8px; border-radius:4px; font-size:11px;">Chưa TT</span>',
-        'DaThanhToan': '<span style="background:#22c55e; color:#052e16; padding:4px 8px; border-radius:4px; font-size:11px;">Đã TT</span>',
-        'DaHuy': '<span style="background:#ef4444; color:#450a0a; padding:4px 8px; border-radius:4px; font-size:11px;">Đã hủy</span>',
-    };
-    
-    tbody.innerHTML = bookings.map(b => `
+
+    tbody.innerHTML = bookings.map(b => {
+        const showtime = new Date(b.showtime);
+        const timeText = showtime.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})
+            + ' - ' + showtime.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'});
+
+        return `
         <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:12px; font-family:monospace;">${b.id}</td>
-            <td style="padding:12px; font-family:monospace;">${esc(b.code)}</td>
-            <td style="padding:12px;">
-                <strong>${esc(b.customer_name)}</strong>
-                <br><span style="color:#94a3b8; font-size:12px;">${esc(b.customer_email)}</span>
+            <td style="padding:12px; color:#38bdf8; font-family:monospace; font-weight:700;">#${esc(b.code)}</td>
+            <td style="padding:12px;"><strong>${esc(b.movie)}</strong></td>
+            <td style="padding:12px; color:#94a3b8;">
+                ${esc(b.cinema)}
+                <br><span style="color:#7dd3fc; font-weight:700;">${timeText}</span>
             </td>
-            <td style="padding:12px;">${esc(b.movie)}</td>
-            <td style="padding:12px;">
-                ${new Date(b.showtime).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
-                <br><span style="color:#94a3b8; font-size:12px;">${esc(b.room)} - ${esc(b.cinema)}</span>
+            <td><span class="seats-badge">${esc(b.seats || '—')}</span></td>
+            <td style="padding:12px; color:#34d399; font-weight:900;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
+            <td style="padding:12px; text-align:center;">
+                <button class="button btn-sm btn-delete delete-booking-btn" data-id="${b.id}" data-code="${esc(b.code)}">Xóa Đơn</button>
             </td>
-            <td style="padding:12px; text-align:right;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
-            <td style="padding:12px;">${statusLabels[b.payment_status] || b.payment_status}</td>
-            <td style="padding:12px;">
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button class="button view-detail-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px;">Xem chi tiết</button>
-                    ${b.payment_status === 'ChuaThanhToan' ? `
-                        <button class="button confirm-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#22c55e;">Xác nhận TT</button>
-                        <button class="button cancel-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Hủy</button>
-                    ` : b.payment_status === 'DaThanhToan' ? `
-                        <button class="button cancel-booking-btn" data-id="${b.id}" style="padding:6px 12px; font-size:12px; background:#ef4444;">Hủy</button>
-                    ` : ''}
-                </div>
-            </td>
-        </tr>
-    `).join('');
-    
+        </tr>`;
+    }).join('');
+
     // Bind events
-    tbody.querySelectorAll('.view-detail-btn').forEach(btn => {
-        btn.addEventListener('click', () => openBookingDetail(btn.dataset.id));
+    tbody.querySelectorAll('.delete-booking-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDeleteBooking(btn.dataset.id, btn.dataset.code));
     });
-    tbody.querySelectorAll('.confirm-booking-btn').forEach(btn => {
-        btn.addEventListener('click', () => confirmBooking(btn.dataset.id));
-    });
-    tbody.querySelectorAll('.cancel-booking-btn').forEach(btn => {
-        btn.addEventListener('click', () => cancelBooking(btn.dataset.id));
-    });
+}
+
+// Xóa đơn (nút "Xóa Đơn" ở ảnh 6.2.1): xóa hẳn đơn + vé + bắp nước
+async function confirmDeleteBooking(id, code) {
+    if (!confirm(`Xóa đơn #${code}? Hành động này không thể hoàn tác.`)) {
+        return;
+    }
+
+    try {
+        await api(`/admin/bookings/${id}`, 'DELETE');
+
+        message('Đã xóa đơn hàng.');
+
+        await loadBookingsAdmin();
+        await loadDashboard();
+    } catch (e) {
+        message(e.message, true);
+    }
 }
 
 // Filters
@@ -1861,11 +1538,17 @@ async function adminCancelBooking(id) {
 function initBookingsPage() {
     currentBookingsPage = 'bookings';
     
-    // Set default dates (last 30 days)
-    const today = new Date();
-    const monthAgo = new Date(today.getTime() - 30*24*60*60*1000);
-    document.getElementById('dateTo').value = today.toISOString().split('T')[0];
-    document.getElementById('dateFrom').value = monthAgo.toISOString().split('T')[0];
+    // Đặt ngày mặc định khi còn ô lọc (trang bookings cũ); dashboard
+    // theo 6.2.1 không có bộ lọc nên bỏ qua.
+    const dateToEl = document.getElementById('dateTo');
+    const dateFromEl = document.getElementById('dateFrom');
+
+    if (dateToEl && dateFromEl) {
+        const today = new Date();
+        const monthAgo = new Date(today.getTime() - 30*24*60*60*1000);
+        dateToEl.value = today.toISOString().split('T')[0];
+        dateFromEl.value = monthAgo.toISOString().split('T')[0];
+    }
     
     const statusFilter = document.getElementById('statusFilter');
     const dateFrom = document.getElementById('dateFrom');
@@ -1896,250 +1579,3 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 // REPORTS (ADMIN)
 // ============================================
-
-let reportsDateFrom = '';
-let reportsDateTo = '';
-
-let dailyRevenueChart = null;
-let topMoviesChart = null;
-
-async function loadReports() {
-    const dateFrom = document.getElementById('reportDateFrom')?.value || '';
-    const dateTo = document.getElementById('reportDateTo')?.value || '';
-    
-    reportsDateFrom = dateFrom;
-    reportsDateTo = dateTo;
-    
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
-    
-    try {
-        const [summary, byDate, topMovies] = await Promise.all([
-            api(`/admin/reports?${params.toString()}`),
-            api(`/admin/reports?${params.toString()}&by_date=1`),
-            api(`/admin/reports?${params.toString()}&top_movies=1`)
-        ]);
-        
-        renderSummary(summary);
-        renderDailyRevenueChart(summary.by_date || []);
-        renderTopMoviesChart(summary.top_movies || []);
-        renderDailyRevenueTable(summary.by_date || []);
-        renderTopMoviesTable(summary.top_movies || []);
-    } catch (e) {
-        message(e.message, true);
-    }
-}
-
-function renderSummary(data) {
-    document.getElementById('totalRevenue').textContent = (data.total_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('ticketRevenue').textContent = (data.ticket_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('concessionRevenue').textContent = (data.concession_revenue || 0).toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('orderCount').textContent = (data.order_count || 0).toLocaleString('vi-VN');
-    document.getElementById('ticketCount').textContent = (data.ticket_count || 0).toLocaleString('vi-VN');
-}
-
-// Daily Revenue Chart
-function renderDailyRevenueChart(data) {
-    const ctx = document.getElementById('dailyRevenueChart');
-    if (!ctx) return;
-    
-    const labels = data.map(d => new Date(d.date).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'}));
-    const ticketRev = data.map(d => (d.ticket_revenue || 0) / 1000);
-    const concessionRev = data.map(d => (d.concession_revenue || 0) / 1000);
-    const totalRev = data.map(d => (d.total_revenue || 0) / 1000);
-    
-    if (dailyRevenueChart) dailyRevenueChart.destroy();
-    
-    dailyRevenueChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [
-                { 
-                    label: 'Doanh thu vé (nghìn VNĐ)', 
-                    data: ticketRev, 
-                    borderColor: '#3b82f6', 
-                    backgroundColor: 'rgba(59,130,246,0.1)',
-                    fill: true,
-                    tension: 0.3
-                },
-                { 
-                    label: 'Doanh thu bắp (nghìn VNĐ)', 
-                    data: concessionRev, 
-                    borderColor: '#f59e0b', 
-                    backgroundColor: 'rgba(245,158,11,0.1)',
-                    fill: true,
-                    tension: 0.3
-                },
-                { 
-                    label: 'Tổng doanh thu (nghìn VNĐ)', 
-                    data: totalRev, 
-                    borderColor: '#22c55e', 
-                    backgroundColor: 'rgba(34,197,94,0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    borderDash: [5, 5]
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: { 
-                legend: { position: 'top' },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('vi-VN')}k VNĐ`
-                    }
-                }
-            },
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { callback: v => v + 'k' }
-                }
-            }
-        }
-    });
-}
-
-// Top Movies Chart
-function renderTopMoviesChart(data) {
-    const ctx = document.getElementById('topMoviesChart');
-    if (!ctx) return;
-    
-    const labels = data.map(m => m.ten_phim.length > 20 ? m.ten_phim.substring(0, 20) + '...' : m.ten_phim);
-    const revenue = data.map(m => (m.revenue || 0) / 1000);
-    const tickets = data.map(m => m.tickets);
-    
-    if (topMoviesChart) topMoviesChart.destroy();
-    
-    topMoviesChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [
-                { 
-                    label: 'Doanh thu (nghìn VNĐ)', 
-                    data: revenue, 
-                    backgroundColor: 'rgba(59,130,246,0.8)',
-                    borderRadius: 4
-                },
-                { 
-                    label: 'Số vé', 
-                    data: tickets, 
-                    backgroundColor: 'rgba(34,197,94,0.8)',
-                    borderRadius: 4,
-                    yAxisID: 'y1'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: { legend: { position: 'top' } },
-            scales: {
-                y: { beginAtZero: true, ticks: { callback: v => v + 'k' } },
-                y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
-            }
-        }
-    });
-}
-
-function renderDailyRevenueTable(data) {
-    const tbody = document.getElementById('dailyRevenueBody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = data.map(d => `
-        <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:10px;">${new Date(d.date).toLocaleDateString('vi-VN')}</td>
-            <td style="padding:10px; text-align:right;">${d.orders || 0}</td>
-            <td style="padding:10px; text-align:right;">${d.tickets || 0}</td>
-            <td style="padding:10px; text-align:right;">${(d.ticket_revenue || 0).toLocaleString('vi-VN')}</td>
-            <td style="padding:10px; text-align:right;">${(d.concession_revenue || 0).toLocaleString('vi-VN')}</td>
-            <td style="padding:10px; text-align:right; font-weight:bold;">${(d.total_revenue || 0).toLocaleString('vi-VN')}</td>
-        </tr>
-    `).join('') || '<tr><td colspan="6" style="padding:20px; text-align:center; color:#94a3b8;">Chưa có dữ liệu</td></tr>';
-}
-
-function renderTopMoviesTable(data) {
-    const tbody = document.getElementById('topMoviesBody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = (data || []).map((m, i) => `
-        <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:10px;">${i+1}. ${esc(m.ten_phim)}</td>
-            <td style="padding:10px; text-align:center;">${m.orders}</td>
-            <td style="padding:10px; text-align:center;">${m.tickets}</td>
-            <td style="padding:10px; text-align:right;">${(m.revenue || 0).toLocaleString('vi-VN')}</td>
-        </tr>
-    `).join('') || '<tr><td colspan="4" style="padding:20px; text-align:center; color:#94a3b8;">Chưa có dữ liệu</td></tr>';
-}
-
-// CSV Export
-function exportReportCSV() {
-    const dateFrom = document.getElementById('reportDateFrom')?.value || '';
-    const dateTo = document.getElementById('reportDateTo')?.value || '';
-    
-    // Fetch data again for export
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
-    params.append('by_date', '1');
-    params.append('top_movies', '1');
-    
-    fetch(`/api/index.php?route=/admin/reports&${params.toString()}`)
-        .then(r => r.json())
-        .then(res => {
-            if (!res.ok) throw new Error(res.error?.message || 'Lỗi tải dữ liệu');
-            
-            const { by_date, top_movies } = res.data;
-            
-            // Create CSV
-            let csv = 'BÁO CÁO DOANH THU CINESTAR\n\n';
-            csv += `Từ ngày: ${document.getElementById('reportDateFrom').value || 'Đầu'}\n`;
-            csv += `Đến ngày: ${document.getElementById('reportDateTo').value || 'Hiện tại'}\n\n`;
-            
-            csv += 'DOANH THU THEO NGÀY\n';
-            csv += 'Ngày,Đơn,Vé,Doanh thu vé (VNĐ),Doanh thu bắp (VNĐ),Tổng doanh thu (VNĐ)\n';
-            (by_date || []).forEach(d => {
-                csv += `${d.date},${d.orders || 0},${d.tickets || 0},${d.ticket_revenue || 0},${d.concession_revenue || 0},${d.total_revenue || 0}\n`;
-            });
-            
-            csv += '\nTOP PHIM BÁN CHẠY\n';
-            csv += 'Thứ tự,Phim,Đơn,Vé,Doanh thu (VNĐ)\n';
-            (top_movies || []).forEach((m, i) => {
-                csv += `${i+1},"${m.ten_phim}",${m.orders},${m.tickets},${m.revenue || 0}\n`;
-            });
-            
-            // Download
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `cinestar_report_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        })
-        .catch(e => message(e.message, true));
-}
-
-// Initialize reports page
-function initReportsPage() {
-    // Set default dates (last 30 days)
-    const today = new Date();
-    const monthAgo = new Date(today.getTime() - 30*24*60*60*1000);
-    document.getElementById('reportDateTo').value = today.toISOString().split('T')[0];
-    document.getElementById('reportDateFrom').value = monthAgo.toISOString().split('T')[0];
-    
-    document.getElementById('filterReportBtn')?.addEventListener('click', loadReports);
-    document.getElementById('exportCsvBtn')?.addEventListener('click', exportReportCSV);
-    
-    loadReports();
-}
-
-// Auto-init if on reports page
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('dailyRevenueChart')) {
-        initReportsPage();
-    }
-});

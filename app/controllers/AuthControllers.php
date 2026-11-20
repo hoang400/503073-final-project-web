@@ -12,16 +12,10 @@ final class AuthController
         $this->respond(['token' => $_SESSION['csrf_token']]);
     }
 
+    
     public function me(): void
     {
-        $user = AuthMiddleware::requireAuth();
-        $this->respond([
-            'id' => (int) $user['id'],
-            'name' => $user['ho_ten'],
-            'email' => $user['email'],
-            'phone' => $user['so_dien_thoai'] ?? '',
-            'role' => $user['vai_tro'],
-        ]);
+        $this->respond($this->auth->me());
     }
 
     public function register(): void

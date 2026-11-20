@@ -180,9 +180,11 @@ final class AdminController
         $data = [
             'ten_phim' => trim($body['ten_phim']),
             'ten_ngan' => trim($body['ten_ngan'] ?? ''),
+            // Form 6.2.2 chỉ có 1 ô "Tên Ngắn (hiển thị Dropdown)" nên
+            // khi không gửi riêng thì dùng tên ngắn làm tên hiển thị.
             'ten_hien_thi_dropdown' => trim(
                 $body['ten_hien_thi_dropdown'] ?? ''
-            ),
+            ) ?: trim($body['ten_ngan'] ?? ''),
 
             'the_loai' => trim($body['the_loai']),
             'thoi_luong' => $duration,
@@ -346,6 +348,28 @@ final class AdminController
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
     }
 
+    public function deleteBooking(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $query = [];
+        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã đơn hàng không hợp lệ.', 422);
+        }
+
+        $this->admin->deleteBooking($id);
+
+        jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
+    }
+
     // ============================================
     // CINEMAS
     // ============================================
@@ -364,6 +388,34 @@ final class AdminController
         ], $cinemas);
 
         jsonResponse(['ok' => true, 'data' => $data]);
+    }
+
+    public function getCinema(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã rạp không hợp lệ.', 422);
+        }
+
+        $cinema = $this->admin->findCinemaById($id);
+
+        if (!$cinema) {
+            throw new ApiException('Không tìm thấy rạp.', 404);
+        }
+
+        jsonResponse(['ok' => true, 'data' => [
+            'id' => (int) $cinema['id'],
+            'name' => $cinema['ten_rap'],
+            'address' => $cinema['dia_chi'],
+            'city' => $cinema['thanh_pho'],
+        ]]);
     }
 
     public function createCinema(): void
@@ -394,10 +446,12 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã rạp không hợp lệ.', 422);
         }
@@ -421,10 +475,12 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã rạp không hợp lệ.', 422);
         }
@@ -463,19 +519,50 @@ final class AdminController
             'cinema_name' => $row['ten_rap'] ?? '',
             'name' => $row['ten_phong'],
             'type' => $row['loai_phong'],
+            'seat_count' => (int) ($row['seat_count'] ?? 0),
         ], $rooms);
 
         jsonResponse(['ok' => true, 'data' => $data]);
+    }
+
+    public function getRoom(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã phòng không hợp lệ.', 422);
+        }
+
+        $room = $this->admin->findRoomById($id);
+
+        if (!$room) {
+            throw new ApiException('Không tìm thấy phòng.', 404);
+        }
+
+        jsonResponse(['ok' => true, 'data' => [
+            'id' => (int) $room['id'],
+            'cinema_id' => (int) $room['rap_id'],
+            'name' => $room['ten_phong'],
+            'type' => $room['loai_phong'],
+        ]]);
     }
 
     public function getRoomSeats(): void
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $roomId = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $roomId = filter_var($query['room_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($roomId === false) {
             throw new ApiException('Mã phòng không hợp lệ.', 422);
         }
@@ -521,10 +608,12 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã phòng không hợp lệ.', 422);
         }
@@ -548,12 +637,19 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã phòng không hợp lệ.', 422);
+        }
+
+        // Phòng còn suất chiếu thì không xóa được (FK suatchieu.phong_id RESTRICT)
+        if ($this->admin->findShowtimes(null, $id)) {
+            throw new ApiException('Phòng còn suất chiếu nên không thể xóa.', 422);
         }
 
         $this->admin->deleteRoom($id);
@@ -595,15 +691,76 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã ghế không hợp lệ.', 422);
         }
 
         $this->admin->deleteSeat($id);
+
+        jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
+    }
+
+    public function generateSeats(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã phòng không hợp lệ.', 422);
+        }
+
+        $body = readJsonBody();
+
+        $rows = filter_var($body['rows'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 20]]);
+        $cols = filter_var($body['cols'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 30]]);
+        $defaultType = trim((string) ($body['default_type'] ?? 'Thuong'));
+
+        if ($rows === false || $cols === false) {
+            throw new ApiException('Số hàng / số ghế mỗi hàng không hợp lệ.', 422);
+        }
+
+        if (!in_array($defaultType, ['Thuong', 'VIP', 'Couple'], true)) {
+            throw new ApiException('Loại ghế không hợp lệ.', 422);
+        }
+
+        $this->admin->generateSeats($id, $rows, $cols, $defaultType);
+
+        jsonResponse(['ok' => true, 'data' => ['room_id' => $id]]);
+    }
+
+    public function updateSeat(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã ghế không hợp lệ.', 422);
+        }
+
+        $body = readJsonBody();
+
+        $type = trim((string) ($body['loai_ghe'] ?? ''));
+        if (!in_array($type, ['Thuong', 'VIP', 'Couple'], true)) {
+            throw new ApiException('Loại ghế không hợp lệ.', 422);
+        }
+
+        $this->admin->updateSeat($id, $type);
 
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
     }
@@ -761,6 +918,36 @@ final class AdminController
         jsonResponse(['ok' => true, 'data' => $data]);
     }
 
+    public function getConcession(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã món không hợp lệ.', 422);
+        }
+
+        $concession = $this->admin->findConcessionById($id);
+
+        if (!$concession) {
+            throw new ApiException('Không tìm thấy món.', 404);
+        }
+
+        jsonResponse(['ok' => true, 'data' => [
+            'id' => (int) $concession['id'],
+            'name' => $concession['ten_mon'],
+            'type' => $concession['loai'],
+            'price' => (float) $concession['don_gia'],
+            'image' => $concession['hinh_anh'] ?? '',
+            'status' => (int) $concession['trang_thai'],
+        ]]);
+    }
+
     public function createConcession(): void
     {
         AdminMiddleware::requireAdmin();
@@ -800,10 +987,12 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã món không hợp lệ.', 422);
         }
@@ -838,10 +1027,12 @@ final class AdminController
     {
         AdminMiddleware::requireAdmin();
 
-        $query = [];
-        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
 
-        $id = filter_var($query['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($id === false) {
             throw new ApiException('Mã món không hợp lệ.', 422);
         }
@@ -878,9 +1069,11 @@ final class AdminController
             'customer_name' => $row['khach_hang'],
             'customer_email' => $row['email'],
             'movie' => $row['ten_phim'],
+            'shortTitle' => $row['ten_ngan'] ?? '',
             'showtime' => $row['thoi_gian_bat_dau'],
             'room' => $row['ten_phong'],
             'cinema' => $row['ten_rap'],
+            'seats' => $row['ghe_da_chon'] ?? '',
         ], $bookings);
 
         jsonResponse(['ok' => true, 'data' => $data]);

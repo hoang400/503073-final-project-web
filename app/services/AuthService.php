@@ -71,7 +71,13 @@ final class AuthService
             );
         }
 
-        return $this->signIn($user);
+        $remember = in_array(
+            $data['remember'] ?? null,
+            [true, 1, '1', 'on'],
+            true
+        );
+
+        return $this->signIn($user, $remember);
     }
 
     public function me(): ?array
@@ -190,12 +196,26 @@ final class AuthService
         return $user;
     }
 
-    private function signIn(array $user): array
+    private function signIn(array $user, bool $remember = false): array
     {
         session_regenerate_id(true);
 
         $_SESSION['user_id'] = (int) $user['id'];
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+        // "Ghi nhớ đăng nhập trong 30 ngày": kéo dài cookie phiên
+        // (mặc định cookie phiên hết hạn khi đóng trình duyệt).
+        if ($remember) {
+            $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+            setcookie(session_name(), session_id(), [
+                'expires' => time() + 30 * 86400,
+                'path' => '/',
+                'secure' => $https,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
 
         return $this->publicUser($user);
     }

@@ -1,4 +1,7 @@
-const API_BASE = 'api/index.php';
+const API_BASE = new URL(
+    '../api/index.php',
+    document.currentScript.src
+).href;
 let csrfToken = '';
 
 

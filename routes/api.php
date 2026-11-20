@@ -88,6 +88,10 @@ return [
         'GET' => [$orders, 'detail'],
     ],
 
+    '/order/cancel' => [
+        'POST' => [$orders, 'cancel'],
+    ],
+
 
     // ADMIN ROUTES
 
@@ -110,6 +114,7 @@ return [
     ],
 
     '/admin/cinemas/{id}' => [
+        'GET' => [$admin, 'getCinema'],
         'PATCH' => [$admin, 'updateCinema'],
         'DELETE' => [$admin, 'deleteCinema'],
     ],
@@ -120,6 +125,7 @@ return [
     ],
 
     '/admin/rooms/{id}' => [
+        'GET' => [$admin, 'getRoom'],
         'PATCH' => [$admin, 'updateRoom'],
         'DELETE' => [$admin, 'deleteRoom'],
     ],
@@ -129,7 +135,12 @@ return [
         'POST' => [$admin, 'createSeat'],
     ],
 
+    '/admin/rooms/{id}/seats/generate' => [
+        'POST' => [$admin, 'generateSeats'],
+    ],
+
     '/admin/seats/{id}' => [
+        'PATCH' => [$admin, 'updateSeat'],
         'DELETE' => [$admin, 'deleteSeat'],
     ],
 
@@ -149,6 +160,7 @@ return [
     ],
 
     '/admin/concessions/{id}' => [
+        'GET' => [$admin, 'getConcession'],
         'PATCH' => [$admin, 'updateConcession'],
         'DELETE' => [$admin, 'deleteConcession'],
     ],
@@ -160,6 +172,7 @@ return [
     '/admin/bookings/{id}' => [
         'GET' => [$admin, 'getBookingDetail'],
         'POST' => [$admin, 'confirmBooking'],
+        'DELETE' => [$admin, 'deleteBooking'],
     ],
 
     '/admin/bookings/{id}/cancel' => [

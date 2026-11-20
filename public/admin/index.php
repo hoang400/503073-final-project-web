@@ -3,100 +3,195 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard | CineStar</title>
+    <title>Hệ Thống Quản Trị | CineStar</title>
     <link rel="stylesheet" href="../css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
-    <header>
-        <a class="brand" href="../index.php">CINESTAR<span>.</span></a>
-        <nav aria-label="Admin navigation">
-            <a href="index.php" class="active">Dashboard</a>
-            <a href="movies.php">Phim</a>
-            <a href="cinemas.php">Rạp</a>
-            <a href="rooms.php">Phòng & Ghế</a>
-            <a href="showtimes.php">Suất chiếu</a>
-            <a href="concessions.php">Bắp nước</a>
-            <a href="bookings.php">Đơn hàng</a>
-            <a href="reports.php">Báo cáo</a>
-        </nav>
-        <div id="account"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="../index.php">
+                <span class="brand-icon">C</span>
+                <span>
+                    <span class="brand-name">CINESTAR<span>.</span></span>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
+                </span>
+            </a>
+            <nav class="main-nav" aria-label="Điều hướng chính">
+                <a href="../index.php">
+                    Trang Chủ
+                </a>
+                <a href="../movies.php">
+                    Phim Đang Chiếu
+                </a>
+                <a href="../booking.php">
+                    Đặt Vé
+                </a>
+                <a href="../history.php">
+                    Lịch Sử Vé
+                </a>
+                <a href="index.php" class="active">
+                    Trang Admin
+                </a>
+            </nav>
+            <div class="account-area">
+                <span class="admin-badge">Admin Mode</span>
+                <div id="account"></div>
+            </div>
+        </div>
     </header>
-    <main>
+    <nav class="admin-subnav" aria-label="Quản trị">
+        <div class="admin-subnav-inner">
+        <a href="index.php" class="active">Dashboard</a>
+        <a href="cinemas.php">Rạp chiếu</a>
+        <a href="rooms.php">Phòng & Ghế</a>
+        <a href="concessions.php">Bắp nước</a>
+        </div>
+    </nav>
+    <main class="admin-main">
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
-            <h1>Dashboard Quản Trị</h1>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <label style="font-size:13px; color:#94a3b8;">
-                    Từ ngày
-                    <input type="date" id="dateFrom" style="width:160px; margin-left:8px;">
-                </label>
-                <label style="font-size:13px; color:#94a3b8;">
-                    Đến ngày
-                    <input type="date" id="dateTo" style="width:160px; margin-left:8px;">
-                </label>
-                <button id="filterBtn" class="button">Lọc</button>
+
+        <div class="admin-page-head">
+            <div>
+                <h1>HỆ THỐNG QUẢN TRỊ BACK-END ADMIN</h1>
+                <p class="admin-page-sub">Quản lý doanh thu, danh sách đơn vé và nghiệp vụ phim</p>
             </div>
         </div>
 
-        <!-- 4 Cards -->
-        <div class="dashboard-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:32px;">
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#3b82f6;">🎫</div>
+        <!-- 3 Cards -->
+        <div class="admin-stat-grid">
+            <article class="card admin-stat-card">
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Tổng đơn hàng</p>
-                    <h2 id="statOrders" style="margin:8px 0 0; font-size:28px;">0</h2>
+                    <p class="admin-stat-label">Tổng doanh thu đặt vé</p>
+                    <h2 class="admin-stat-value" id="statTotalRevenue" style="color:#34d399;">0 VNĐ</h2>
+                    <p class="admin-stat-sub">Tính từ dữ liệu hệ thống</p>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#22c55e;">💰</div>
+            <article class="card admin-stat-card">
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Doanh thu vé</p>
-                    <h2 id="statTicketRev" style="margin:8px 0 0; font-size:28px;">0 VNĐ</h2>
+                    <p class="admin-stat-label">Tổng số vé đã bán</p>
+                    <h2 class="admin-stat-value" id="statOrders" style="color:#38bdf8;">0 Đơn vé</h2>
+                    <p class="admin-stat-sub">Cập nhật thời gian thực</p>
                 </div>
             </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#f59e0b;">🍿</div>
+            <article class="card admin-stat-card">
                 <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Doanh thu bắp nước</p>
-                    <h2 id="statConcessionRev" style="margin:8px 0 0; font-size:28px;">0 VNĐ</h2>
-                </div>
-            </article>
-            <article class="card stat-card">
-                <div class="stat-icon" style="background:#a855f7;">🎟️</div>
-                <div>
-                    <p style="color:#94a3b8; font-size:13px; margin:0;">Vé đã bán</p>
-                    <h2 id="statTickets" style="margin:8px 0 0; font-size:28px;">0</h2>
+                    <p class="admin-stat-label">Số phim đang chiếu</p>
+                    <h2 class="admin-stat-value" id="statMoviesShowing" style="color:#818cf8;">0 Phim</h2>
+                    <p class="admin-stat-sub">Danh mục phim active</p>
                 </div>
             </article>
         </div>
 
-        <!-- Chart -->
-        <article class="card" style="margin-bottom:24px;">
-            <h2>Doanh thu 7 ngày gần nhất</h2>
-            <canvas id="revenueChart" height="300"></canvas>
+        <!-- Quản lý danh sách phim -->
+        <article class="card admin-section">
+            <div class="admin-section-head">
+                <h2>Quản lý danh sách phim</h2>
+                <button id="addMovieBtn" class="btn-sky" type="button">+ Thêm Phim Mới</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table id="moviesTable" class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:100px;">Poster</th>
+                            <th>Tên phim</th>
+                            <th style="width:100px;">Thời lượng</th>
+                            <th style="width:100px;">IMDb</th>
+                            <th style="width:160px; text-align:center;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="moviesBody"></tbody>
+                </table>
+            </div>
+            <div id="moviesEmptyState" style="display:none; padding:32px; text-align:center; color:#94a3b8;">
+                Chưa có phim nào trong hệ thống!
+            </div>
         </article>
 
-        <!-- Top Movies -->
-        <article class="card">
-            <h2>Top 5 phim bán chạy</h2>
-            <table id="topMoviesTable" style="width:100%; border-collapse:collapse; margin-top:16px;">
-                <thead>
-                    <tr style="border-bottom:1px solid #334155; text-align:left;">
-                        <th style="padding:12px;">Phim</th>
-                        <th style="padding:12px;">Đơn</th>
-                        <th style="padding:12px;">Vé</th>
-                        <th style="padding:12px;">Doanh thu</th>
-                    </tr>
-                </thead>
-                <tbody id="topMoviesBody"></tbody>
-            </table>
+        <!-- Danh sách đơn vé hệ thống -->
+        <article class="card admin-section">
+            <div class="admin-section-head">
+                <h2>Danh sách đơn vé hệ thống</h2>
+            </div>
+            <div class="admin-table-wrap">
+                <table id="bookingsTable" class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:140px;">Mã vé</th>
+                            <th>Tên phim</th>
+                            <th style="width:220px;">Rạp / Suất chiếu</th>
+                            <th style="width:110px;">Ghế chọn</th>
+                            <th style="width:130px;">Doanh thu</th>
+                            <th style="width:120px; text-align:center;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsBody"></tbody>
+                </table>
+            </div>
+            <div id="bookingsEmptyState" style="display:none; padding:32px; text-align:center; color:#94a3b8;">
+                Chưa có đơn vé nào được ghi nhận!
+            </div>
         </article>
+
+        <!-- Thêm / Sửa phim -->
+        <div id="movieModal" class="modal-overlay" style="display:none;">
+            <div class="modal" style="max-width:768px; width:90%;">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Thêm phim mới</h2>
+                    <button id="closeModal" class="modal-close">×</button>
+                </div>
+                <form id="movieForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="movieId">
+                        <div>
+                            <label>Tên Phim</label>
+                            <input type="text" name="ten_phim" id="ten_phim" required maxlength="255" style="width:100%;">
+                        </div>
+                        <div>
+                            <label>Tên Ngắn (hiển thị Dropdown)</label>
+                            <input type="text" name="ten_ngan" id="ten_ngan" required maxlength="255" placeholder="Ví dụ: Godzilla x Kong" style="width:100%;">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label>URL Ảnh Poster</label>
+                            <input type="url" name="poster_url" id="poster_url" required maxlength="255" placeholder="https://..." style="width:100%;">
+                            <div id="posterPreview" style="margin-top:8px; max-height:200px;"></div>
+                        </div>
+                        <div>
+                            <label>Thời Lượng</label>
+                            <input type="number" name="thoi_luong" id="thoi_luong" required min="1" max="600" placeholder="VD: 115 phút" style="width:100%;">
+                        </div>
+                        <div>
+                            <label>Điểm IMDb</label>
+                            <input type="number" name="imdb" id="imdb" required min="0" max="10" step="0.1" placeholder="VD: 7.5/10" style="width:100%;">
+                        </div>
+                        <div>
+                            <label>Giới Hạn Tuổi</label>
+                            <input type="text" name="do_tuoi" id="do_tuoi" required maxlength="10" placeholder="VD: C13, T18..." style="width:100%;">
+                        </div>
+                        <div>
+                            <label>ID Trailer YouTube</label>
+                            <input type="text" name="trailer_url" id="trailer_url" required maxlength="500" placeholder="VD: dQw4w9WgXcQ" style="width:100%;">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label>Thể Loại (Cách nhau bằng dấu phẩy)</label>
+                            <input type="text" name="the_loai" id="the_loai" required maxlength="100" placeholder="Hành Động, Khoa Học Viễn Tưởng..." style="width:100%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn-gradient btn-block" id="submitBtn">LƯU THÔNG TIN PHIM</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
-    <footer>© 2026 CineStar Admin</footer>
+    <footer class="site-footer">
+        <p>
+            © 2026 CineStar Cinema Vietnam.
+            Hệ thống đặt vé giá rẻ cho sinh viên & giới trẻ.
+        </p>
+    </footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/admin.js?v=4"></script>
 </body>
 </html>
