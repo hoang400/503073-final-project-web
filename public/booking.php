@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 
 <body>
@@ -189,68 +189,10 @@
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
 
-                <div id="fnbModal" class="fnb-modal" hidden>
-                    <div class="fnb-modal-backdrop" data-close-fnb></div>
-                    <div class="fnb-modal-card" role="dialog" aria-modal="true" aria-label="Bắp nước">
-                        <div class="fnb-modal-head">
-                            <div>
-                                <span class="section-eyebrow">CINESTAR F&amp;B</span>
-                                <h3>Bắp nước</h3>
-                                <p>Chọn món ăn kèm cho buổi xem phim của bạn.</p>
-                            </div>
-                            <button id="fnbClose" type="button" class="fnb-modal-close" aria-label="Đóng">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-
-                        <div id="fnb" class="fnb-modal-list">
-                            <p class="booking-placeholder">Đang tải danh sách bắp nước...</p>
-                        </div>
-
-                        <div class="fnb-modal-foot">
-                            <div>
-                                <span>Tạm tính bắp nước</span>
-                                <strong id="fnbTotal">0 VNĐ</strong>
-                            </div>
-                            <button id="fnbApply" type="button" class="fnb-modal-apply">
-                                Xong
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <button id="checkout" class="booking-checkout booking-pay" disabled>
                     THANH TOÁN ĐẶT VÉ
                 </button>
             </aside>
-
-            <!-- Modal thanh toán VietQR (6.1.3.4) -->
-            <div id="vietqrModal" class="fnb-modal" hidden>
-                <div class="fnb-modal-backdrop" data-close-vietqr></div>
-                <div class="fnb-modal-card vietqr-card" role="dialog" aria-modal="true" aria-label="Thanh toán VietQR">
-                    <div class="fnb-modal-head">
-                        <div>
-                            <span class="section-eyebrow">THANH TOÁN MÔ PHỎNG</span>
-                            <h3>Quét mã VietQR để thanh toán</h3>
-                            <p>Mở ứng dụng ngân hàng và quét mã bên dưới.</p>
-                        </div>
-                        <button id="vietqrClose" type="button" class="fnb-modal-close" aria-label="Đóng">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-                    <div class="vietqr-body">
-                        <img id="vietqrImage" src="" alt="Mã VietQR thanh toán" width="220" height="220">
-                        <dl class="vietqr-rows">
-                            <div><dt>Mã đơn:</dt><dd id="vietqrCode">—</dd></div>
-                            <div><dt>Tổng tiền:</dt><dd id="vietqrTotal">—</dd></div>
-                        </dl>
-                        <p class="vietqr-note">Thanh toán mô phỏng cho đồ án: sau khi quét mã, bấm "Xem chi tiết đơn" để kiểm tra vé và mã QR soát vé.</p>
-                    </div>
-                    <div class="fnb-modal-foot">
-                        <button id="vietqrViewOrder" type="button" class="fnb-modal-apply">Xem chi tiết đơn</button>
-                    </div>
-                </div>
-            </div>
 
             <!-- Cột phải: sơ đồ ghế -->
             <section class="card booking-seat-card">
@@ -301,6 +243,55 @@
     <footer class="site-footer">
         © 2026 CineStar · Đồ án website đặt vé xem phim
     </footer>
+
+                <div id="fnbModal" class="fnb-modal" hidden>
+                    <div class="fnb-modal-backdrop" data-close-fnb></div>
+                    <div class="fnb-modal-card" role="dialog" aria-modal="true" aria-label="Bắp nước">
+                        <div class="fnb-modal-head fnb-modal-head-title">
+                            <h3><span aria-hidden="true">🍔</span> BỎNG NGÔ &amp; NƯỚC NGỌT</h3>
+                            <button id="fnbClose" type="button" class="fnb-modal-close" aria-label="Đóng">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div id="fnb" class="fnb-modal-list">
+                            <p class="booking-placeholder">Đang tải danh sách bắp nước...</p>
+                        </div>
+
+                        <div class="fnb-modal-foot fnb-modal-foot-single">
+                            <button id="fnbApply" type="button" class="fnb-modal-apply">
+                                XÁC NHẬN BỎNG NƯỚC
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            <div id="vietqrModal" class="fnb-modal" hidden>
+                <div class="fnb-modal-backdrop" data-close-vietqr></div>
+                <div class="fnb-modal-card vietqr-card" role="dialog" aria-modal="true" aria-label="Thanh toán VietQR">
+                    <div class="fnb-modal-head">
+                        <div>
+                            <span class="section-eyebrow">THANH TOÁN MÔ PHỎNG</span>
+                            <h3>Quét mã VietQR để thanh toán</h3>
+                            <p>Mở ứng dụng ngân hàng và quét mã bên dưới.</p>
+                        </div>
+                        <button id="vietqrClose" type="button" class="fnb-modal-close" aria-label="Đóng">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="vietqr-body">
+                        <img id="vietqrImage" src="" alt="Mã VietQR thanh toán" width="220" height="220">
+                        <dl class="vietqr-rows">
+                            <div><dt>Mã đơn:</dt><dd id="vietqrCode">—</dd></div>
+                            <div><dt>Tổng tiền:</dt><dd id="vietqrTotal">—</dd></div>
+                        </dl>
+                        <p class="vietqr-note">Thanh toán mô phỏng cho đồ án: sau khi quét mã, bấm "Xem chi tiết đơn" để kiểm tra vé và mã QR soát vé.</p>
+                    </div>
+                    <div class="fnb-modal-foot">
+                        <button id="vietqrViewOrder" type="button" class="fnb-modal-apply">Xem chi tiết đơn</button>
+                    </div>
+                </div>
+            </div>
 
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>

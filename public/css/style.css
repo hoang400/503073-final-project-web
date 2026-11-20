@@ -2429,7 +2429,7 @@ button:disabled {
 .fnb-modal {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: 200;
     display: grid;
     place-items: center;
     padding: 20px;
@@ -2438,13 +2438,13 @@ button:disabled {
 .fnb-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(2, 6, 23, 0.75);
+    background: rgba(2, 6, 23, 0.88);
     backdrop-filter: blur(4px);
 }
 
 .fnb-modal-card {
     position: relative;
-    width: min(760px, 100%);
+    width: min(560px, 100%);
     max-height: 86vh;
     display: flex;
     flex-direction: column;
@@ -2497,7 +2497,7 @@ button:disabled {
 
 .fnb-modal-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
     padding: 6px 24px 18px;
     overflow-y: auto;
@@ -2507,10 +2507,10 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px;
+    padding: 14px 16px;
     border: 1px solid #334155;
     border-radius: 14px;
-    background: #0f172a99;
+    background: #0f172a;
 }
 
 .fnb-card-info {
@@ -2529,7 +2529,7 @@ button:disabled {
 }
 
 .fnb-card-info small {
-    color: #7dd3fc;
+    color: #fbbf24;
     font-size: 11px;
     font-weight: 700;
 }
@@ -2561,15 +2561,23 @@ button:disabled {
 }
 
 .fnb-qty-input {
-    width: 56px;
-    padding: 7px 4px;
-    border: 1px solid #475569;
+    width: 36px;
+    padding: 7px 0;
+    border: 0;
     border-radius: 8px;
-    background: #0f172a;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
+    background: transparent;
+    color: #38bdf8;
+    font-size: 15px;
+    font-weight: 800;
     text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.fnb-qty-input::-webkit-outer-spin-button,
+.fnb-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .fnb-qty-input:focus {
@@ -3166,4 +3174,44 @@ button:disabled {
     .detail-head {
         flex-direction: column;
     }
+}
+
+.fnb-modal-head-title {
+    align-items: center;
+    padding-bottom: 18px;
+}
+
+.fnb-modal-head-title h3 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.fnb-step-btn[data-step="1"] {
+    border-color: transparent;
+    background: linear-gradient(100deg, #0284c7, #4f46e5);
+}
+
+.fnb-modal-foot-single {
+    display: block;
+    padding: 0 24px 20px;
+    border-top: 0;
+}
+
+.fnb-modal-foot-single .fnb-modal-apply {
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.auth-wrap {
+    width: min(460px, 100%);
+}
+
+.auth-card {
+    margin: 16px auto 0;
+}
+
+.auth-back {
+    margin-bottom: 0;
 }
