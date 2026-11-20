@@ -46,7 +46,12 @@
         <h1>Chi tiết đơn vé</h1><a href="history.php">← Lịch sử đặt vé</a>
         <section id="detail" class="card">Đang tải thông tin đơn…</section>
     </main>
-    <footer>© 2026 CineStar • Đồ án website đặt vé xem phim</footer>
+    <footer class="site-footer">
+        <p>
+            © 2026 CineStar Cinema Vietnam.
+            Hệ thống đặt vé giá rẻ cho sinh viên & giới trẻ.
+        </p>
+    </footer>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script src="js/history.js?v=9"></script>
