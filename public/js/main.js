@@ -180,8 +180,7 @@ function renderHero(movies) {
         `;
     }
 
-    $('#hero-title').textContent =
-        featured.shortTitle || featured.title;
+    $('#hero-title').textContent = featured.title;
 
     $('#hero-description').textContent =
         featured.description || 'Khám phá bộ phim tại CineStar.';
@@ -301,10 +300,6 @@ async function header() {
             <a href="login.php" class="account-login">
                 Đăng nhập
             </a>
-
-            <a href="register.php" class="account-register">
-                Đăng ký
-            </a>
         `;
 
     if (!user) {
@@ -325,28 +320,35 @@ async function header() {
     });
 }
 
+
 async function loadMovies() {
     const container = $('#movies');
+    const hero = $('#hero');
 
-    if (!container) {
+    if (!container && !hero) {
         return;
     }
 
-    container.innerHTML =
-        '<p class="loading-text">Đang tải danh sách phim...</p>';
+    if (container) {
+        container.innerHTML =
+            '<p class="loading-text">Đang tải danh sách phim...</p>';
+    }
 
     try {
+  
         const movies = await api('/movies');
 
         if (!Array.isArray(movies)) {
             throw new Error('Dữ liệu phim không hợp lệ.');
         }
+        if (hero) {
+            renderHero(movies);
+        }
+        if (!container) {
+            return;
+        }
 
-        renderHero(movies);
-
-        const search = $('#search');
-
-        if (search) {
+        if ($('#search')) {
             renderMovieFilters(movies);
             setupMovieSearch(movies);
         } else {
@@ -356,18 +358,20 @@ async function loadMovies() {
 
             renderMovies(container, showingMovies);
         }
+
     } catch (error) {
-        container.innerHTML = `
-            <div class="empty-movies">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <p>Không tải được danh sách phim.</p>
-            </div>
-        `;
+        if (container) {
+            container.innerHTML = `
+                <div class="empty-movies">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <p>Không tải được danh sách phim.</p>
+                </div>
+            `;
+        }
 
         message(error.message, true);
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     header().catch(error => message(error.message, true));
 

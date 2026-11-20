@@ -29,49 +29,75 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="min-h-screen flex flex-col antialiased">
+<body class="home-page">
 
-    <header class="site-header glass-panel sticky top-0 z-40">
+    
+    <header class="site-header glass-panel">
         <div class="header-inner">
             <a href="index.php" class="brand">
                 <div class="brand-icon">C</div>
                 <div>
                     <span class="brand-name">CINESTAR<span>.</span></span>
-                    <small>HỆ THỐNG RẠP CHIẾU PHIM</small>
+                    <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
                 </div>
             </a>
 
-            <nav class="main-nav">
+            <nav class="main-nav" aria-label="Điều hướng chính">
                 <a href="index.php" class="active">
-                    <i class="fa-solid fa-house"></i> Trang chủ
+                    <i class="fa-solid fa-house"></i>
+                    Trang Chủ
                 </a>
+
                 <a href="movies.php">
-                    <i class="fa-solid fa-film"></i> Phim đang chiếu
+                    <i class="fa-solid fa-film"></i>
+                    Phim Đang Chiếu
                 </a>
+
                 <a href="booking.php">
-                    <i class="fa-solid fa-ticket"></i> Đặt vé
+                    <i class="fa-solid fa-ticket"></i>
+                    Đặt Vé
                 </a>
+
                 <a href="history.php">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử vé
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    Lịch Sử Vé
+                </a>
+
+                <a href="admin/index.php">
+                    <i class="fa-solid fa-user-shield"></i>
+                    Trang Admin
                 </a>
             </nav>
 
-            <div id="account" class="account-area"></div>
+            <div class="header-actions">
+                <span class="location-pill">
+                    <i class="fa-solid fa-location-arrow"></i>
+                    TP. Hồ Chí Minh
+                </span>
+
+                <div id="account" class="account-area"></div>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 space-y-10 flex-grow py-8">
+    
+    <main class="home-main">
 
-        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+        <div id="notice" class="notice"
+            role="status" aria-live="polite"></div>
 
+        <!-- HERO BANNER -->
         <section id="hero" class="hero-banner">
             <div class="hero-content">
+
                 <span class="hero-label">
                     <i class="fa-solid fa-fire"></i>
-                    PHIM NỔI BẬT
+                    PHIM HOT NHẤT TUẦN
                 </span>
 
-                <h1 id="hero-title">Khám phá thế giới điện ảnh</h1>
+                <h1 id="hero-title">
+                    Khám phá thế giới điện ảnh
+                </h1>
 
                 <p id="hero-description">
                     Những bộ phim hấp dẫn đang chờ bạn tại CineStar.
@@ -80,7 +106,9 @@
                 <div class="hero-meta" id="hero-meta"></div>
 
                 <div class="hero-actions">
-                    <a id="hero-booking" href="movies.php" class="primary-button">
+                    <a id="hero-booking"
+                    href="movies.php"
+                    class="primary-button">
                         <i class="fa-solid fa-ticket"></i>
                         ĐẶT VÉ NGAY
                     </a>
@@ -90,65 +118,75 @@
                         XEM TẤT CẢ PHIM
                     </a>
                 </div>
+
             </div>
         </section>
 
+        <!-- FOUR FEATURE CARDS -->
         <section class="feature-grid">
+
             <article class="feature-card">
                 <div class="feature-icon sky">
                     <i class="fa-solid fa-tags"></i>
                 </div>
-                <h3>Ưu đãi sinh viên</h3>
-                <p>Nhiều chương trình ưu đãi dành cho học sinh, sinh viên.</p>
+
+                <h3>Vé Chỉ Từ 45.000 VNĐ</h3>
+
+                <p>
+                    Đồng giá ưu đãi đặc biệt cho Học sinh -
+                    Sinh viên cả tuần.
+                </p>
             </article>
 
             <article class="feature-card">
                 <div class="feature-icon indigo">
                     <i class="fa-solid fa-couch"></i>
                 </div>
-                <h3>Ghế ngồi đa dạng</h3>
-                <p>Lựa chọn ghế thường, ghế VIP và ghế đôi Sweetbox.</p>
+
+                <h3>Ghế Đôi Sweetbox</h3>
+
+                <p>
+                    Không gian riêng tư thoải mái cho các cặp
+                    đôi giá 200k.
+                </p>
             </article>
 
             <article class="feature-card">
                 <div class="feature-icon amber">
                     <i class="fa-solid fa-burger"></i>
                 </div>
-                <h3>Bắp nước hấp dẫn</h3>
-                <p>Nhiều lựa chọn bắp nước và combo tiện lợi.</p>
+
+                <h3>Combo Bỏng Nước Giá Rẻ</h3>
+
+                <p>
+                    Combo Solo 79k, Combo Couple 109k
+                    tiết kiệm tối đa.
+                </p>
             </article>
 
             <article class="feature-card">
                 <div class="feature-icon emerald">
-                    <i class="fa-solid fa-ticket"></i>
+                    <i class="fa-solid fa-qrcode"></i>
                 </div>
-                <h3>Đặt vé trực tuyến</h3>
-                <p>Chọn phim, suất chiếu và ghế ngồi ngay trên website.</p>
+
+                <h3>Thanh Toán VietQR</h3>
+
+                <p>
+                    Quét mã QR chuyển khoản tự động qua
+                    ứng dụng Ngân hàng.
+                </p>
             </article>
-        </section>
 
-        <section class="space-y-6">
-            <div class="section-heading">
-                <div>
-                    <span class="section-eyebrow">CINESTAR CINEMA</span>
-                    <h2>Phim đang chiếu</h2>
-                    <p>Khám phá những bộ phim hiện có tại rạp.</p>
-                </div>
-
-                <a href="movies.php" class="view-all-link">
-                    Xem tất cả <i class="fa-solid fa-arrow-right"></i>
-                </a>
-            </div>
-
-            <div id="movies" class="movie-grid">
-                <p class="loading-text">Đang tải danh sách phim...</p>
-            </div>
         </section>
 
     </main>
 
+
     <footer class="site-footer">
-        <p>© 2026 CineStar Cinema Vietnam. Website đặt vé xem phim.</p>
+        <p>
+            © 2026 CineStar Cinema Vietnam.
+            Hệ thống đặt vé giá rẻ cho sinh viên & giới trẻ.
+        </p>
     </footer>
 
     <script src="js/api.js"></script>

@@ -1574,3 +1574,250 @@ button:disabled {
     }
 }
 
+.home-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.home-page .header-inner {
+    max-width: 1440px;
+    min-height: 78px;
+}
+
+.home-page .brand-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 25px;
+    border-radius: 14px;
+}
+
+.home-page .brand-name {
+    font-size: 27px;
+}
+
+.home-page .brand small {
+    font-size: 8px;
+    letter-spacing: 1.1px;
+}
+
+.home-page .main-nav {
+    gap: 22px;
+}
+
+.home-page .main-nav a {
+    font-size: 13px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.location-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
+    border: 1px solid #334155;
+    border-radius: 30px;
+    background: #1e293b99;
+    color: #cbd5e1;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.location-pill i {
+    color: #38bdf8;
+}
+
+.home-page .account-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 19px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.home-main {
+    width: min(1330px, calc(100% - 48px));
+    margin: 20px auto 0;
+    padding: 0 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    flex: 1;
+}
+
+.home-page .hero-banner {
+    min-height: 415px;
+    padding: 52px;
+    border-radius: 27px;
+}
+
+.home-page .hero-content {
+    max-width: 780px;
+}
+
+.home-page .hero-label {
+    font-size: 12px;
+    padding: 8px 14px;
+}
+
+.home-page .hero-content h1 {
+    max-width: 790px;
+    margin: 19px 0 14px;
+    font-size: clamp(36px, 4.2vw, 54px);
+    line-height: 1.08;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.home-page .hero-content p {
+    max-width: 780px;
+    font-size: 15px;
+    line-height: 1.55;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.home-page .hero-actions {
+    margin-top: 27px;
+}
+
+.home-page .primary-button,
+.home-page .secondary-button {
+    min-height: 50px;
+    padding: 14px 23px;
+    font-size: 13px;
+}
+
+.home-page .feature-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.home-page .feature-card {
+    min-height: 172px;
+    padding: 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-page .feature-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+    font-size: 21px;
+}
+
+.home-page .feature-card h3 {
+    font-size: 14px;
+    margin-bottom: 9px;
+}
+
+.home-page .feature-card p {
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.home-page .site-footer {
+    margin-top: 35px;
+    padding: 22px 16px;
+    font-size: 12px;
+}
+
+/* Homepage responsive */
+
+@media (max-width: 1100px) {
+    .home-page .header-inner {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+    }
+
+    .home-page .main-nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .home-page .header-actions {
+        margin-left: auto;
+    }
+
+    .home-page .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .home-main {
+        width: calc(100% - 28px);
+        margin-top: 14px;
+        gap: 25px;
+    }
+
+    .home-page .header-inner {
+        padding: 12px 14px;
+    }
+
+    .home-page .header-actions {
+        width: 100%;
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    .home-page .main-nav {
+        justify-content: flex-start;
+        gap: 17px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+
+    .home-page .main-nav a {
+        font-size: 11px;
+    }
+
+    .home-page .hero-banner {
+        min-height: 360px;
+        padding: 28px 22px;
+    }
+
+    .home-page .hero-content h1 {
+        font-size: 31px;
+    }
+
+    .home-page .hero-content p {
+        font-size: 12px;
+    }
+
+    .home-page .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .home-page .feature-card {
+        min-height: 165px;
+        padding: 16px 9px;
+    }
+
+    .home-page .feature-card h3 {
+        font-size: 11px;
+    }
+
+    .home-page .feature-card p {
+        font-size: 10px;
+    }
+}
+
