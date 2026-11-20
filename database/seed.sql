@@ -8,11 +8,11 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Mật khẩu mặc định: "12345678" (đã hash BCrypt)
 -- ============================================
 INSERT INTO `nguoidung` (`ho_ten`, `email`, `mat_khau`, `so_dien_thoai`, `vai_tro`) VALUES
-('Admin CineStar', 'admin@cinestar.vn', '$2y$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '0901234567', 'ADMIN'),
-('Nhân viên A', 'staff@cinestar.vn', '$2y$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '0901234568', 'STAFF'),
-('Nguyễn Văn An', 'an.nguyen@email.com', '$2y$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '0912345678', 'CUSTOMER'),
-('Trần Thị Bình', 'binh.tran@email.com', '$2y$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '0912345679', 'CUSTOMER'),
-('Lê Hoàng Cường', 'cuong.le@email.com', '$2y$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '0912345680', 'CUSTOMER');
+('Admin CineStar', 'admin@cinestar.vn', '$2b$10$XGs3NEQLSX7wc1U7u3xPbuI7pO536Iw5VYViOEK9E.P2SSMCZCcJK', '0901234567', 'ADMIN'),
+('Nhân viên A', 'staff@cinestar.vn', '$2b$10$XGs3NEQLSX7wc1U7u3xPbuI7pO536Iw5VYViOEK9E.P2SSMCZCcJK', '0901234568', 'STAFF'),
+('Nguyễn Văn An', 'an.nguyen@email.com', '$2b$10$XGs3NEQLSX7wc1U7u3xPbuI7pO536Iw5VYViOEK9E.P2SSMCZCcJK', '0912345678', 'CUSTOMER'),
+('Trần Thị Bình', 'binh.tran@email.com', '$2b$10$XGs3NEQLSX7wc1U7u3xPbuI7pO536Iw5VYViOEK9E.P2SSMCZCcJK', '0912345679', 'CUSTOMER'),
+('Lê Hoàng Cường', 'cuong.le@email.com', '$2b$10$XGs3NEQLSX7wc1U7u3xPbuI7pO536Iw5VYViOEK9E.P2SSMCZCcJK', '0912345680', 'CUSTOMER');
 
 -- ============================================
 -- RẠP CHIẾU
