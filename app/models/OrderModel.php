@@ -23,7 +23,15 @@ final class OrderModel
              LEFT JOIN chitietve cv ON cv.dat_ve_id = d.id
              LEFT JOIN ghe g ON g.id = cv.ghe_id
              WHERE d.user_id = :user_id
-             GROUP BY d.id
+             -- GROUP BY liệt kê đủ các cột không gom nhóm: XAMPP dùng
+             -- MariaDB, chế độ ONLY_FULL_GROUP_BY ở đây không chấp nhận
+             -- GROUP BY d.id một mình (dù MySQL 8 cho phép nhờ khóa
+             -- chính), nên /orders trả 500. Liệt kê đủ cột thì kết quả
+             -- vẫn như cũ vì d.id là duy nhất cho mỗi đơn.
+             GROUP BY d.id, d.ma_don_hang, d.tong_tien,
+                      d.trang_thai_thanh_toan, d.thoi_gian_dat,
+                      p.ten_phim, s.thoi_gian_bat_dau,
+                      r.ten_rap, r.dia_chi, pc.ten_phong
              ORDER BY d.thoi_gian_dat DESC'
         );
         $statement->execute(['user_id' => $userId]);
