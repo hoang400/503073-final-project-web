@@ -2420,3 +2420,12 @@ button:disabled {
         grid-template-columns: 1fr;
     }
 }
+
+/* FIX v2: thuộc tính [hidden] bị CSS display ghi đè.
+   .booking-hero { display:grid } và .booking-trailer
+   { display:inline-flex } thắng style mặc định của
+   trình duyệt cho [hidden], nên hero/trailer hiện ra
+   rỗng ngay cả khi chưa chọn phim. */
+[hidden] {
+    display: none !important;
+}
