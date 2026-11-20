@@ -3373,7 +3373,7 @@ button:disabled {
 
 .poster-thumb { width: 48px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid #334155; display: block; }
 .movie-sub { color: var(--muted); font-size: 12px; }
-.imdb-badge { color: #fbbf24; font-weight: 700; white-space: nowrap; }
+.admin-table .imdb-badge { position: static; padding: 0; border: none; border-radius: 0; background: none; backdrop-filter: none; color: #fbbf24; font-size: 14px; font-weight: 700; white-space: nowrap; }
 .seats-badge { color: #fbbf24; font-weight: 700; white-space: nowrap; }
 
 .btn-sm { padding: 6px 12px !important; font-size: 11px !important; }
