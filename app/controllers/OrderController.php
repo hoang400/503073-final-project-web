@@ -20,6 +20,10 @@ final class OrderController
             'total' => (float) $row['tong_tien'],
             'status' => $row['trang_thai_thanh_toan'],
             'createdAt' => $row['thoi_gian_dat'],
+            'cinema' => $row['ten_rap'],
+            'address' => $row['dia_chi'],
+            'room' => $row['ten_phong'],
+            'seats' => $row['ghe_da_chon'] ?? '',
         ], $this->orders->findByUser($userId));
 
         jsonResponse(['ok' => true, 'data' => $data]);
@@ -53,5 +57,31 @@ final class OrderController
         }
 
         jsonResponse(['ok' => true, 'data' => $order]);
+    }
+
+    public function cancel(): void
+    {
+        $user = AuthMiddleware::requireAuth();
+        $userId = (int) $user['id'];
+
+        $body = readJsonBody();
+        $orderId = filter_var(
+            $body['order_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($orderId === false) {
+            throw new ApiException('Mã đơn hàng không hợp lệ.', 422);
+        }
+
+        if (!$this->orders->cancelOrder($userId, (int) $orderId)) {
+            throw new ApiException(
+                'Không thể hủy đơn này (đơn đã hủy hoặc suất chiếu đã bắt đầu).',
+                409
+            );
+        }
+
+        jsonResponse(['ok' => true, 'data' => ['cancelled' => true]]);
     }
 }

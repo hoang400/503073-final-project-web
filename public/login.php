@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập | CineStar</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 
 <body>
@@ -16,11 +16,13 @@
     </header>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
+        <a class="auth-back" href="index.php">← Quay lại</a>
         <h1>Đăng nhập</h1>
         <form id="auth-form" data-mode="login" class="card auth-card"><span class="tag">TÀI KHOẢN CINESTAR</span>
-            <h2>Chào mừng trở lại</h2><label>Email<input name="email" type="email" required maxlength="254"
-                    autocomplete="email"></label><label>Mật khẩu<input name="password" type="password" required
-                    minlength="1" maxlength="128" autocomplete="current-password"></label><button>Đăng nhập</button><a
+            <h2>Chào mừng trở lại</h2>
+            <p class="auth-intro">Đăng nhập để đặt vé và xem lịch sử của bạn.</p><label>Email<input name="email" type="email" required maxlength="254"
+                    autocomplete="email" placeholder="ban@example.com"></label><label>Mật khẩu<input name="password" type="password" required
+                    minlength="1" maxlength="128" autocomplete="current-password" placeholder="Nhập mật khẩu"></label><label class="remember-row"><input type="checkbox" name="remember" value="on"> Ghi nhớ đăng nhập trong 30 ngày</label><button type="submit" class="auth-submit">Đăng nhập</button><a
                 id="switch-auth" href="register.php">Chưa có tài khoản? Đăng ký</a>
         </form>
     </main>

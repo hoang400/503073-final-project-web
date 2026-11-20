@@ -8,11 +8,22 @@ final class OrderModel
         $statement = Database::connection()->prepare(
             'SELECT d.id, d.ma_don_hang, d.tong_tien,
                     d.trang_thai_thanh_toan, d.thoi_gian_dat,
-                    p.ten_phim, s.thoi_gian_bat_dau
+                    p.ten_phim, s.thoi_gian_bat_dau,
+                    r.ten_rap, r.dia_chi, pc.ten_phong,
+                    GROUP_CONCAT(
+                        CONCAT(g.hang_ghe, g.so_thu_tu)
+                        ORDER BY g.hang_ghe, g.so_thu_tu
+                        SEPARATOR ', '
+                    ) AS ghe_da_chon
              FROM datve d
              JOIN suatchieu s ON s.id = d.suat_chieu_id
              JOIN phim p ON p.id = s.phim_id
+             JOIN phongchieu pc ON pc.id = s.phong_id
+             JOIN rapchieu r ON r.id = pc.rap_id
+             LEFT JOIN chitietve cv ON cv.dat_ve_id = d.id
+             LEFT JOIN ghe g ON g.id = cv.ghe_id
              WHERE d.user_id = :user_id
+             GROUP BY d.id
              ORDER BY d.thoi_gian_dat DESC'
         );
         $statement->execute(['user_id' => $userId]);
@@ -29,10 +40,13 @@ final class OrderModel
                     d.phuong_thuc_thanh_toan,
                     d.trang_thai_thanh_toan, d.thoi_gian_dat,
                     p.ten_phim, s.thoi_gian_bat_dau,
-                    s.thoi_gian_ket_thuc
+                    s.thoi_gian_ket_thuc,
+                    r.ten_rap, r.dia_chi, pc.ten_phong
              FROM datve d
              JOIN suatchieu s ON s.id = d.suat_chieu_id
              JOIN phim p ON p.id = s.phim_id
+             JOIN phongchieu pc ON pc.id = s.phong_id
+             JOIN rapchieu r ON r.id = pc.rap_id
              WHERE d.id = :order_id AND d.user_id = :user_id
              LIMIT 1'
         );
@@ -70,5 +84,52 @@ final class OrderModel
         $order['concessions'] = $concessions->fetchAll();
 
         return $order;
+    }
+
+    // Hủy vé (khách hàng tự hủy): chỉ hủy đơn của chính mình, chưa hủy
+    // trước đó và suất chiếu chưa bắt đầu. Chỉ đổi trạng thái sang DaHuy
+    // (không xóa) để bảo toàn lịch sử; ghế tự về trạng thái trống vì các
+    // truy vấn ghế chỉ tính đơn chưa hủy (trang_thai_thanh_toan <> 'DaHuy').
+    public function cancelOrder(int $userId, int $orderId): bool
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $check = $pdo->prepare(
+                'SELECT d.id
+                 FROM datve d
+                 JOIN suatchieu s ON s.id = d.suat_chieu_id
+                 WHERE d.id = :order_id
+                 AND d.user_id = :user_id
+                 AND d.trang_thai_thanh_toan <> \'DaHuy\'
+                 AND s.thoi_gian_bat_dau > NOW()
+                 LIMIT 1 FOR UPDATE'
+            );
+            $check->execute([
+                'order_id' => $orderId,
+                'user_id' => $userId,
+            ]);
+
+            if (!$check->fetch()) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $update = $pdo->prepare(
+                "UPDATE datve
+                 SET trang_thai_thanh_toan = 'DaHuy'
+                 WHERE id = :order_id"
+            );
+            $update->execute(['order_id' => $orderId]);
+
+            $pdo->commit();
+            return true;
+        } catch (Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $exception;
+        }
     }
 }

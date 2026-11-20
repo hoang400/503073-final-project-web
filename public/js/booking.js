@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let selectedSeats = [];
     let selectedSeatDetails = [];
+    let holdTimer = null;
+    let lastOrderId = null;
     let showtimes = []; // tất cả suất chiếu của phim đang chọn
     let movies = [];
     let concessions = [];
@@ -169,6 +171,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetSelectedSeats() {
         selectedSeats = [];
         selectedSeatDetails = [];
+    }
+
+    // Đếm ngược thời gian giữ ghế (báo cáo Ch.4.3.3): /holds trả về
+    // expiresAt, hiển thị còn lại bao lâu để thanh toán. Hết hạn thì
+    // báo và tải lại sơ đồ ghế để người dùng chọn lại.
+    function stopHoldCountdown() {
+        if (holdTimer) {
+            clearInterval(holdTimer);
+            holdTimer = null;
+        }
+
+        const el = document.getElementById('holdCountdown');
+        if (el) el.hidden = true;
+    }
+
+    function startHoldCountdown(expiresAt) {
+        stopHoldCountdown();
+
+        const el = document.getElementById('holdCountdown');
+        const timeEl = document.getElementById('holdCountdownTime');
+        if (!el || !timeEl || !expiresAt) return;
+
+        const deadline = new Date(String(expiresAt).replace(' ', 'T')).getTime();
+        if (Number.isNaN(deadline)) return;
+
+        const tick = () => {
+            const left = Math.max(0, deadline - Date.now());
+            const minutes = String(Math.floor(left / 60000)).padStart(2, '0');
+            const seconds = String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
+
+            timeEl.textContent = `${minutes}:${seconds}`;
+            el.hidden = false;
+
+            if (left <= 0) {
+                stopHoldCountdown();
+                message('Đã hết thời gian giữ ghế (5 phút). Vui lòng chọn lại ghế.', true);
+                resetSelectedSeats();
+                updateBill();
+                loadSeats();
+            }
+        };
+
+        tick();
+        holdTimer = setInterval(tick, 1000);
+    }
+
+    // Modal VietQR (báo cáo 6.1.3.4): sau khi /checkout tạo đơn thành
+    // công, hiện mã QR + mã đơn + tổng tiền thay vì chuyển trang ngay.
+    function openVietqrModal(order) {
+        const modal = document.getElementById('vietqrModal');
+        if (!modal || !order) return;
+
+        lastOrderId = order.id;
+
+        const qrData = `CINESTAR|${order.code}|${Math.round(order.total)}`;
+        const img = document.getElementById('vietqrImage');
+        if (img) {
+            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='
+                + encodeURIComponent(qrData);
+        }
+
+        const codeEl = document.getElementById('vietqrCode');
+        if (codeEl) codeEl.textContent = order.code || '—';
+        const totalEl = document.getElementById('vietqrTotal');
+        if (totalEl) totalEl.textContent = money(order.total);
+
+        stopHoldCountdown();
+        modal.hidden = false;
+    }
+
+    function closeVietqrModal() {
+        const modal = document.getElementById('vietqrModal');
+        if (modal) modal.hidden = true;
     }
 
     function getSeatClass(type) {
@@ -558,6 +633,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadSeats() {
+        // Đổi suất chiếu / tải lại sơ đồ thì ghế giữ cũ không còn ý nghĩa.
+        stopHoldCountdown();
         resetSelectedSeats();
 
         seatsContainer.innerHTML = `
@@ -597,72 +674,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function fnbImage(item) {
-        // Ảnh thật trong public/images/fnb/ (theo loại món).
-        // Không dùng item.image nữa vì DB đang lưu link example.com đã chết,
-        // trình duyệt request là 404 (xem tab Network).
-        if (item.type === 'Nuoc') return 'images/fnb/nuoc.jpg';
-        if (item.type === 'Combo') return 'images/fnb/combo.jpg';
-        return 'images/fnb/bap.jpg';
-    }
-
-    function fnbEmoji(item) {
-        if (item.type === 'Nuoc') return '\u{1F964}';
-        if (item.type === 'Combo') return '\u{1F37F}';
-        return '\u{1F37F}';
-    }
-
     function updateFnbTotal() {
         const totalEl = document.getElementById('fnbTotal');
         if (totalEl) totalEl.textContent = money(getFoodTotal());
-        fnbContainer.querySelectorAll('[data-qty-for]').forEach(span => {
-            const input = fnbContainer.querySelector(
-                `[data-concession="${span.dataset.qtyFor}"]`
-            );
-            if (input) span.textContent = input.value;
-        });
     }
 
     function renderConcessions() {
+        // Theo báo cáo 4.4.1: mỗi món chỉ hiện tên, đơn giá và ô nhập số
+        // lượng (không dùng ảnh). Nút -/+ giữ lại để tăng giảm nhanh,
+        // ô số vẫn nhập trực tiếp được, kiểm tra số nguyên không âm.
         fnbContainer.innerHTML = concessions.length
             ? concessions.map(item => `
                 <div class="fnb-card">
-                    <div class="fnb-card-img">
-                        <img src="${fnbImage(item)}" alt="${esc(item.name)}" loading="lazy">
-                        <span class="fnb-card-emoji" hidden>${fnbEmoji(item)}</span>
-                    </div>
                     <div class="fnb-card-info">
                         <strong>${esc(item.name)}</strong>
                         <small>${money(item.price)}</small>
                     </div>
                     <div class="fnb-stepper">
                         <button type="button" class="fnb-step-btn" data-step-for="${item.id}" data-step="-1" aria-label="Giảm ${esc(item.name)}">\u2212</button>
-                        <span class="fnb-qty" data-qty-for="${item.id}">0</span>
+                        <input
+                            type="number"
+                            class="fnb-qty-input"
+                            min="0"
+                            max="20"
+                            step="1"
+                            value="0"
+                            data-concession="${item.id}"
+                            aria-label="Số lượng ${esc(item.name)}"
+                        >
                         <button type="button" class="fnb-step-btn" data-step-for="${item.id}" data-step="1" aria-label="Tăng ${esc(item.name)}">+</button>
                     </div>
-                    <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        step="1"
-                        value="0"
-                        data-concession="${item.id}"
-                        aria-label="Số lượng ${esc(item.name)}"
-                        hidden
-                    >
                 </div>
             `).join('')
             : '<p class="booking-placeholder">Hiện chưa có bắp nước.</p>';
-
-        // Nếu ảnh local vẫn lỗi (vd: chưa copy 3 file jpg vào public/images/fnb/)
-        // thì hiện icon thay thế, không để vỡ hình.
-        fnbContainer.querySelectorAll('.fnb-card-img img').forEach(img => {
-            img.addEventListener('error', () => {
-                img.hidden = true;
-                const fallback = img.parentElement.querySelector('.fnb-card-emoji');
-                if (fallback) fallback.hidden = false;
-            });
-        });
 
         fnbContainer.querySelectorAll('input').forEach(input => {
             input.addEventListener('input', () => {
@@ -797,6 +841,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.key === 'Escape' && fnbModal && !fnbModal.hidden) {
             closeFnbModal();
         }
+        const vietqrModal = document.getElementById('vietqrModal');
+        if (event.key === 'Escape' && vietqrModal && !vietqrModal.hidden) {
+            closeVietqrModal();
+        }
+    });
+
+    document.getElementById('vietqrClose')?.addEventListener('click', closeVietqrModal);
+    document.querySelector('[data-close-vietqr]')?.addEventListener('click', closeVietqrModal);
+    document.getElementById('vietqrViewOrder')?.addEventListener('click', () => {
+        if (lastOrderId) {
+            location.href = `order-detail.php?id=${encodeURIComponent(lastOrderId)}`;
+        }
     });
 
     checkoutButton.addEventListener('click', async () => {
@@ -818,21 +874,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedConcessions = getFoodItems();
 
         try {
-            await api('/holds', 'POST', {
+            const hold = await api('/holds', 'POST', {
                 showtimeId: Number(showtimeSelect.value),
                 seatIds: selectedSeats,
             });
+
+            startHoldCountdown(hold.expiresAt);
 
             const order = await api('/checkout', 'POST', {
                 showtimeId: Number(showtimeSelect.value),
                 concessions: selectedConcessions,
             });
 
-            location.href = `order-detail.php?id=${encodeURIComponent(order.id)}`;
+            openVietqrModal(order);
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = 'THANH TOÁN ĐẶT VÉ';
         } catch (error) {
+            stopHoldCountdown();
             message(error.message, true);
             // Lỗi trước đây chỉ hiện ở notice trên đầu trang nên nhìn như "không có gì xảy ra".
             document.getElementById('notice')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Ghế có thể đã bị người khác giữ/bán trong lúc xử lý:
+            // tải lại sơ đồ để trạng thái ghế đúng với server.
+            loadSeats();
             checkoutButton.disabled = false;
             checkoutButton.textContent = 'THANH TOÁN ĐẶT VÉ';
         }

@@ -26,7 +26,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 
 <body class="home-page">
@@ -177,6 +177,25 @@
                 </p>
             </article>
 
+        </section>
+
+        <!-- PHIM ĐANG CHIẾU (6.1.1: poster phim đang được săn đón) -->
+        <section class="home-movies-section">
+            <div class="section-heading home-movies-heading">
+                <div>
+                    <span class="section-eyebrow">CINESTAR CINEMA</span>
+                    <h2>Phim đang chiếu</h2>
+                    <p>Những bộ phim đang được săn đón nhất tại rạp.</p>
+                </div>
+                <a href="movies.php" class="secondary-button">
+                    <i class="fa-solid fa-film"></i>
+                    XEM TẤT CẢ PHIM
+                </a>
+            </div>
+
+            <div id="movies" class="movie-grid">
+                <p class="loading-text">Đang tải danh sách phim...</p>
+            </div>
         </section>
 
     </main>

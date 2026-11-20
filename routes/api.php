@@ -88,6 +88,10 @@ return [
         'GET' => [$orders, 'detail'],
     ],
 
+    '/order/cancel' => [
+        'POST' => [$orders, 'cancel'],
+    ],
+
 
     // ADMIN ROUTES
 

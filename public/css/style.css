@@ -2521,29 +2521,6 @@ button:disabled {
     background: #0f172a99;
 }
 
-.fnb-card-img {
-    flex-shrink: 0;
-    width: 64px;
-    height: 64px;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1e293b, #312e81);
-}
-
-.fnb-card-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.fnb-card-emoji {
-    font-size: 30px;
-    line-height: 1;
-}
-
 .fnb-card-info {
     flex: 1;
     min-width: 0;
@@ -2591,12 +2568,21 @@ button:disabled {
     color: #7dd3fc;
 }
 
-.fnb-qty {
-    min-width: 20px;
-    color: white;
+.fnb-qty-input {
+    width: 56px;
+    padding: 7px 4px;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #fff;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 700;
     text-align: center;
+}
+
+.fnb-qty-input:focus {
+    outline: 2px solid #38bdf8;
+    outline-offset: 1px;
 }
 
 .fnb-modal-foot {
@@ -2643,4 +2629,178 @@ button:disabled {
     .fnb-modal {
         padding: 12px;
     }
+}
+
+
+/* ===== FIX V6 — Chương 6 báo cáo ===== */
+
+/* Trang chủ: mục phim đang chiếu */
+.home-movies-section {
+    max-width: 1280px;
+    margin: 8px auto 0;
+    padding: 0 24px 48px;
+}
+
+.home-movies-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.home-movies-heading h2 {
+    margin: 4px 0;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.home-movies-heading p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Đếm ngược giữ ghế (4.3.3) */
+.hold-countdown {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 1px solid #f59e0b66;
+    border-radius: 10px;
+    background: #f59e0b1a;
+    color: #fcd34d;
+    font-size: 13px;
+}
+
+.hold-countdown strong {
+    font-size: 15px;
+}
+
+/* Modal VietQR (6.1.3.4) */
+.vietqr-card {
+    max-width: 420px;
+    text-align: center;
+}
+
+.vietqr-body {
+    padding: 8px 4px 0;
+}
+
+.vietqr-body img {
+    display: block;
+    margin: 0 auto 16px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.vietqr-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 12px;
+    text-align: left;
+}
+
+.vietqr-rows > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.vietqr-rows dt {
+    color: #94a3b8;
+}
+
+.vietqr-rows dd {
+    margin: 0;
+    font-weight: 700;
+}
+
+.vietqr-note {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* Lịch sử / chi tiết đơn (6.1.3.5, 6.1.3.6) */
+.order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #0ea5e9, #4f46e5);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button.secondary-button {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+.button.danger-button {
+    background: #7f1d1d;
+    border: 1px solid #ef4444;
+}
+
+.ticket-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ticket-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    background: #0f172a80;
+}
+
+.ticket-qr {
+    flex-shrink: 0;
+    padding: 6px;
+    border-radius: 10px;
+    background: #fff;
+}
+
+/* Đăng nhập / đăng ký: ô ghi nhớ (6.1.4) */
+.remember-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.remember-row input[type=checkbox] {
+    width: 16px !important;
+    height: 16px;
+    accent-color: #4f46e5;
 }

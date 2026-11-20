@@ -276,6 +276,47 @@ function setupMovieSearch(movies) {
     render();
 }
 
+// Trang đích sau khi đăng nhập: lấy từ ?next=, chỉ chấp nhận đường dẫn
+// tương đối trong site (chống open-redirect). Mặc định về trang chủ.
+function returnPage() {
+    const next = new URLSearchParams(location.search).get('next') || '';
+
+    if (
+        next
+        && !next.startsWith('//')
+        && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(next)
+        && !next.includes('\\')
+        && (next.startsWith('/') || next.endsWith('.php') || !next.includes(':'))
+    ) {
+        return next.replace(/^\/+/, '');
+    }
+
+    return 'index.php';
+}
+
+// Trang yêu cầu đăng nhập (lịch sử, chi tiết đơn, tài khoản):
+// chưa đăng nhập thì chuyển sang login và giữ lại trang hiện tại.
+async function requireUser() {
+    let user = null;
+
+    try {
+        user = await api('/auth/me');
+    } catch {
+        user = null;
+    }
+
+    if (user) {
+        return true;
+    }
+
+    const next = location.pathname.split('/').pop()
+        + (location.search || '');
+
+    location.href = 'login.php?next=' + encodeURIComponent(next);
+
+    return false;
+}
+
 async function header() {
     const account = $('#account');
 

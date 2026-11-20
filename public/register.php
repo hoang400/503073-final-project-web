@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng ký | CineStar</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 
 <body>
@@ -18,12 +18,13 @@
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         <h1>Đăng ký</h1>
         <form id="auth-form" data-mode="register" class="card auth-card"><span class="tag">TÀI KHOẢN CINESTAR</span>
-            <h2>Tạo tài khoản</h2><label>Họ và tên<input name="name" type="text" required minlength="2" maxlength="80"
-                    autocomplete="name"></label><label>Email<input name="email" type="email" required maxlength="254"
-                    autocomplete="email"></label><label>Mật khẩu<input name="password" type="password" required
-                    minlength="8" maxlength="128" autocomplete="new-password"></label><label>Xác nhận mật khẩu<input
+            <h2>Tạo tài khoản</h2>
+            <p class="auth-intro">Đăng ký để đặt vé và lưu lại những trải nghiệm điện ảnh của bạn.</p><label>Họ và tên<input name="name" type="text" required minlength="2" maxlength="80"
+                    autocomplete="name" placeholder="Nguyễn Văn A"></label><label>Email<input name="email" type="email" required maxlength="254"
+                    autocomplete="email" placeholder="ban@example.com"></label><label>Mật khẩu<input name="password" type="password" required
+                    minlength="8" maxlength="128" autocomplete="new-password" placeholder="Ít nhất 8 ký tự"></label><label>Xác nhận mật khẩu<input
                     name="confirm" type="password" required minlength="8" maxlength="128"
-                    autocomplete="new-password"></label><button>Đăng ký</button><a id="switch-auth" href="login.php">Đã
+                    autocomplete="new-password" placeholder="Nhập lại mật khẩu"></label><label class="remember-row"><input type="checkbox" name="remember" value="on"> Ghi nhớ đăng nhập trong 30 ngày</label><button type="submit" class="auth-submit">Đăng ký</button><a id="switch-auth" href="login.php">Đã
                 có tài khoản? Đăng nhập</a>
         </form>
     </main>
