@@ -180,9 +180,11 @@ final class AdminController
         $data = [
             'ten_phim' => trim($body['ten_phim']),
             'ten_ngan' => trim($body['ten_ngan'] ?? ''),
+            // Form 6.2.2 chỉ có 1 ô "Tên Ngắn (hiển thị Dropdown)" nên
+            // khi không gửi riêng thì dùng tên ngắn làm tên hiển thị.
             'ten_hien_thi_dropdown' => trim(
                 $body['ten_hien_thi_dropdown'] ?? ''
-            ),
+            ) ?: trim($body['ten_ngan'] ?? ''),
 
             'the_loai' => trim($body['the_loai']),
             'thoi_luong' => $duration,
@@ -342,6 +344,28 @@ final class AdminController
             throw new ApiException('Mã phim không hợp lệ.', 422);
         }
         $this->admin->deleteMovie($id);
+
+        jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
+    }
+
+    public function deleteBooking(): void
+    {
+        AdminMiddleware::requireAdmin();
+
+        $query = [];
+        parse_str((string) parse_url($_GET['route'] ?? '', PHP_URL_QUERY), $query);
+
+        $id = filter_var(
+            $_GET['route_params']['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($id === false) {
+            throw new ApiException('Mã đơn hàng không hợp lệ.', 422);
+        }
+
+        $this->admin->deleteBooking($id);
 
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
     }
@@ -878,6 +902,7 @@ final class AdminController
             'customer_name' => $row['khach_hang'],
             'customer_email' => $row['email'],
             'movie' => $row['ten_phim'],
+            'shortTitle' => $row['ten_ngan'] ?? '',
             'showtime' => $row['thoi_gian_bat_dau'],
             'room' => $row['ten_phong'],
             'cinema' => $row['ten_rap'],

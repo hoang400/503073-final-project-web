@@ -564,7 +564,7 @@ final class AdminModel
         $pdo = Database::connection();
         $sql = "SELECT d.id, d.ma_don_hang, d.tong_tien, d.phuong_thuc_thanh_toan, d.trang_thai_thanh_toan, d.thoi_gian_dat,
                        u.ho_ten as khach_hang, u.email,
-                       p.ten_phim, s.thoi_gian_bat_dau, ph.ten_phong, r.ten_rap,
+                       p.ten_phim, p.ten_ngan, s.thoi_gian_bat_dau, ph.ten_phong, r.ten_rap,
                        (SELECT GROUP_CONCAT(CONCAT(g.hang_ghe, g.so_thu_tu) ORDER BY g.hang_ghe, g.so_thu_tu SEPARATOR ', ')
                         FROM chitietve cv JOIN ghe g ON g.id = cv.ghe_id
                         WHERE cv.dat_ve_id = d.id) AS ghe_da_chon
@@ -711,6 +711,39 @@ final class AdminModel
             // Release holds (if any)
             $stmt = $pdo->prepare('DELETE FROM ghedanggiu WHERE suat_chieu_id = ?');
             $stmt->execute([$order['suat_chieu_id']]);
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    // Xóa hẳn một đơn hàng (nút "Xóa Đơn" ở báo cáo 6.2.1):
+    // xóa bắp nước + vé của đơn trước rồi mới xóa đơn, vì các khóa
+    // ngoại đang đặt ON DELETE RESTRICT.
+    public function deleteBooking(int $id): void
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $stmt = $pdo->prepare('SELECT id FROM datve WHERE id = ? FOR UPDATE');
+            $stmt->execute([$id]);
+            $order = $stmt->fetch();
+
+            if (!$order) {
+                throw new ApiException('Đơn hàng không tồn tại.', 404);
+            }
+
+            $stmt = $pdo->prepare('DELETE FROM chitietdatbapnuoc WHERE dat_ve_id = ?');
+            $stmt->execute([$id]);
+
+            $stmt = $pdo->prepare('DELETE FROM chitietve WHERE dat_ve_id = ?');
+            $stmt->execute([$id]);
+
+            $stmt = $pdo->prepare('DELETE FROM datve WHERE id = ?');
+            $stmt->execute([$id]);
 
             $pdo->commit();
         } catch (\Throwable $e) {

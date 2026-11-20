@@ -22,9 +22,6 @@
                 <a href="index.php">
                     <i class="fa-solid fa-gauge-high"></i> Dashboard
                 </a>
-                <a href="movies.php">
-                    <i class="fa-solid fa-film"></i> Phim
-                </a>
                 <a href="cinemas.php">
                     <i class="fa-solid fa-building"></i> Rạp
                 </a>
@@ -36,9 +33,6 @@
                 </a>
                 <a href="concessions.php">
                     <i class="fa-solid fa-burger"></i> Bắp nước
-                </a>
-                <a href="bookings.php">
-                    <i class="fa-solid fa-ticket"></i> Đơn hàng
                 </a>
                 <a href="reports.php" class="active">
                     <i class="fa-solid fa-chart-line"></i> Báo cáo

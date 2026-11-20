@@ -70,17 +70,9 @@ function renderTopMovies(data) {
     `).join('') || '<tr><td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">Chưa có dữ liệu</td></tr>';
 }
 
-// Filter handlers
+// Dashboard (theo báo cáo 6.2): tải thống kê tổng, không lọc theo ngày
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('filterBtn')) {
-        document.getElementById('filterBtn').addEventListener('click', loadDashboard);
-        
-        // Set default dates (last 7 days)
-        const today = new Date();
-        const weekAgo = new Date(today.getTime() - 7*24*60*60*1000);
-        document.getElementById('dateTo').value = today.toISOString().split('T')[0];
-        document.getElementById('dateFrom').value = weekAgo.toISOString().split('T')[0];
-        
+    if (document.getElementById('statTotalRevenue')) {
         loadDashboard();
     }
 });
@@ -114,8 +106,10 @@ async function loadMoviesAdmin() {
 
 function renderMoviesTable(movies) {
     const tbody = document.getElementById('moviesBody');
-    const emptyState = document.getElementById('emptyState');
+    const emptyState = document.getElementById('moviesEmptyState');
     const table = document.getElementById('moviesTable');
+
+    if (!tbody) return;
     
     if (!movies || movies.length === 0) {
         tbody.innerHTML = '';
@@ -127,12 +121,6 @@ function renderMoviesTable(movies) {
     table.style.display = 'table';
     emptyState.style.display = 'none';
     
-    const statusLabels = {
-        'DANG_CHIEU': '<span style="background:#22c55e; color:#052e16; padding:4px 8px; border-radius:4px; font-size:11px;">Đang chiếu</span>',
-        'SAP_CHIEU': '<span style="background:#3b82f6; color:#1e3a5f; padding:4px 8px; border-radius:4px; font-size:11px;">Sắp chiếu</span>',
-        'NGUNG_CHIEU': '<span style="background:#ef4444; color:#450a0a; padding:4px 8px; border-radius:4px; font-size:11px;">Ngưng chiếu</span>',
-    };
-    
     tbody.innerHTML = movies.map(m => `
         <tr>
             <td>
@@ -141,11 +129,10 @@ function renderMoviesTable(movies) {
             <td>
                 <strong>${esc(m.title)}</strong>
                 <br>
-                <small class="movie-sub">${esc(m.genre)}</small>
+                <small class="movie-sub" style="text-transform:uppercase;">${esc(m.genre)}</small>
             </td>
             <td>${m.duration} phút</td>
             <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
-            <td>${statusLabels[m.status] || m.status}</td>
             <td>
                 <div style="display:flex; gap:8px;">
                     <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
@@ -207,26 +194,11 @@ async function loadMovieForEdit(id) {
         document.getElementById('ten_ngan').value =
             movie.shortTitle || '';
 
-        document.getElementById('ten_hien_thi_dropdown').value =
-            movie.dropdownTitle || '';
-
         document.getElementById('do_tuoi').value =
             movie.ageTag || '';
 
-        document.getElementById('mo_ta_do_tuoi').value =
-            movie.ageDesc || '';
-
         document.getElementById('imdb').value =
             movie.imdb ?? '';
-
-        document.getElementById('dao_dien').value =
-            movie.director || '';
-
-        document.getElementById('bien_kich').value =
-            movie.writers || '';
-
-        document.getElementById('dien_vien').value =
-            movie.stars || '';
 
         document.getElementById('ten_phim').value =
             movie.title || '';
@@ -237,17 +209,11 @@ async function loadMovieForEdit(id) {
         document.getElementById('thoi_luong').value =
             movie.duration ?? '';
 
-        document.getElementById('trang_thai').value =
-            movie.status || 'SAP_CHIEU';
-
         document.getElementById('poster_url').value =
             movie.poster_url || '';
 
         document.getElementById('trailer_url').value =
             movie.trailer_url || '';
-
-        document.getElementById('mo_ta').value =
-            movie.description || '';
 
         const preview = document.getElementById('posterPreview');
 
@@ -300,6 +266,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
+
+            // Form chỉ có 1 ô "Tên Ngắn (hiển thị Dropdown)" nên dùng
+            // luôn làm tên hiển thị trong danh sách chọn phim.
+            if (data.ten_ngan) {
+                data.ten_hien_thi_dropdown = data.ten_ngan;
+            }
+
+            // Ô trailer nhận ID YouTube (vd. dQw4w9WgXcQ) theo mẫu 6.2.2.
+            // Trang đặt vé dùng thẳng trailer_url làm href nên nếu nhập
+            // ID thì đổi thành link xem được.
+            if (
+                data.trailer_url
+                && !/^https?:\/\//i.test(data.trailer_url.trim())
+            ) {
+                data.trailer_url =
+                    'https://www.youtube.com/watch?v='
+                    + data.trailer_url.trim();
+            }
 
             // Chuyển thời lượng thành số nguyên
             if (data.thoi_luong) {
@@ -1623,65 +1607,64 @@ async function loadBookingsAdmin() {
 
 function renderBookingsTable(bookings) {
     const tbody = document.getElementById('bookingsBody');
-    const emptyState = document.getElementById('emptyState');
+    const emptyState = document.getElementById('bookingsEmptyState');
     const table = document.getElementById('bookingsTable');
-    
+
+    if (!tbody) return;
+
     if (!bookings || bookings.length === 0) {
         tbody.innerHTML = '';
         table.style.display = 'none';
         emptyState.style.display = 'block';
         return;
     }
-    
+
     table.style.display = 'table';
     emptyState.style.display = 'none';
-    
-    const statusLabels = {
-        'ChuaThanhToan': '<span style="background:#f59e0b; color:#451a03; padding:4px 8px; border-radius:4px; font-size:11px;">Chưa TT</span>',
-        'DaThanhToan': '<span style="background:#22c55e; color:#052e16; padding:4px 8px; border-radius:4px; font-size:11px;">Đã TT</span>',
-        'DaHuy': '<span style="background:#ef4444; color:#450a0a; padding:4px 8px; border-radius:4px; font-size:11px;">Đã hủy</span>',
-    };
-    
-    tbody.innerHTML = bookings.map(b => `
+
+    tbody.innerHTML = bookings.map(b => {
+        const showtime = new Date(b.showtime);
+        const timeText = showtime.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})
+            + ' - ' + showtime.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'});
+
+        return `
         <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:12px; font-family:monospace;">${b.id}</td>
-            <td style="padding:12px; font-family:monospace;">${esc(b.code)}</td>
+            <td style="padding:12px; color:#60a5fa; font-family:monospace;">#${esc(b.code)}</td>
+            <td style="padding:12px;"><strong>${esc(b.movie)}${b.shortTitle ? ` (${esc(b.shortTitle)})` : ''}</strong></td>
             <td style="padding:12px;">
-                <strong>${esc(b.customer_name)}</strong>
-                <br><span style="color:#94a3b8; font-size:12px;">${esc(b.customer_email)}</span>
-            </td>
-            <td style="padding:12px;">${esc(b.movie)}</td>
-            <td style="padding:12px;">
-                ${new Date(b.showtime).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
-                <br><span style="color:#94a3b8; font-size:12px;">${esc(b.room)} - ${esc(b.cinema)}</span>
+                <strong>${esc(b.cinema)}</strong>
+                <br><span style="color:#94a3b8; font-size:12px;">${timeText}</span>
             </td>
             <td><span class="seats-badge">${esc(b.seats || '—')}</span></td>
-            <td style="padding:12px; text-align:right;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
-            <td style="padding:12px;">${statusLabels[b.payment_status] || b.payment_status}</td>
+            <td style="padding:12px; text-align:right; color:#22c55e; font-weight:700;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
             <td style="padding:12px;">
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button class="button btn-sm view-detail-btn" data-id="${b.id}">Xem chi tiết</button>
-                    ${b.payment_status === 'ChuaThanhToan' ? `
-                        <button class="button btn-sm btn-confirm confirm-booking-btn" data-id="${b.id}">Xác nhận TT</button>
-                        <button class="button btn-sm btn-delete cancel-booking-btn" data-id="${b.id}">Hủy</button>
-                    ` : b.payment_status === 'DaThanhToan' ? `
-                        <button class="button btn-sm btn-delete cancel-booking-btn" data-id="${b.id}">Hủy</button>
-                    ` : ''}
-                </div>
+                <button class="button btn-sm btn-delete delete-booking-btn" data-id="${b.id}" data-code="${esc(b.code)}">Xóa Đơn</button>
             </td>
-        </tr>
-    `).join('');
-    
+        </tr>`;
+    }).join('');
+
     // Bind events
-    tbody.querySelectorAll('.view-detail-btn').forEach(btn => {
-        btn.addEventListener('click', () => openBookingDetail(btn.dataset.id));
+    tbody.querySelectorAll('.delete-booking-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDeleteBooking(btn.dataset.id, btn.dataset.code));
     });
-    tbody.querySelectorAll('.confirm-booking-btn').forEach(btn => {
-        btn.addEventListener('click', () => confirmBooking(btn.dataset.id));
-    });
-    tbody.querySelectorAll('.cancel-booking-btn').forEach(btn => {
-        btn.addEventListener('click', () => cancelBooking(btn.dataset.id));
-    });
+}
+
+// Xóa đơn (nút "Xóa Đơn" ở ảnh 6.2.1): xóa hẳn đơn + vé + bắp nước
+async function confirmDeleteBooking(id, code) {
+    if (!confirm(`Xóa đơn #${code}? Hành động này không thể hoàn tác.`)) {
+        return;
+    }
+
+    try {
+        await api(`/admin/bookings/${id}`, 'DELETE');
+
+        message('Đã xóa đơn hàng.');
+
+        await loadBookingsAdmin();
+        await loadDashboard();
+    } catch (e) {
+        message(e.message, true);
+    }
 }
 
 // Filters
@@ -1890,11 +1873,17 @@ async function adminCancelBooking(id) {
 function initBookingsPage() {
     currentBookingsPage = 'bookings';
     
-    // Set default dates (last 30 days)
-    const today = new Date();
-    const monthAgo = new Date(today.getTime() - 30*24*60*60*1000);
-    document.getElementById('dateTo').value = today.toISOString().split('T')[0];
-    document.getElementById('dateFrom').value = monthAgo.toISOString().split('T')[0];
+    // Đặt ngày mặc định khi còn ô lọc (trang bookings cũ); dashboard
+    // theo 6.2.1 không có bộ lọc nên bỏ qua.
+    const dateToEl = document.getElementById('dateTo');
+    const dateFromEl = document.getElementById('dateFrom');
+
+    if (dateToEl && dateFromEl) {
+        const today = new Date();
+        const monthAgo = new Date(today.getTime() - 30*24*60*60*1000);
+        dateToEl.value = today.toISOString().split('T')[0];
+        dateFromEl.value = monthAgo.toISOString().split('T')[0];
+    }
     
     const statusFilter = document.getElementById('statusFilter');
     const dateFrom = document.getElementById('dateFrom');

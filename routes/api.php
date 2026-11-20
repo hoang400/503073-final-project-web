@@ -164,6 +164,7 @@ return [
     '/admin/bookings/{id}' => [
         'GET' => [$admin, 'getBookingDetail'],
         'POST' => [$admin, 'confirmBooking'],
+        'DELETE' => [$admin, 'deleteBooking'],
     ],
 
     '/admin/bookings/{id}/cancel' => [
