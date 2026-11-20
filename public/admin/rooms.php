@@ -45,7 +45,6 @@
         <a href="index.php">Dashboard</a>
         <a href="cinemas.php">Rạp chiếu</a>
         <a href="rooms.php" class="active">Phòng & Ghế</a>
-        <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php">Bắp nước</a>
         </div>
     </nav>
@@ -54,13 +53,12 @@
         
         <div class="admin-page-head">
             <h1>Quản Lý Phòng & Ghế</h1>
-            <button id="addRoomBtn" class="btn-sky">+ Thêm phòng</button>
         </div>
 
         <!-- Cinema Filter -->
-        <div class="filters" style="margin-bottom:24px;">
+        <div class="admin-filters">
             <label>
-                Lọc theo rạp
+                <span>Lọc theo rạp</span>
                 <select id="cinemaFilter">
                     <option value="">Tất cả rạp</option>
                 </select>

@@ -45,7 +45,6 @@
         <a href="index.php" class="active">Dashboard</a>
         <a href="cinemas.php">Rạp chiếu</a>
         <a href="rooms.php">Phòng & Ghế</a>
-        <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php">Bắp nước</a>
         </div>
     </nav>

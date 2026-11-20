@@ -3305,6 +3305,12 @@ button:disabled {
     .admin-main { padding: 24px 16px; }
     .admin-subnav-inner { padding: 8px 16px; }
 }
+
+/* Thanh lọc ở trang phòng & bắp nước: nhãn nhỏ + ô chọn nền tối (khớp kiểu modal) */
+.admin-filters { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 24px; }
+.admin-filters label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+.admin-filters select { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; font-size: 14px; color: #fff; min-width: 200px; cursor: pointer; }
+.admin-filters select:focus { border-color: #38bdf8; outline: none; }
 .admin-subnav a { color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; }
 .admin-subnav a:hover { color: #fff; background: rgba(148, 163, 184, .12); }
 .admin-subnav a.active { color: #fff; background: #1d4ed8; }

@@ -45,7 +45,6 @@
         <a href="index.php">Dashboard</a>
         <a href="cinemas.php">Rạp chiếu</a>
         <a href="rooms.php">Phòng & Ghế</a>
-        <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php" class="active">Bắp nước</a>
         </div>
     </nav>
@@ -58,9 +57,9 @@
         </div>
 
         <!-- Filter -->
-        <div class="filters" style="margin-bottom:24px;">
+        <div class="admin-filters">
             <label>
-                Loại
+                <span>Loại</span>
                 <select id="typeFilter">
                     <option value="">Tất cả loại</option>
                     <option value="Bap">Bắp</option>
@@ -69,7 +68,7 @@
                 </select>
             </label>
             <label>
-                Trạng thái
+                <span>Trạng thái</span>
                 <select id="statusFilter">
                     <option value="">Tất cả</option>
                     <option value="1">Còn bán</option>
@@ -85,7 +84,6 @@
                     <thead>
                         <tr>
                             <th style="width:60px;">ID</th>
-                            <th style="width:80px;">Ảnh</th>
                             <th>Tên món</th>
                             <th>Loại</th>
                             <th style="width:120px;">Giá</th>
@@ -129,12 +127,6 @@
                         <div>
                             <label>Giá (VNĐ) <span style="color:#ef4444;">*</span></label>
                             <input type="number" name="don_gia" id="don_gia" required min="0" step="1000" style="width:100%;">
-                        </div>
-                        
-                        <div style="grid-column:1/-1;">
-                            <label>URL Ảnh</label>
-                            <input type="url" name="hinh_anh" id="hinh_anh" maxlength="255" placeholder="https://..." style="width:100%;">
-                            <div id="concessionImagePreview" style="margin-top:8px;"></div>
                         </div>
                         
                         <div>

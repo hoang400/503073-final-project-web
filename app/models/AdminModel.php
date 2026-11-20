@@ -245,7 +245,9 @@ final class AdminModel
     public function findRoomsByCinema(int $cinemaId): array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, rap_id, ten_phong, loai_phong FROM phongchieu WHERE rap_id = ? ORDER BY ten_phong'
+            'SELECT p.id, p.rap_id, p.ten_phong, p.loai_phong, COUNT(g.id) AS seat_count
+             FROM phongchieu p LEFT JOIN ghe g ON g.phong_id = p.id
+             WHERE p.rap_id = ? GROUP BY p.id, p.rap_id, p.ten_phong, p.loai_phong ORDER BY p.ten_phong'
         );
         $stmt->execute([$cinemaId]);
         return $stmt->fetchAll();
@@ -254,9 +256,11 @@ final class AdminModel
     public function findAllRooms(): array
     {
         $stmt = Database::connection()->query(
-            'SELECT p.id, p.rap_id, p.ten_phong, p.loai_phong, r.ten_rap
+            'SELECT p.id, p.rap_id, p.ten_phong, p.loai_phong, r.ten_rap, COUNT(g.id) AS seat_count
              FROM phongchieu p
              JOIN rapchieu r ON r.id = p.rap_id
+             LEFT JOIN ghe g ON g.phong_id = p.id
+             GROUP BY p.id, p.rap_id, p.ten_phong, p.loai_phong, r.ten_rap
              ORDER BY r.ten_rap, p.ten_phong'
         );
         return $stmt->fetchAll();
@@ -305,8 +309,20 @@ final class AdminModel
     public function deleteRoom(int $id): void
     {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('DELETE FROM phongchieu WHERE id = ?');
-        $stmt->execute([$id]);
+        $pdo->beginTransaction();
+
+        try {
+            // Xóa ghế của phòng trước (FK ghe.phong_id ON DELETE RESTRICT)
+            $this->deleteSeatsByRoom($id);
+
+            $stmt = $pdo->prepare('DELETE FROM phongchieu WHERE id = ?');
+            $stmt->execute([$id]);
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
     }
 
     // Seats management
@@ -342,6 +358,36 @@ final class AdminModel
         $pdo = Database::connection();
         $stmt = $pdo->prepare('DELETE FROM ghe WHERE phong_id = ?');
         $stmt->execute([$roomId]);
+    }
+
+    public function generateSeats(int $roomId, int $rows, int $cols, string $defaultType): void
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            // Xóa hết ghế cũ rồi tạo lại theo số hàng / số cột
+            $this->deleteSeatsByRoom($roomId);
+
+            $stmt = $pdo->prepare('INSERT INTO ghe (phong_id, hang_ghe, so_thu_tu, loai_ghe) VALUES (?, ?, ?, ?)');
+            for ($r = 0; $r < $rows; $r++) {
+                $rowLabel = chr(ord('A') + $r);
+                for ($c = 1; $c <= $cols; $c++) {
+                    $stmt->execute([$roomId, $rowLabel, $c, $defaultType]);
+                }
+            }
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    public function updateSeat(int $id, string $type): void
+    {
+        $stmt = Database::connection()->prepare('UPDATE ghe SET loai_ghe = ? WHERE id = ?');
+        $stmt->execute([$type, $id]);
     }
 
     // ============================================

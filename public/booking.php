@@ -165,6 +165,10 @@
                         <dd id="ticketCinema">—</dd>
                     </div>
                     <div>
+                        <dt>Phòng:</dt>
+                        <dd id="ticketRoom">—</dd>
+                    </div>
+                    <div>
                         <dt>Ghế đã chọn:</dt>
                         <dd id="ticketSeats" class="booking-ticket-seats">Chưa chọn ghế</dd>
                     </div>

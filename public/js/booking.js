@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ticketMovie = document.getElementById('ticketMovie');
         const ticketShowtime = document.getElementById('ticketShowtime');
         const ticketCinema = document.getElementById('ticketCinema');
+        const ticketRoom = document.getElementById('ticketRoom');
         const ticketSeats = document.getElementById('ticketSeats');
         const ticketCount = document.getElementById('ticketCount');
         const ticketFormat = document.getElementById('ticketFormat');
@@ -126,7 +127,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (ticketCinema) {
             ticketCinema.textContent = showtime
-                ? (showtime.cinemaName || showtime.roomName || '—')
+                ? (showtime.cinemaName || '—')
+                : '—';
+        }
+
+        if (ticketRoom) {
+            ticketRoom.textContent = showtime
+                ? ((showtime.roomName || '—') + (showtime.roomType ? ` • ${showtime.roomType}` : ''))
                 : '—';
         }
 
