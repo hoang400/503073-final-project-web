@@ -2429,3 +2429,218 @@ button:disabled {
 [hidden] {
     display: none !important;
 }
+
+/* =========================================
+   F&B POPUP — BẮP NƯỚC (v3)
+========================================= */
+
+.fnb-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.fnb-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.75);
+    backdrop-filter: blur(4px);
+}
+
+.fnb-modal-card {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: #151b2b;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+.fnb-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px 14px;
+}
+
+.fnb-modal-head h3 {
+    margin: 6px 0 4px;
+    color: white;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.fnb-modal-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.fnb-modal-close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #cbd5e1;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.fnb-modal-close:hover {
+    border-color: #38bdf8;
+    color: white;
+}
+
+.fnb-modal-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 6px 24px 18px;
+    overflow-y: auto;
+}
+
+.fnb-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    background: #0f172a99;
+}
+
+.fnb-card-img {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e293b, #312e81);
+}
+
+.fnb-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.fnb-card-emoji {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.fnb-card-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fnb-card-info strong {
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.fnb-card-info small {
+    color: #7dd3fc;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.fnb-stepper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fnb-step-btn {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: #1e293b;
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.fnb-step-btn:hover {
+    border-color: #38bdf8;
+    color: #7dd3fc;
+}
+
+.fnb-qty {
+    min-width: 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.fnb-modal-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--line);
+}
+
+.fnb-modal-foot span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.fnb-modal-foot strong {
+    color: #7dd3fc;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.fnb-modal-apply {
+    padding: 12px 28px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(100deg, #0284c7, #4f46e5);
+    color: white;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.fnb-modal-apply:hover {
+    filter: brightness(1.15);
+}
+
+@media (max-width: 640px) {
+    .fnb-modal-list {
+        grid-template-columns: 1fr;
+    }
+
+    .fnb-modal {
+        padding: 12px;
+    }
+}

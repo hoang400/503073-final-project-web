@@ -291,7 +291,7 @@ final class BookingModel
 
             // Lấy loại ghế để tính giá
             $seatPriceQuery = $pdo->prepare(
-                "SELECT g.id, g.loai_ghe, s.gia_ve_co_ban
+                "SELECT g.id, g.loai_ghe
                  FROM ghe g
                  JOIN suatchieu s ON s.phong_id = g.phong_id
                  WHERE s.id = ? AND g.id IN ($marks)"

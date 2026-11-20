@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dateStrip = $('#dateStrip');
     const seatsContainer = $('#seats');
     const fnbContainer = $('#fnb');
-    const fnbPanel = $('#fnbPanel');
+    const fnbModal = $('#fnbModal');
     const fnbToggle = $('#fnbToggle');
     const bill = $('#bill');
     const checkoutButton = $('#checkout');
@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         updateTicketInfo();
         updateLegendPrices();
+        updateFnbTotal();
     }
 
     function resetSelectedSeats() {
@@ -596,14 +597,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function fnbEmoji(item) {
+        if (item.type === 'Nuoc') return '\u{1F964}';
+        if (item.type === 'Combo') return '\u{1F37F}';
+        return '\u{1F37F}';
+    }
+
+    function updateFnbTotal() {
+        const totalEl = document.getElementById('fnbTotal');
+        if (totalEl) totalEl.textContent = money(getFoodTotal());
+        fnbContainer.querySelectorAll('[data-qty-for]').forEach(span => {
+            const input = fnbContainer.querySelector(
+                `[data-concession="${span.dataset.qtyFor}"]`
+            );
+            if (input) span.textContent = input.value;
+        });
+    }
+
     function renderConcessions() {
         fnbContainer.innerHTML = concessions.length
             ? concessions.map(item => `
-                <label class="fnb-item">
-                    <span class="fnb-item-info">
+                <div class="fnb-card">
+                    <div class="fnb-card-img">
+                        ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy">` : ''}
+                        <span class="fnb-card-emoji" ${item.image ? 'hidden' : ''}>${fnbEmoji(item)}</span>
+                    </div>
+                    <div class="fnb-card-info">
                         <strong>${esc(item.name)}</strong>
                         <small>${money(item.price)}</small>
-                    </span>
+                    </div>
+                    <div class="fnb-stepper">
+                        <button type="button" class="fnb-step-btn" data-step-for="${item.id}" data-step="-1" aria-label="Giảm ${esc(item.name)}">\u2212</button>
+                        <span class="fnb-qty" data-qty-for="${item.id}">0</span>
+                        <button type="button" class="fnb-step-btn" data-step-for="${item.id}" data-step="1" aria-label="Tăng ${esc(item.name)}">+</button>
+                    </div>
                     <input
                         type="number"
                         min="0"
@@ -612,10 +639,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         value="0"
                         data-concession="${item.id}"
                         aria-label="Số lượng ${esc(item.name)}"
+                        hidden
                     >
-                </label>
+                </div>
             `).join('')
             : '<p class="booking-placeholder">Hiện chưa có bắp nước.</p>';
+
+        // Ảnh trong DB hiện là link example.com (chết) -> hiện icon thay thế.
+        // Chỉ cần đổi hinh_anh trong DB sang link ảnh thật là ảnh sẽ hiện.
+        fnbContainer.querySelectorAll('.fnb-card-img img').forEach(img => {
+            img.addEventListener('error', () => {
+                img.hidden = true;
+                const fallback = img.parentElement.querySelector('.fnb-card-emoji');
+                if (fallback) fallback.hidden = false;
+            });
+        });
 
         fnbContainer.querySelectorAll('input').forEach(input => {
             input.addEventListener('input', () => {
@@ -624,8 +662,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (quantity > 20) quantity = 20;
                 input.value = String(Math.floor(quantity));
                 updateBill();
+                updateFnbTotal();
             });
         });
+
+        fnbContainer.querySelectorAll('[data-step-for]').forEach(button => {
+            button.addEventListener('click', () => {
+                const input = fnbContainer.querySelector(
+                    `[data-concession="${button.dataset.stepFor}"]`
+                );
+                if (!input) return;
+                const next = Number(input.value || 0) + Number(button.dataset.step);
+                input.value = String(Math.max(0, Math.min(20, next)));
+                input.dispatchEvent(new Event('input'));
+            });
+        });
+
+        updateFnbTotal();
+    }
+
+    function openFnbModal() {
+        if (!fnbModal) return;
+        fnbModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFnbModal() {
+        if (!fnbModal) return;
+        fnbModal.hidden = true;
+        document.body.style.overflow = '';
     }
 
     // ---- Khởi tạo ----
@@ -714,10 +779,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             : 'XEM THÊM <i class="fa-solid fa-chevron-down"></i>';
     });
 
-    fnbToggle?.addEventListener('click', () => {
-        const isHidden = fnbPanel.hidden;
-        fnbPanel.hidden = !isHidden;
-        fnbToggle.classList.toggle('open', isHidden);
+    fnbToggle?.addEventListener('click', openFnbModal);
+
+    document.getElementById('fnbClose')?.addEventListener('click', closeFnbModal);
+    document.getElementById('fnbApply')?.addEventListener('click', closeFnbModal);
+    fnbModal?.querySelector('[data-close-fnb]')?.addEventListener('click', closeFnbModal);
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && fnbModal && !fnbModal.hidden) {
+            closeFnbModal();
+        }
     });
 
     checkoutButton.addEventListener('click', async () => {
@@ -726,6 +796,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             || selectedSeats.length === 0
             || selectedSeats.length > 8
         ) {
+            message('Vui lòng chọn suất chiếu và ít nhất 1 ghế trước khi thanh toán.', true);
             return;
         }
 
@@ -751,6 +822,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             location.href = `order-detail.php?id=${encodeURIComponent(order.id)}`;
         } catch (error) {
             message(error.message, true);
+            // Lỗi trước đây chỉ hiện ở notice trên đầu trang nên nhìn như "không có gì xảy ra".
+            document.getElementById('notice')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             checkoutButton.disabled = false;
             checkoutButton.textContent = 'THANH TOÁN ĐẶT VÉ';
         }
