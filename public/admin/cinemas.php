@@ -41,14 +41,15 @@
         </div>
     </header>
     <nav class="admin-subnav" aria-label="Quản trị">
+        <div class="admin-subnav-inner">
         <a href="index.php">Dashboard</a>
         <a href="cinemas.php" class="active">Rạp chiếu</a>
         <a href="rooms.php">Phòng & Ghế</a>
         <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php">Bắp nước</a>
-        <a href="reports.php">Báo cáo</a>
+        </div>
     </nav>
-    <main>
+    <main class="admin-main">
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         
         <div class="admin-page-head">
