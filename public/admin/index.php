@@ -19,33 +19,41 @@
             </a>
             <nav class="main-nav" aria-label="Điều hướng chính">
                 <a href="../index.php">
-                    <i class="fa-solid fa-house"></i> Trang Chủ
+                    Trang Chủ
                 </a>
                 <a href="../movies.php">
-                    <i class="fa-solid fa-film"></i> Phim Đang Chiếu
+                    Phim Đang Chiếu
                 </a>
                 <a href="../booking.php">
-                    <i class="fa-solid fa-ticket"></i> Đặt Vé
+                    Đặt Vé
                 </a>
                 <a href="../history.php">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Vé
+                    Lịch Sử Vé
                 </a>
                 <a href="index.php" class="active">
-                    <i class="fa-solid fa-user-shield"></i> Trang Admin
+                    Trang Admin
                 </a>
             </nav>
             <div class="account-area">
-                <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Mode</span>
+                <span class="admin-badge">Admin Mode</span>
                 <div id="account"></div>
             </div>
         </div>
     </header>
+    <nav class="admin-subnav" aria-label="Quản trị">
+        <a href="index.php" class="active">Dashboard</a>
+        <a href="cinemas.php">Rạp chiếu</a>
+        <a href="rooms.php">Phòng & Ghế</a>
+        <a href="showtimes.php">Suất chiếu</a>
+        <a href="concessions.php">Bắp nước</a>
+        <a href="reports.php">Báo cáo</a>
+    </nav>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
         <div class="admin-page-head">
             <div>
-                <h1><i class="fa-solid fa-screwdriver-wrench"></i> HỆ THỐNG QUẢN TRỊ BACK-END ADMIN</h1>
+                <h1>HỆ THỐNG QUẢN TRỊ BACK-END ADMIN</h1>
                 <p class="admin-page-sub">Quản lý doanh thu, danh sách đơn vé và nghiệp vụ phim</p>
             </div>
         </div>
@@ -53,15 +61,13 @@
         <!-- 3 Cards -->
         <div class="admin-stat-grid">
             <article class="card admin-stat-card">
-                <div class="admin-stat-icon" style="background:#22c55e;">💰</div>
                 <div>
                     <p class="admin-stat-label">Tổng doanh thu đặt vé</p>
-                    <h2 class="admin-stat-value" id="statTotalRevenue" style="color:#22c55e;">0 VNĐ</h2>
+                    <h2 class="admin-stat-value" id="statTotalRevenue" style="color:#34d399;">0 VNĐ</h2>
                     <p class="admin-stat-sub">Tính từ dữ liệu hệ thống</p>
                 </div>
             </article>
             <article class="card admin-stat-card">
-                <div class="admin-stat-icon" style="background:#3b82f6;">🎫</div>
                 <div>
                     <p class="admin-stat-label">Tổng số vé đã bán</p>
                     <h2 class="admin-stat-value" id="statOrders" style="color:#38bdf8;">0 Đơn vé</h2>
@@ -69,10 +75,9 @@
                 </div>
             </article>
             <article class="card admin-stat-card">
-                <div class="admin-stat-icon" style="background:#a855f7;">🎬</div>
                 <div>
                     <p class="admin-stat-label">Số phim đang chiếu</p>
-                    <h2 class="admin-stat-value" id="statMoviesShowing" style="color:#c084fc;">0 Phim</h2>
+                    <h2 class="admin-stat-value" id="statMoviesShowing" style="color:#818cf8;">0 Phim</h2>
                     <p class="admin-stat-sub">Danh mục phim active</p>
                 </div>
             </article>
@@ -81,8 +86,8 @@
         <!-- Quản lý danh sách phim -->
         <article class="card admin-section">
             <div class="admin-section-head">
-                <h2><i class="fa-solid fa-film"></i> Quản lý danh sách phim</h2>
-                <button id="addMovieBtn" class="button btn-gradient" type="button">+ Thêm Phim Mới</button>
+                <h2>Quản lý danh sách phim</h2>
+                <button id="addMovieBtn" class="btn-sky" type="button">+ Thêm Phim Mới</button>
             </div>
             <div class="admin-table-wrap">
                 <table id="moviesTable" class="admin-table">
@@ -92,21 +97,21 @@
                             <th>Tên phim</th>
                             <th style="width:100px;">Thời lượng</th>
                             <th style="width:100px;">IMDb</th>
-                            <th style="width:160px;">Hành động</th>
+                            <th style="width:160px; text-align:center;">Hành động</th>
                         </tr>
                     </thead>
                     <tbody id="moviesBody"></tbody>
                 </table>
             </div>
             <div id="moviesEmptyState" style="display:none; padding:32px; text-align:center; color:#94a3b8;">
-                Chưa có phim nào
+                Chưa có phim nào trong hệ thống!
             </div>
         </article>
 
         <!-- Danh sách đơn vé hệ thống -->
         <article class="card admin-section">
             <div class="admin-section-head">
-                <h2><i class="fa-solid fa-list"></i> Danh sách đơn vé hệ thống</h2>
+                <h2>Danh sách đơn vé hệ thống</h2>
             </div>
             <div class="admin-table-wrap">
                 <table id="bookingsTable" class="admin-table">
@@ -117,20 +122,20 @@
                             <th style="width:220px;">Rạp / Suất chiếu</th>
                             <th style="width:110px;">Ghế chọn</th>
                             <th style="width:130px;">Doanh thu</th>
-                            <th style="width:120px;">Hành động</th>
+                            <th style="width:120px; text-align:center;">Hành động</th>
                         </tr>
                     </thead>
                     <tbody id="bookingsBody"></tbody>
                 </table>
             </div>
             <div id="bookingsEmptyState" style="display:none; padding:32px; text-align:center; color:#94a3b8;">
-                Chưa có đơn hàng nào
+                Chưa có đơn vé nào được ghi nhận!
             </div>
         </article>
 
         <!-- Thêm / Sửa phim -->
         <div id="movieModal" class="modal-overlay" style="display:none;">
-            <div class="modal" style="max-width:640px; width:90%;">
+            <div class="modal" style="max-width:768px; width:90%;">
                 <div class="modal-header">
                     <h2 id="modalTitle">Thêm phim mới</h2>
                     <button id="closeModal" class="modal-close">×</button>
@@ -139,36 +144,36 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="movieId">
                         <div>
-                            <label>Tên Phim <span style="color:#ef4444;">*</span></label>
+                            <label>Tên Phim</label>
                             <input type="text" name="ten_phim" id="ten_phim" required maxlength="255" style="width:100%;">
                         </div>
                         <div>
                             <label>Tên Ngắn (hiển thị Dropdown)</label>
-                            <input type="text" name="ten_ngan" id="ten_ngan" maxlength="255" placeholder="Ví dụ: Godzilla x Kong" style="width:100%;">
+                            <input type="text" name="ten_ngan" id="ten_ngan" required maxlength="255" placeholder="Ví dụ: Godzilla x Kong" style="width:100%;">
                         </div>
                         <div style="grid-column:1/-1;">
                             <label>URL Ảnh Poster</label>
-                            <input type="url" name="poster_url" id="poster_url" maxlength="255" placeholder="https://..." style="width:100%;">
+                            <input type="url" name="poster_url" id="poster_url" required maxlength="255" placeholder="https://..." style="width:100%;">
                             <div id="posterPreview" style="margin-top:8px; max-height:200px;"></div>
                         </div>
                         <div>
-                            <label>Thời Lượng <span style="color:#ef4444;">*</span></label>
+                            <label>Thời Lượng</label>
                             <input type="number" name="thoi_luong" id="thoi_luong" required min="1" max="600" placeholder="VD: 115 phút" style="width:100%;">
                         </div>
                         <div>
                             <label>Điểm IMDb</label>
-                            <input type="number" name="imdb" id="imdb" min="0" max="10" step="0.1" placeholder="VD: 7.5/10" style="width:100%;">
+                            <input type="number" name="imdb" id="imdb" required min="0" max="10" step="0.1" placeholder="VD: 7.5/10" style="width:100%;">
                         </div>
                         <div>
                             <label>Giới Hạn Tuổi</label>
-                            <input type="text" name="do_tuoi" id="do_tuoi" maxlength="10" placeholder="VD: C13, T18..." style="width:100%;">
+                            <input type="text" name="do_tuoi" id="do_tuoi" required maxlength="10" placeholder="VD: C13, T18..." style="width:100%;">
                         </div>
                         <div>
                             <label>ID Trailer YouTube</label>
-                            <input type="text" name="trailer_url" id="trailer_url" maxlength="500" placeholder="VD: dQw4w9WgXcQ" style="width:100%;">
+                            <input type="text" name="trailer_url" id="trailer_url" required maxlength="500" placeholder="VD: dQw4w9WgXcQ" style="width:100%;">
                         </div>
                         <div style="grid-column:1/-1;">
-                            <label>Thể Loại (Cách nhau bằng dấu phẩy) <span style="color:#ef4444;">*</span></label>
+                            <label>Thể Loại (Cách nhau bằng dấu phẩy)</label>
                             <input type="text" name="the_loai" id="the_loai" required maxlength="100" placeholder="Hành Động, Khoa Học Viễn Tưởng..." style="width:100%;">
                         </div>
                     </div>

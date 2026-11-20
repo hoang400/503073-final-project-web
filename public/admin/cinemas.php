@@ -17,38 +17,43 @@
                     <small>HỆ THỐNG RẠP RẺ NHẤT VIỆT NAM</small>
                 </span>
             </a>
-            <nav class="main-nav" aria-label="Admin navigation">
-                <a href="index.php">
-                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+            <nav class="main-nav" aria-label="Điều hướng chính">
+                <a href="../index.php">
+                    Trang Chủ
                 </a>
-                <a href="cinemas.php" class="active">
-                    <i class="fa-solid fa-building"></i> Rạp
+                <a href="../movies.php">
+                    Phim Đang Chiếu
                 </a>
-                <a href="rooms.php">
-                    <i class="fa-solid fa-door-open"></i> Phòng & Ghế
+                <a href="../booking.php">
+                    Đặt Vé
                 </a>
-                <a href="showtimes.php">
-                    <i class="fa-solid fa-clock"></i> Suất chiếu
+                <a href="../history.php">
+                    Lịch Sử Vé
                 </a>
-                <a href="concessions.php">
-                    <i class="fa-solid fa-burger"></i> Bắp nước
-                </a>
-                <a href="reports.php">
-                    <i class="fa-solid fa-chart-line"></i> Báo cáo
+                <a href="index.php" class="active">
+                    Trang Admin
                 </a>
             </nav>
             <div class="account-area">
-                <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Mode</span>
+                <span class="admin-badge">Admin Mode</span>
                 <div id="account"></div>
             </div>
         </div>
     </header>
+    <nav class="admin-subnav" aria-label="Quản trị">
+        <a href="index.php">Dashboard</a>
+        <a href="cinemas.php" class="active">Rạp chiếu</a>
+        <a href="rooms.php">Phòng & Ghế</a>
+        <a href="showtimes.php">Suất chiếu</a>
+        <a href="concessions.php">Bắp nước</a>
+        <a href="reports.php">Báo cáo</a>
+    </nav>
     <main>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         
         <div class="admin-page-head">
             <h1>Quản Lý Rạp Chiếu</h1>
-            <button id="addCinemaBtn" class="button">+ Thêm rạp</button>
+            <button id="addCinemaBtn" class="btn-sky">+ Thêm rạp</button>
         </div>
 
         <!-- Cinemas Table -->
@@ -109,6 +114,6 @@
     <footer>© 2026 CineStar Admin</footer>
     <script src="../js/api.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js?v=2"></script>
+    <script src="../js/admin.js?v=3"></script>
 </body>
 </html>

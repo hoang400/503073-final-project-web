@@ -129,12 +129,12 @@ function renderMoviesTable(movies) {
             <td>
                 <strong>${esc(m.title)}</strong>
                 <br>
-                <small class="movie-sub" style="text-transform:uppercase;">${esc(m.genre)}</small>
+                <small style="color:#38bdf8; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.5px;">${esc(m.genre)}</small>
             </td>
             <td>${m.duration} phút</td>
             <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
-            <td>
-                <div style="display:flex; gap:8px;">
+            <td style="text-align:center;">
+                <div style="display:flex; gap:8px; justify-content:center;">
                     <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
                     <button class="button btn-sm btn-delete delete-btn" data-id="${m.id}" data-title="${esc(m.title)}">Xóa</button>
                 </div>
@@ -166,13 +166,14 @@ function openMovieModal(id = null) {
     preview.innerHTML = '';
     document.getElementById('movieId').value = '';
     
+    // Nút lưu luôn là "LƯU THÔNG TIN PHIM" như file mẫu; chỉ tiêu đề đổi khi sửa
+    submitBtn.textContent = 'LƯU THÔNG TIN PHIM';
+
     if (id) {
-        title.textContent = 'Sửa phim';
-        submitBtn.textContent = 'CẬP NHẬT PHIM';
+        title.textContent = 'Cập nhật thông tin phim';
         loadMovieForEdit(id);
     } else {
         title.textContent = 'Thêm phim mới';
-        submitBtn.textContent = 'LƯU THÔNG TIN PHIM';
     }
     
     modal.style.display = 'flex';
@@ -313,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } finally {
                 btn.disabled = false;
-                btn.textContent = wasEditing ? 'Cập nhật' : 'Thêm';
+                btn.textContent = 'LƯU THÔNG TIN PHIM';
             }
         });
     }
@@ -1629,15 +1630,15 @@ function renderBookingsTable(bookings) {
 
         return `
         <tr style="border-bottom:1px solid #334155;">
-            <td style="padding:12px; color:#60a5fa; font-family:monospace;">#${esc(b.code)}</td>
-            <td style="padding:12px;"><strong>${esc(b.movie)}${b.shortTitle ? ` (${esc(b.shortTitle)})` : ''}</strong></td>
-            <td style="padding:12px;">
-                <strong>${esc(b.cinema)}</strong>
-                <br><span style="color:#94a3b8; font-size:12px;">${timeText}</span>
+            <td style="padding:12px; color:#38bdf8; font-family:monospace; font-weight:700;">#${esc(b.code)}</td>
+            <td style="padding:12px;"><strong>${esc(b.movie)}</strong></td>
+            <td style="padding:12px; color:#94a3b8;">
+                ${esc(b.cinema)}
+                <br><span style="color:#7dd3fc; font-weight:700;">${timeText}</span>
             </td>
             <td><span class="seats-badge">${esc(b.seats || '—')}</span></td>
-            <td style="padding:12px; text-align:right; color:#22c55e; font-weight:700;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
-            <td style="padding:12px;">
+            <td style="padding:12px; color:#34d399; font-weight:900;">${(b.total || 0).toLocaleString('vi-VN')} VNĐ</td>
+            <td style="padding:12px; text-align:center;">
                 <button class="button btn-sm btn-delete delete-booking-btn" data-id="${b.id}" data-code="${esc(b.code)}">Xóa Đơn</button>
             </td>
         </tr>`;
