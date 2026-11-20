@@ -168,12 +168,6 @@ final class BookingModel
                 'DELETE FROM ghedanggiu WHERE suat_chieu_id = ? AND user_id = ?'
             );
             $delOld->execute([$showtimeId, $userId]);
-
-            // Insert holds mới (hết hạn 5 phút, theo đặc tả báo cáo Ch.3.3.2).
-            // Tính bằng NOW() của MySQL, vì mọi chỗ kiểm tra hết hạn
-            // (expires_at > NOW()) đều dùng đồng hồ MySQL. Dùng giờ PHP
-            // ở đây từng gây lỗi: ghế vừa giữ đã hết hạn ngay, checkout
-            // trả 409 "Bạn không giữ ghế nào hoặc đã hết hạn."
             $expiresAtRow = $pdo->query(
                 'SELECT DATE_ADD(NOW(), INTERVAL 5 MINUTE) AS expires_at'
             )->fetch();

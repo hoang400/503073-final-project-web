@@ -2421,18 +2421,10 @@ button:disabled {
     }
 }
 
-/* FIX v2: thuộc tính [hidden] bị CSS display ghi đè.
-   .booking-hero { display:grid } và .booking-trailer
-   { display:inline-flex } thắng style mặc định của
-   trình duyệt cho [hidden], nên hero/trailer hiện ra
-   rỗng ngay cả khi chưa chọn phim. */
 [hidden] {
     display: none !important;
 }
 
-/* =========================================
-   F&B POPUP — BẮP NƯỚC (v3)
-========================================= */
 
 .fnb-modal {
     position: fixed;
@@ -2631,10 +2623,6 @@ button:disabled {
     }
 }
 
-
-/* ===== FIX V6 — Chương 6 báo cáo ===== */
-
-/* Trang chủ: mục phim đang chiếu */
 .home-movies-section {
     max-width: 1280px;
     margin: 8px auto 0;
