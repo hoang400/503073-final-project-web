@@ -36,6 +36,9 @@ final class Database
             ]
         );
 
+        // Đồng bộ múi giờ MySQL với PHP (xem bootstrap.php).
+        self::$connection->exec("SET time_zone = '+07:00'");
+
         return self::$connection;
     }
 }

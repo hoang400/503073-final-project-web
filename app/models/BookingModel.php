@@ -169,8 +169,15 @@ final class BookingModel
             );
             $delOld->execute([$showtimeId, $userId]);
 
-            // Insert holds mới (hết hạn 10 phút)
-            $expiresAt = (new DateTime())->modify('+10 minutes')->format('Y-m-d H:i:s');
+            // Insert holds mới (hết hạn 10 phút).
+            // Tính bằng NOW() của MySQL, vì mọi chỗ kiểm tra hết hạn
+            // (expires_at > NOW()) đều dùng đồng hồ MySQL. Dùng giờ PHP
+            // ở đây từng gây lỗi: ghế vừa giữ đã hết hạn ngay, checkout
+            // trả 409 "Bạn không giữ ghế nào hoặc đã hết hạn."
+            $expiresAtRow = $pdo->query(
+                'SELECT DATE_ADD(NOW(), INTERVAL 10 MINUTE) AS expires_at'
+            )->fetch();
+            $expiresAt = $expiresAtRow['expires_at'];
             $insertHold = $pdo->prepare(
                 'INSERT INTO ghedanggiu (suat_chieu_id, ghe_id, user_id, expires_at)
                 VALUES (:showtime_id, :seat_id, :user_id, :expires_at)'

@@ -597,6 +597,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function fnbImage(item) {
+        // Ảnh thật trong public/images/fnb/ (theo loại món).
+        // Không dùng item.image nữa vì DB đang lưu link example.com đã chết,
+        // trình duyệt request là 404 (xem tab Network).
+        if (item.type === 'Nuoc') return 'images/fnb/nuoc.jpg';
+        if (item.type === 'Combo') return 'images/fnb/combo.jpg';
+        return 'images/fnb/bap.jpg';
+    }
+
     function fnbEmoji(item) {
         if (item.type === 'Nuoc') return '\u{1F964}';
         if (item.type === 'Combo') return '\u{1F37F}';
@@ -619,8 +628,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             ? concessions.map(item => `
                 <div class="fnb-card">
                     <div class="fnb-card-img">
-                        ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy">` : ''}
-                        <span class="fnb-card-emoji" ${item.image ? 'hidden' : ''}>${fnbEmoji(item)}</span>
+                        <img src="${fnbImage(item)}" alt="${esc(item.name)}" loading="lazy">
+                        <span class="fnb-card-emoji" hidden>${fnbEmoji(item)}</span>
                     </div>
                     <div class="fnb-card-info">
                         <strong>${esc(item.name)}</strong>
@@ -645,8 +654,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             `).join('')
             : '<p class="booking-placeholder">Hiện chưa có bắp nước.</p>';
 
-        // Ảnh trong DB hiện là link example.com (chết) -> hiện icon thay thế.
-        // Chỉ cần đổi hinh_anh trong DB sang link ảnh thật là ảnh sẽ hiện.
+        // Nếu ảnh local vẫn lỗi (vd: chưa copy 3 file jpg vào public/images/fnb/)
+        // thì hiện icon thay thế, không để vỡ hình.
         fnbContainer.querySelectorAll('.fnb-card-img img').forEach(img => {
             img.addEventListener('error', () => {
                 img.hidden = true;

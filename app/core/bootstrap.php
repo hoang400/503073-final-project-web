@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+// Múi giờ VN: PHP (new DateTime) và MySQL NOW() phải cùng một đồng hồ,
+// nếu không ghế vừa giữ đã bị coi là hết hạn ở checkout (lỗi 409).
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 final class ApiException extends RuntimeException
 {
 }
