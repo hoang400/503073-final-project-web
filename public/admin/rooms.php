@@ -45,6 +45,7 @@
         <a href="index.php">Dashboard</a>
         <a href="cinemas.php">Rạp chiếu</a>
         <a href="rooms.php" class="active">Phòng & Ghế</a>
+        <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php">Bắp nước</a>
         </div>
     </nav>
@@ -94,7 +95,7 @@
                 <h2 id="seatMapTitle">Sơ đồ ghế - Phòng </h2>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button id="addSeatBtn" class="button">+ Thêm ghế</button>
-                    <button id="autoGenSeatsBtn" class="button" style="background:#8b5cf6;">Tự động tạo ghế</button>
+
                     <button id="backToRoomsBtn" class="button" style="background:transparent; color:#94a3b8;">← Quay lại</button>
                 </div>
             </div>
@@ -155,38 +156,35 @@
             </div>
         </div>
 
-        <!-- Auto Generate Seats Modal -->
-        <div id="autoGenModal" class="modal-overlay" style="display:none;">
+        <!-- Thêm ghế thủ công -->
+        <div id="seatModal" class="modal-overlay" style="display:none;">
             <div class="modal" style="max-width:400px; width:90%;">
                 <div class="modal-header">
-                    <h2>Tự động tạo ghế</h2>
-                    <button id="closeAutoGenModal" class="modal-close">×</button>
+                    <h2>Thêm ghế mới</h2>
+                    <button id="closeSeatModal" class="modal-close">×</button>
                 </div>
-                <form id="autoGenForm">
+                <form id="seatForm">
                     <div class="modal-body">
                         <div>
-                            <label>Số hàng (A, B, C...)</label>
-                            <input type="number" name="rows" id="genRows" value="8" min="1" max="20" style="width:100%;">
+                            <label>Hàng ghế <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="hang_ghe" id="seatRow" required maxlength="1" placeholder="VD: A" style="width:100%; text-transform:uppercase;">
                         </div>
                         <div>
-                            <label>Số ghế mỗi hàng</label>
-                            <input type="number" name="cols" id="genCols" value="12" min="1" max="30" style="width:100%;">
+                            <label>Số thứ tự <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="so_thu_tu" id="seatNumber" required min="1" max="30" placeholder="VD: 5" style="width:100%;">
                         </div>
                         <div style="grid-column:1/-1;">
-                            <label>Loại ghế mặc định</label>
-                            <select name="default_type" id="genDefaultType" style="width:100%;">
+                            <label>Loại ghế</label>
+                            <select name="loai_ghe" id="seatType" style="width:100%;">
                                 <option value="Thuong">Thường</option>
                                 <option value="VIP">VIP</option>
                                 <option value="Couple">Couple</option>
                             </select>
                         </div>
-                        <div style="grid-column:1/-1; font-size:13px; color:#94a3b8;">
-                            <strong>Lưu ý:</strong> Sẽ xóa tất cả ghế hiện tại của phòng này và tạo lại.
-                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="cancelAutoGenModal" class="button btn-ghost">Hủy</button>
-                        <button type="submit" class="btn-gradient">Tạo ghế</button>
+                        <button type="button" id="cancelSeatModal" class="button btn-ghost">Hủy</button>
+                        <button type="submit" class="btn-gradient">Thêm ghế</button>
                     </div>
                 </form>
             </div>
