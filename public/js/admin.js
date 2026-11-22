@@ -83,11 +83,13 @@ window.AdminDashboard = { loadDashboard, renderChart, renderTopMovies };
 
 let currentMoviePage = 'movies';
 
+let currentMovieStatusFilter = '';
+
 async function loadMoviesAdmin() {
     if (currentMoviePage !== 'movies') return;
     
     const search = document.getElementById('searchInput')?.value || '';
-    const status = document.getElementById('statusFilter')?.value || '';
+    const status = currentMovieStatusFilter;
     
     const params = new URLSearchParams();
     if (search) params.append('search', search);
@@ -107,13 +109,31 @@ function movieStatusBadge(status) {
     return '<span style="color:#94a3b8;">—</span>';
 }
 
+function movieStatusColor(status) {
+    if (status === 'DANG_CHIEU') return '#34d399';
+    if (status === 'SAP_CHIEU') return '#38bdf8';
+    if (status === 'NGUNG_CHIEU') return '#f87171';
+    return '#94a3b8';
+}
+
+function movieStatusSelect(m) {
+    const sel = (v) => m.status === v ? 'selected' : '';
+    return `<select class="movie-status-select" data-id="${m.id}" style="background:#1e293b; color:${movieStatusColor(m.status)}; border:1px solid #334155; border-radius:6px; padding:4px 6px; font-weight:700; cursor:pointer;">
+        <option value="DANG_CHIEU" ${sel('DANG_CHIEU')}>Đang chiếu</option>
+        <option value="SAP_CHIEU" ${sel('SAP_CHIEU')}>Sắp chiếu</option>
+        <option value="NGUNG_CHIEU" ${sel('NGUNG_CHIEU')}>Ngưng chiếu</option>
+    </select>`;
+}
+
 function renderMoviesTable(movies) {
     const tbody = document.getElementById('moviesBody');
     const emptyState = document.getElementById('moviesEmptyState');
     const table = document.getElementById('moviesTable');
 
     if (!tbody) return;
-    movies = (movies || []).filter(m => m.status !== 'NGUNG_CHIEU');
+    if (currentMovieStatusFilter !== 'NGUNG_CHIEU') {
+        movies = (movies || []).filter(m => m.status !== 'NGUNG_CHIEU');
+    }
     
     if (!movies || movies.length === 0) {
         tbody.innerHTML = '';
@@ -137,7 +157,7 @@ function renderMoviesTable(movies) {
             </td>
             <td>${m.duration} phút</td>
             <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
-            <td>${movieStatusBadge(m.status)}</td>
+            <td>${movieStatusSelect(m)}</td>
             <td style="text-align:center;">
                 <div style="display:flex; gap:8px; justify-content:center;">
                     <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
@@ -153,6 +173,10 @@ function renderMoviesTable(movies) {
     });
     tbody.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', () => confirmDeleteMovie(btn.dataset.id, btn.dataset.title));
+    });
+    // v36: đổi trạng thái phim từ dropdown trong cột Trạng thái
+    tbody.querySelectorAll('.movie-status-select').forEach(sel => {
+        sel.addEventListener('change', () => changeMovieStatus(sel.dataset.id, sel.value));
     });
 }
 
@@ -332,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Delete confirm
 function confirmDeleteMovie(id, title) {
-    if (!confirm(`Xóa phim "${title}"? Hành động này không thể hoàn tác (sẽ chuyển trạng thái Ngưng chiếu).`)) return;
+    if (!confirm(`Xóa phim "${title}"? Hành động này không thể hoàn tác (sẽ xóa hẳn phim khỏi cơ sở dữ liệu).`)) return;
     
     api(`/admin/movies/${id}`, 'DELETE')
         .then(() => {
@@ -341,6 +365,20 @@ function confirmDeleteMovie(id, title) {
             loadDashboard();
         })
         .catch(err => message(err.message, true));
+}
+
+function changeMovieStatus(id, status) {
+    const label = status === 'DANG_CHIEU' ? 'Đang chiếu' : status === 'SAP_CHIEU' ? 'Sắp chiếu' : 'Ngưng chiếu';
+    api(`/admin/movies/${id}`, 'PATCH', { trang_thai: status })
+        .then(() => {
+            message(`Đã chuyển phim sang trạng thái ${label}.`);
+            loadMoviesAdmin();
+            loadDashboard();
+        })
+        .catch(err => {
+            message(err.message, true);
+            loadMoviesAdmin();
+        });
 }
 
 // Initialize movies page
@@ -360,6 +398,19 @@ function initMoviesPage() {
     statusFilter?.addEventListener('change', loadMoviesAdmin);
     
     document.getElementById('addMovieBtn')?.addEventListener('click', () => openMovieModal());
+
+    document.querySelectorAll('.movie-status-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.movie-status-btn').forEach(b => {
+                b.classList.remove('btn-sky');
+                b.classList.add('btn-ghost');
+            });
+            btn.classList.remove('btn-ghost');
+            btn.classList.add('btn-sky');
+            currentMovieStatusFilter = btn.dataset.status || '';
+            loadMoviesAdmin();
+        });
+    });
     
     loadMoviesAdmin();
 }
@@ -793,7 +844,7 @@ async function loadSeatMap(roomId) {
 function renderSeatMap(seats) {
     const container = document.getElementById('seatMap');
     if (!seats || seats.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "Tự động tạo ghế" hoặc thêm thủ công.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "+ Thêm ghế" để thêm ghế thủ công.</p>';
         return;
     }
 
@@ -875,66 +926,57 @@ function deleteSeat(seatId) {
         .catch(err => message(err.message, true));
 }
 
-// Auto Generate Seats Modal
-let autoGenRoomId = null;
-
-function openAutoGenModal(roomId) {
-    autoGenRoomId = roomId;
-    document.getElementById('autoGenModal').style.display = 'flex';
+// Thêm ghế thủ công: form chọn hàng + số + loại ghế
+function openSeatModal() {
+    const form = document.getElementById('seatForm');
+    if (form) form.reset();
+    document.getElementById('seatType').value = selectedSeatType;
+    document.getElementById('seatModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
-function closeAutoGenModal() {
-    document.getElementById('autoGenModal').style.display = 'none';
+function closeSeatModal() {
+    document.getElementById('seatModal').style.display = 'none';
     document.body.style.overflow = '';
-    autoGenRoomId = null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto gen form
-    const form = document.getElementById('autoGenForm');
+    const form = document.getElementById('seatForm');
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            if (!currentRoomId) return;
             const btn = form.querySelector('button[type="submit"]');
             btn.disabled = true;
-            btn.textContent = 'Đang tạo...';
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            data.rows = parseInt(data.rows);
-            data.cols = parseInt(data.cols);
-            
+            btn.textContent = 'Đang thêm...';
+            const row = (document.getElementById('seatRow').value || '').trim().toUpperCase();
+            const number = parseInt(document.getElementById('seatNumber').value, 10);
+            const type = document.getElementById('seatType').value;
             try {
-                if (!autoGenRoomId) throw new Error('Chưa chọn phòng.');
-                const roomId = autoGenRoomId;
-                await api(`/admin/rooms/${roomId}/seats/generate`, 'POST', data);
-                message('Đã tạo lại sơ đồ ghế!');
-                closeAutoGenModal();
-                loadSeatMap(roomId);
+                await api(`/admin/rooms/${currentRoomId}/seats`, 'POST', {
+                    phong_id: currentRoomId,
+                    hang_ghe: row,
+                    so_thu_tu: number,
+                    loai_ghe: type,
+                });
+                message(`Đã thêm ghế ${row}${number} (${type})!`);
+                closeSeatModal();
+                loadSeatMap(currentRoomId);
             } catch (err) {
                 message(err.message, true);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Tạo ghế';
+                btn.textContent = 'Thêm ghế';
             }
         });
     }
-    
-    // Auto gen modal close
-    document.getElementById('closeAutoGenModal')?.addEventListener('click', closeAutoGenModal);
-    document.getElementById('cancelAutoGenModal')?.addEventListener('click', closeAutoGenModal);
-    document.getElementById('autoGenModal')?.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeAutoGenModal();
+
+    document.getElementById('closeSeatModal')?.addEventListener('click', closeSeatModal);
+    document.getElementById('cancelSeatModal')?.addEventListener('click', closeSeatModal);
+    document.getElementById('seatModal')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeSeatModal();
     });
 });
-
-function closeAutoGenModal() {
-    document.getElementById('autoGenModal').style.display = 'none';
-    document.body.style.overflow = '';
-    autoGenRoomId = null;
-}
 
 // Seat type radio handling
 document.addEventListener('DOMContentLoaded', () => {
@@ -955,37 +997,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Add seat button: thêm 1 ghế sau ghế cuối của hàng cuối, loại theo radio đang chọn
-    document.getElementById('addSeatBtn')?.addEventListener('click', async () => {
+    // Add seat button: mở form thêm ghế (tự chọn hàng + số + loại ghế)
+    document.getElementById('addSeatBtn')?.addEventListener('click', () => {
         if (!currentRoomId) return;
-        try {
-            const seats = await api(`/admin/rooms/${currentRoomId}/seats`);
-            let row = 'A';
-            let number = 1;
-            if (seats.length) {
-                const sorted = [...seats].sort((a, b) => a.row.localeCompare(b.row) || a.number - b.number);
-                const last = sorted[sorted.length - 1];
-                row = last.row;
-                number = last.number + 1;
-            }
-            await api(`/admin/rooms/${currentRoomId}/seats`, 'POST', {
-                phong_id: currentRoomId,
-                hang_ghe: row,
-                so_thu_tu: number,
-                loai_ghe: selectedSeatType,
-            });
-            message(`Đã thêm ghế ${row}${number} (${selectedSeatType})!`);
-            loadSeatMap(currentRoomId);
-        } catch (err) {
-            message(err.message, true);
-        }
+        openSeatModal();
     });
     
-    // Auto gen seats button
-    document.getElementById('autoGenSeatsBtn')?.addEventListener('click', () => {
-        if (!currentRoomId) return;
-        openAutoGenModal(currentRoomId);
-    });
+
     
     // Back button
     document.getElementById('backToRoomsBtn')?.addEventListener('click', backToRooms);
@@ -1645,7 +1663,7 @@ function fillShowtimeFilters(movies, rooms) {
     if (movieFilter) {
         const current = movieFilter.value;
         movieFilter.innerHTML = '<option value="">Tất cả phim</option>' +
-            movies.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
+            movies.filter(m => m.status !== 'NGUNG_CHIEU').map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
         movieFilter.value = current;
     }
 

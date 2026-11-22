@@ -104,7 +104,7 @@
                             <th>Tên phim</th>
                             <th style="width:100px;">Thời lượng</th>
                             <th style="width:100px;">IMDb</th>
-                            <th style="width:110px;">Trạng thái</th>
+                            <th style="width:150px;">Trạng thái</th>
                             <th style="width:160px; text-align:center;">Hành động</th>
                         </tr>
                     </thead>
