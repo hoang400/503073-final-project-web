@@ -135,9 +135,7 @@ return [
         'POST' => [$admin, 'createSeat'],
     ],
 
-    '/admin/rooms/{id}/seats/generate' => [
-        'POST' => [$admin, 'generateSeats'],
-    ],
+
 
     '/admin/seats/{id}' => [
         'PATCH' => [$admin, 'updateSeat'],

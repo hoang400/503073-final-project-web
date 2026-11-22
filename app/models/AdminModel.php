@@ -175,8 +175,10 @@ final class AdminModel
     }
     public function deleteMovie(int $id): void
     {
-        // Soft delete: set status to NGUNG_CHIEU
-        $this->updateMovie($id, ['trang_thai' => 'NGUNG_CHIEU']);
+        // v35: xóa cứng — xóa hẳn hàng phim khỏi DB (controller chặn trước
+        // nếu phim còn suất chiếu, vì FK suatchieu.phim_id RESTRICT).
+        $stmt = Database::connection()->prepare('DELETE FROM phim WHERE id = ?');
+        $stmt->execute([$id]);
     }
 
     // ============================================
@@ -346,6 +348,15 @@ final class AdminModel
         return (int) $pdo->lastInsertId();
     }
 
+    public function seatExists(int $roomId, string $row, int $number): bool
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT 1 FROM ghe WHERE phong_id = ? AND hang_ghe = ? AND so_thu_tu = ? LIMIT 1'
+        );
+        $stmt->execute([$roomId, $row, $number]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function deleteSeat(int $id): void
     {
         $pdo = Database::connection();
@@ -360,29 +371,7 @@ final class AdminModel
         $stmt->execute([$roomId]);
     }
 
-    public function generateSeats(int $roomId, int $rows, int $cols, string $defaultType): void
-    {
-        $pdo = Database::connection();
-        $pdo->beginTransaction();
 
-        try {
-            // Xóa hết ghế cũ rồi tạo lại theo số hàng / số cột
-            $this->deleteSeatsByRoom($roomId);
-
-            $stmt = $pdo->prepare('INSERT INTO ghe (phong_id, hang_ghe, so_thu_tu, loai_ghe) VALUES (?, ?, ?, ?)');
-            for ($r = 0; $r < $rows; $r++) {
-                $rowLabel = chr(ord('A') + $r);
-                for ($c = 1; $c <= $cols; $c++) {
-                    $stmt->execute([$roomId, $rowLabel, $c, $defaultType]);
-                }
-            }
-
-            $pdo->commit();
-        } catch (\Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            throw $e;
-        }
-    }
 
     public function updateSeat(int $id, string $type): void
     {

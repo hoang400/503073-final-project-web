@@ -8,7 +8,6 @@ async function loadDashboard() {
     if (dateTo) params.append('date_to', dateTo);
     
     try {
-        // /admin/reports trả cả 3 khối (summary, by_date, top_movies) trong 1 lần gọi
         const data = await api(`/admin/reports?${params.toString()}`);
 
         renderDashboardSummary(data.summary || {});
@@ -69,8 +68,6 @@ function renderTopMovies(data) {
         </tr>
     `).join('') || '<tr><td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">Chưa có dữ liệu</td></tr>';
 }
-
-// Dashboard (theo báo cáo 6.2): tải thống kê tổng, không lọc theo ngày
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('statTotalRevenue')) {
         loadDashboard();
@@ -86,11 +83,13 @@ window.AdminDashboard = { loadDashboard, renderChart, renderTopMovies };
 
 let currentMoviePage = 'movies';
 
+let currentMovieStatusFilter = '';
+
 async function loadMoviesAdmin() {
     if (currentMoviePage !== 'movies') return;
     
     const search = document.getElementById('searchInput')?.value || '';
-    const status = document.getElementById('statusFilter')?.value || '';
+    const status = currentMovieStatusFilter;
     
     const params = new URLSearchParams();
     if (search) params.append('search', search);
@@ -103,6 +102,28 @@ async function loadMoviesAdmin() {
         message(e.message, true);
     }
 }
+function movieStatusBadge(status) {
+    if (status === 'DANG_CHIEU') return '<span style="color:#34d399; font-weight:700;">Đang chiếu</span>';
+    if (status === 'SAP_CHIEU') return '<span style="color:#38bdf8; font-weight:700;">Sắp chiếu</span>';
+    if (status === 'NGUNG_CHIEU') return '<span style="color:#f87171; font-weight:700;">Ngưng chiếu</span>';
+    return '<span style="color:#94a3b8;">—</span>';
+}
+
+function movieStatusColor(status) {
+    if (status === 'DANG_CHIEU') return '#34d399';
+    if (status === 'SAP_CHIEU') return '#38bdf8';
+    if (status === 'NGUNG_CHIEU') return '#f87171';
+    return '#94a3b8';
+}
+
+function movieStatusSelect(m) {
+    const sel = (v) => m.status === v ? 'selected' : '';
+    return `<select class="movie-status-select" data-id="${m.id}" style="background:#1e293b; color:${movieStatusColor(m.status)}; border:1px solid #334155; border-radius:6px; padding:4px 6px; font-weight:700; cursor:pointer;">
+        <option value="DANG_CHIEU" ${sel('DANG_CHIEU')}>Đang chiếu</option>
+        <option value="SAP_CHIEU" ${sel('SAP_CHIEU')}>Sắp chiếu</option>
+        <option value="NGUNG_CHIEU" ${sel('NGUNG_CHIEU')}>Ngưng chiếu</option>
+    </select>`;
+}
 
 function renderMoviesTable(movies) {
     const tbody = document.getElementById('moviesBody');
@@ -110,6 +131,9 @@ function renderMoviesTable(movies) {
     const table = document.getElementById('moviesTable');
 
     if (!tbody) return;
+    if (currentMovieStatusFilter !== 'NGUNG_CHIEU') {
+        movies = (movies || []).filter(m => m.status !== 'NGUNG_CHIEU');
+    }
     
     if (!movies || movies.length === 0) {
         tbody.innerHTML = '';
@@ -133,6 +157,7 @@ function renderMoviesTable(movies) {
             </td>
             <td>${m.duration} phút</td>
             <td>${m.imdb !== null && m.imdb !== undefined ? `<span class="imdb-badge">★ ${esc(String(m.imdb))}/10</span>` : '<span class="movie-sub">—</span>'}</td>
+            <td>${movieStatusSelect(m)}</td>
             <td style="text-align:center;">
                 <div style="display:flex; gap:8px; justify-content:center;">
                     <button class="button btn-sm btn-edit edit-btn" data-id="${m.id}">Sửa</button>
@@ -148,6 +173,10 @@ function renderMoviesTable(movies) {
     });
     tbody.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', () => confirmDeleteMovie(btn.dataset.id, btn.dataset.title));
+    });
+    // v36: đổi trạng thái phim từ dropdown trong cột Trạng thái
+    tbody.querySelectorAll('.movie-status-select').forEach(sel => {
+        sel.addEventListener('change', () => changeMovieStatus(sel.dataset.id, sel.value));
     });
 }
 
@@ -165,8 +194,6 @@ function openMovieModal(id = null) {
     form.reset();
     preview.innerHTML = '';
     document.getElementById('movieId').value = '';
-    
-    // Nút lưu luôn là "LƯU THÔNG TIN PHIM" như file mẫu; chỉ tiêu đề đổi khi sửa
     submitBtn.textContent = 'LƯU THÔNG TIN PHIM';
 
     if (id) {
@@ -329,14 +356,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Delete confirm
 function confirmDeleteMovie(id, title) {
-    if (!confirm(`Xóa phim "${title}"? Hành động này không thể hoàn tác (sẽ chuyển trạng thái Ngưng chiếu).`)) return;
+    if (!confirm(`Xóa phim "${title}"? Hành động này không thể hoàn tác (sẽ xóa hẳn phim khỏi cơ sở dữ liệu).`)) return;
     
     api(`/admin/movies/${id}`, 'DELETE')
         .then(() => {
             message('Xóa phim thành công!');
             loadMoviesAdmin();
+            loadDashboard();
         })
         .catch(err => message(err.message, true));
+}
+
+function changeMovieStatus(id, status) {
+    const label = status === 'DANG_CHIEU' ? 'Đang chiếu' : status === 'SAP_CHIEU' ? 'Sắp chiếu' : 'Ngưng chiếu';
+    api(`/admin/movies/${id}`, 'PATCH', { trang_thai: status })
+        .then(() => {
+            message(`Đã chuyển phim sang trạng thái ${label}.`);
+            loadMoviesAdmin();
+            loadDashboard();
+        })
+        .catch(err => {
+            message(err.message, true);
+            loadMoviesAdmin();
+        });
 }
 
 // Initialize movies page
@@ -356,6 +398,19 @@ function initMoviesPage() {
     statusFilter?.addEventListener('change', loadMoviesAdmin);
     
     document.getElementById('addMovieBtn')?.addEventListener('click', () => openMovieModal());
+
+    document.querySelectorAll('.movie-status-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.movie-status-btn').forEach(b => {
+                b.classList.remove('btn-sky');
+                b.classList.add('btn-ghost');
+            });
+            btn.classList.remove('btn-ghost');
+            btn.classList.add('btn-sky');
+            currentMovieStatusFilter = btn.dataset.status || '';
+            loadMoviesAdmin();
+        });
+    });
     
     loadMoviesAdmin();
 }
@@ -789,7 +844,7 @@ async function loadSeatMap(roomId) {
 function renderSeatMap(seats) {
     const container = document.getElementById('seatMap');
     if (!seats || seats.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "Tự động tạo ghế" hoặc thêm thủ công.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px;">Chưa có ghế. Bấm "+ Thêm ghế" để thêm ghế thủ công.</p>';
         return;
     }
 
@@ -871,66 +926,57 @@ function deleteSeat(seatId) {
         .catch(err => message(err.message, true));
 }
 
-// Auto Generate Seats Modal
-let autoGenRoomId = null;
-
-function openAutoGenModal(roomId) {
-    autoGenRoomId = roomId;
-    document.getElementById('autoGenModal').style.display = 'flex';
+// Thêm ghế thủ công: form chọn hàng + số + loại ghế
+function openSeatModal() {
+    const form = document.getElementById('seatForm');
+    if (form) form.reset();
+    document.getElementById('seatType').value = selectedSeatType;
+    document.getElementById('seatModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
-function closeAutoGenModal() {
-    document.getElementById('autoGenModal').style.display = 'none';
+function closeSeatModal() {
+    document.getElementById('seatModal').style.display = 'none';
     document.body.style.overflow = '';
-    autoGenRoomId = null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto gen form
-    const form = document.getElementById('autoGenForm');
+    const form = document.getElementById('seatForm');
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            if (!currentRoomId) return;
             const btn = form.querySelector('button[type="submit"]');
             btn.disabled = true;
-            btn.textContent = 'Đang tạo...';
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            data.rows = parseInt(data.rows);
-            data.cols = parseInt(data.cols);
-            
+            btn.textContent = 'Đang thêm...';
+            const row = (document.getElementById('seatRow').value || '').trim().toUpperCase();
+            const number = parseInt(document.getElementById('seatNumber').value, 10);
+            const type = document.getElementById('seatType').value;
             try {
-                if (!autoGenRoomId) throw new Error('Chưa chọn phòng.');
-                const roomId = autoGenRoomId;
-                await api(`/admin/rooms/${roomId}/seats/generate`, 'POST', data);
-                message('Đã tạo lại sơ đồ ghế!');
-                closeAutoGenModal();
-                loadSeatMap(roomId);
+                await api(`/admin/rooms/${currentRoomId}/seats`, 'POST', {
+                    phong_id: currentRoomId,
+                    hang_ghe: row,
+                    so_thu_tu: number,
+                    loai_ghe: type,
+                });
+                message(`Đã thêm ghế ${row}${number} (${type})!`);
+                closeSeatModal();
+                loadSeatMap(currentRoomId);
             } catch (err) {
                 message(err.message, true);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Tạo ghế';
+                btn.textContent = 'Thêm ghế';
             }
         });
     }
-    
-    // Auto gen modal close
-    document.getElementById('closeAutoGenModal')?.addEventListener('click', closeAutoGenModal);
-    document.getElementById('cancelAutoGenModal')?.addEventListener('click', closeAutoGenModal);
-    document.getElementById('autoGenModal')?.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeAutoGenModal();
+
+    document.getElementById('closeSeatModal')?.addEventListener('click', closeSeatModal);
+    document.getElementById('cancelSeatModal')?.addEventListener('click', closeSeatModal);
+    document.getElementById('seatModal')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeSeatModal();
     });
 });
-
-function closeAutoGenModal() {
-    document.getElementById('autoGenModal').style.display = 'none';
-    document.body.style.overflow = '';
-    autoGenRoomId = null;
-}
 
 // Seat type radio handling
 document.addEventListener('DOMContentLoaded', () => {
@@ -951,37 +997,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Add seat button: thêm 1 ghế sau ghế cuối của hàng cuối, loại theo radio đang chọn
-    document.getElementById('addSeatBtn')?.addEventListener('click', async () => {
+    // Add seat button: mở form thêm ghế (tự chọn hàng + số + loại ghế)
+    document.getElementById('addSeatBtn')?.addEventListener('click', () => {
         if (!currentRoomId) return;
-        try {
-            const seats = await api(`/admin/rooms/${currentRoomId}/seats`);
-            let row = 'A';
-            let number = 1;
-            if (seats.length) {
-                const sorted = [...seats].sort((a, b) => a.row.localeCompare(b.row) || a.number - b.number);
-                const last = sorted[sorted.length - 1];
-                row = last.row;
-                number = last.number + 1;
-            }
-            await api(`/admin/rooms/${currentRoomId}/seats`, 'POST', {
-                phong_id: currentRoomId,
-                hang_ghe: row,
-                so_thu_tu: number,
-                loai_ghe: selectedSeatType,
-            });
-            message(`Đã thêm ghế ${row}${number} (${selectedSeatType})!`);
-            loadSeatMap(currentRoomId);
-        } catch (err) {
-            message(err.message, true);
-        }
+        openSeatModal();
     });
     
-    // Auto gen seats button
-    document.getElementById('autoGenSeatsBtn')?.addEventListener('click', () => {
-        if (!currentRoomId) return;
-        openAutoGenModal(currentRoomId);
-    });
+
     
     // Back button
     document.getElementById('backToRoomsBtn')?.addEventListener('click', backToRooms);
@@ -1298,6 +1320,7 @@ function renderBookingsTable(bookings) {
             <td style="padding:12px;"><strong>${esc(b.movie)}</strong></td>
             <td style="padding:12px; color:#94a3b8;">
                 ${esc(b.cinema)}
+                <br><span style="color:#7dd3fc;">${esc(b.room || '—')}</span>
                 <br><span style="color:#7dd3fc; font-weight:700;">${timeText}</span>
             </td>
             <td><span class="seats-badge">${esc(b.seats || '—')}</span></td>
@@ -1576,6 +1599,287 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ============================================
-// REPORTS (ADMIN)
-// ============================================
+
+let currentShowtimesPage = 'showtimes';
+let showtimeMovies = [];
+let showtimeRooms = [];
+let showtimeList = [];
+
+function showtimeToInput(value) {
+    return String(value || '').replace(' ', 'T').slice(0, 16);
+}
+
+function showtimeToMysql(value) {
+    const v = String(value || '').trim();
+    if (!v) return '';
+    return v.replace('T', ' ') + ':00';
+}
+
+function formatShowtime(value) {
+    const d = new Date(String(value || '').replace(' ', 'T'));
+    if (Number.isNaN(d.getTime())) return esc(value);
+    return d.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})
+        + ' - ' + d.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'});
+}
+
+function showShowtimeFormError(text) {
+    const el = document.getElementById('showtimeFormError');
+    if (!el) return;
+    el.textContent = text || '';
+    el.style.display = text ? 'block' : 'none';
+}
+
+async function loadShowtimesAdmin() {
+    if (currentShowtimesPage !== 'showtimes') return;
+
+    const movieId = document.getElementById('movieFilter')?.value || '';
+    const roomId = document.getElementById('roomFilter')?.value || '';
+    const date = document.getElementById('dateFilter')?.value || '';
+
+    const params = new URLSearchParams();
+    if (movieId) params.append('movie_id', movieId);
+    if (roomId) params.append('room_id', roomId);
+    if (date) params.append('date', date);
+
+    try {
+        const [showtimes, movies, rooms] = await Promise.all([
+            api(`/admin/showtimes?${params.toString()}`),
+            api('/admin/movies'),
+            api('/admin/rooms'),
+        ]);
+
+        showtimeMovies = movies || [];
+        showtimeRooms = rooms || [];
+
+        fillShowtimeFilters(showtimeMovies, showtimeRooms);
+        renderShowtimesTable(showtimes);
+    } catch (e) {
+        message(e.message, true);
+    }
+}
+
+function fillShowtimeFilters(movies, rooms) {
+    const movieFilter = document.getElementById('movieFilter');
+    if (movieFilter) {
+        const current = movieFilter.value;
+        movieFilter.innerHTML = '<option value="">Tất cả phim</option>' +
+            movies.filter(m => m.status !== 'NGUNG_CHIEU').map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
+        movieFilter.value = current;
+    }
+
+    const roomFilter = document.getElementById('roomFilter');
+    if (roomFilter) {
+        const current = roomFilter.value;
+        roomFilter.innerHTML = '<option value="">Tất cả phòng</option>' +
+            rooms.map(r => `<option value="${r.id}">${esc(r.name)} (${esc(r.cinema_name)})</option>`).join('');
+        roomFilter.value = current;
+    }
+}
+
+function fillShowtimeFormSelects() {
+    const movieSelect = document.getElementById('showtimeMovieId');
+    if (movieSelect) {
+        movieSelect.innerHTML = showtimeMovies.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
+    }
+
+    const roomSelect = document.getElementById('showtimeRoomId');
+    if (roomSelect) {
+        roomSelect.innerHTML = showtimeRooms.map(r => `<option value="${r.id}">${esc(r.name)} (${esc(r.cinema_name)})</option>`).join('');
+    }
+}
+
+function renderShowtimesTable(showtimes) {
+    const tbody = document.getElementById('showtimesBody');
+    const emptyState = document.getElementById('showtimesEmptyState');
+    const table = document.getElementById('showtimesTable');
+
+    if (!tbody) return;
+
+    showtimeList = showtimes || [];
+
+    if (showtimeList.length === 0) {
+        tbody.innerHTML = '';
+        table.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+    }
+
+    table.style.display = 'table';
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = showtimeList.map(s => `
+        <tr style="border-bottom:1px solid #334155;">
+            <td style="padding:12px; font-family:monospace;">${s.id}</td>
+            <td style="padding:12px;"><strong>${esc(s.movie_title)}</strong></td>
+            <td style="padding:12px;">${esc(s.cinema_name)}<br><span style="color:#7dd3fc;">${esc(s.room_name)}</span></td>
+            <td style="padding:12px;">${formatShowtime(s.start_time)}</td>
+            <td style="padding:12px;">${formatShowtime(s.end_time)}</td>
+            <td style="padding:12px;">
+                <div style="display:flex; gap:8px;">
+                    <button class="button btn-sm btn-edit edit-showtime-btn" data-id="${s.id}">Sửa</button>
+                    <button class="button btn-sm btn-delete delete-showtime-btn" data-id="${s.id}" data-label="${esc(s.movie_title)} - ${esc(formatShowtime(s.start_time))}">Xóa</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    // Bind events
+    tbody.querySelectorAll('.edit-showtime-btn').forEach(btn => {
+        btn.addEventListener('click', () => openShowtimeModal(btn.dataset.id));
+    });
+    tbody.querySelectorAll('.delete-showtime-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDeleteShowtime(btn.dataset.id, btn.dataset.label));
+    });
+}
+
+// Modal handling
+let editingShowtimeId = null;
+
+function openShowtimeModal(id = null) {
+    editingShowtimeId = id;
+    const modal = document.getElementById('showtimeModal');
+    const form = document.getElementById('showtimeForm');
+    const title = document.getElementById('showtimeModalTitle');
+    const submitBtn = document.getElementById('showtimeSubmitBtn');
+
+    form.reset();
+    document.getElementById('showtimeId').value = '';
+    showShowtimeFormError('');
+
+    fillShowtimeFormSelects();
+
+    if (id) {
+        title.textContent = 'Sửa suất chiếu';
+        submitBtn.textContent = 'Cập nhật';
+        loadShowtimeForEdit(id);
+    } else {
+        title.textContent = 'Thêm suất chiếu mới';
+        submitBtn.textContent = 'Thêm';
+    }
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeShowtimeModal() {
+    document.getElementById('showtimeModal').style.display = 'none';
+    document.body.style.overflow = '';
+    editingShowtimeId = null;
+}
+
+function loadShowtimeForEdit(id) {
+    const row = showtimeList.find(s => String(s.id) === String(id));
+    if (!row) {
+        showShowtimeFormError('Không tìm thấy suất chiếu. Tải lại trang rồi thử lại.');
+        return;
+    }
+    document.getElementById('showtimeId').value = row.id;
+    document.getElementById('showtimeMovieId').value = row.movie_id;
+    document.getElementById('showtimeRoomId').value = row.room_id;
+    document.getElementById('showtimeStart').value = showtimeToInput(row.start_time);
+    document.getElementById('showtimeEnd').value = showtimeToInput(row.end_time);
+}
+
+// Form submit
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('showtimeForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('showtimeSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+            showShowtimeFormError('');
+
+            const restoreBtn = () => {
+                btn.disabled = false;
+                btn.textContent = editingShowtimeId ? 'Cập nhật' : 'Thêm';
+            };
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            delete data.id;
+
+            data.phim_id = parseInt(data.phim_id, 10);
+            data.phong_id = parseInt(data.phong_id, 10);
+            if (!editingShowtimeId) {
+                data.gia_ve_co_ban = 90000;
+            }
+            data.thoi_gian_bat_dau = showtimeToMysql(data.thoi_gian_bat_dau);
+            data.thoi_gian_ket_thuc = showtimeToMysql(data.thoi_gian_ket_thuc);
+
+            // Validate phía client
+            const start = new Date(data.thoi_gian_bat_dau.replace(' ', 'T'));
+            const end = new Date(data.thoi_gian_ket_thuc.replace(' ', 'T'));
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+                showShowtimeFormError('Giờ bắt đầu / kết thúc không hợp lệ.');
+                restoreBtn();
+                return;
+            }
+            if (end <= start) {
+                showShowtimeFormError('Giờ kết thúc phải sau giờ bắt đầu.');
+                restoreBtn();
+                return;
+            }
+
+            try {
+                if (editingShowtimeId) {
+                    await api(`/admin/showtimes/${editingShowtimeId}?id=${editingShowtimeId}`, 'PATCH', data);
+                    message('Cập nhật suất chiếu thành công!');
+                } else {
+                    await api('/admin/showtimes', 'POST', data);
+                    message('Thêm suất chiếu thành công!');
+                }
+
+                closeShowtimeModal();
+                loadShowtimesAdmin();
+            } catch (err) {
+                showShowtimeFormError(err.message);
+                message(err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = editingShowtimeId ? 'Cập nhật' : 'Thêm';
+            }
+        });
+    }
+
+    // Modal close buttons
+    document.getElementById('closeShowtimeModal')?.addEventListener('click', closeShowtimeModal);
+    document.getElementById('cancelShowtimeModal')?.addEventListener('click', closeShowtimeModal);
+    document.getElementById('showtimeModal')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeShowtimeModal();
+    });
+});
+
+// Delete confirm
+function confirmDeleteShowtime(id, label) {
+    if (!confirm(`Xóa suất chiếu "${label}"? Suất chiếu đã có đơn vé sẽ không xóa được.`)) return;
+
+    api(`/admin/showtimes/${id}?id=${id}`, 'DELETE')
+        .then(() => {
+            message('Xóa suất chiếu thành công!');
+            loadShowtimesAdmin();
+        })
+        .catch(err => message(err.message, true));
+}
+
+// Initialize showtimes page
+function initShowtimesPage() {
+    currentShowtimesPage = 'showtimes';
+
+    document.getElementById('movieFilter')?.addEventListener('change', loadShowtimesAdmin);
+    document.getElementById('roomFilter')?.addEventListener('change', loadShowtimesAdmin);
+    document.getElementById('dateFilter')?.addEventListener('change', loadShowtimesAdmin);
+
+    document.getElementById('addShowtimeBtn')?.addEventListener('click', () => openShowtimeModal());
+
+    loadShowtimesAdmin();
+}
+
+// Auto-init if on showtimes page
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('showtimesTable')) {
+        initShowtimesPage();
+    }
+});

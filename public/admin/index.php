@@ -45,6 +45,7 @@
         <a href="index.php" class="active">Dashboard</a>
         <a href="cinemas.php">Rạp chiếu</a>
         <a href="rooms.php">Phòng & Ghế</a>
+        <a href="showtimes.php">Suất chiếu</a>
         <a href="concessions.php">Bắp nước</a>
         </div>
     </nav>
@@ -89,6 +90,12 @@
                 <h2>Quản lý danh sách phim</h2>
                 <button id="addMovieBtn" class="btn-sky" type="button">+ Thêm Phim Mới</button>
             </div>
+            <div class="admin-filters">
+                <button type="button" class="button btn-sky movie-status-btn" data-status="">Tất cả</button>
+                <button type="button" class="button btn-ghost movie-status-btn" data-status="DANG_CHIEU">Đang chiếu</button>
+                <button type="button" class="button btn-ghost movie-status-btn" data-status="SAP_CHIEU">Sắp chiếu</button>
+                <button type="button" class="button btn-ghost movie-status-btn" data-status="NGUNG_CHIEU">Ngưng chiếu</button>
+            </div>
             <div class="admin-table-wrap">
                 <table id="moviesTable" class="admin-table">
                     <thead>
@@ -97,6 +104,7 @@
                             <th>Tên phim</th>
                             <th style="width:100px;">Thời lượng</th>
                             <th style="width:100px;">IMDb</th>
+                            <th style="width:150px;">Trạng thái</th>
                             <th style="width:160px; text-align:center;">Hành động</th>
                         </tr>
                     </thead>
@@ -119,7 +127,7 @@
                         <tr>
                             <th style="width:140px;">Mã vé</th>
                             <th>Tên phim</th>
-                            <th style="width:220px;">Rạp / Suất chiếu</th>
+                            <th style="width:240px;">Rạp / Phòng / Suất chiếu</th>
                             <th style="width:110px;">Ghế chọn</th>
                             <th style="width:130px;">Doanh thu</th>
                             <th style="width:120px; text-align:center;">Hành động</th>

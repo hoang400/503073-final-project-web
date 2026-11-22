@@ -269,6 +269,9 @@ final class AdminController
 
             $data['thoi_luong'] = $duration;
         }
+        if (array_key_exists('imdb', $body)) {
+            $data['diem_imdb'] = $body['imdb'];
+        }
 
         if (isset($data['diem_imdb']) && $data['diem_imdb'] !== '') {
             if (
@@ -343,6 +346,11 @@ final class AdminController
         if ($id === false) {
             throw new ApiException('Mã phim không hợp lệ.', 422);
         }
+
+        if ($this->admin->findShowtimes($id, null)) {
+            throw new ApiException('Phim còn suất chiếu nên không thể xóa.', 422);
+        }
+
         $this->admin->deleteMovie($id);
 
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
@@ -682,6 +690,16 @@ final class AdminController
             throw new ApiException('Loại ghế không hợp lệ.', 422);
         }
 
+        if (!preg_match('/^[A-Z]$/', $data['hang_ghe'])) {
+            throw new ApiException('Hàng ghế không hợp lệ (chỉ 1 ký tự A–Z).', 422);
+        }
+        if ($data['so_thu_tu'] < 1 || $data['so_thu_tu'] > 30) {
+            throw new ApiException('Số thứ tự ghế phải từ 1 đến 30.', 422);
+        }
+        if ($this->admin->seatExists($data['phong_id'], $data['hang_ghe'], $data['so_thu_tu'])) {
+            throw new ApiException("Ghế {$data['hang_ghe']}{$data['so_thu_tu']} đã tồn tại trong phòng này.", 422);
+        }
+
         $id = $this->admin->createSeat($data);
 
         jsonResponse(['ok' => true, 'data' => ['id' => $id]], 201);
@@ -706,38 +724,7 @@ final class AdminController
         jsonResponse(['ok' => true, 'data' => ['id' => $id]]);
     }
 
-    public function generateSeats(): void
-    {
-        AdminMiddleware::requireAdmin();
 
-        $id = filter_var(
-            $_GET['route_params']['id'] ?? null,
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
-        );
-
-        if ($id === false) {
-            throw new ApiException('Mã phòng không hợp lệ.', 422);
-        }
-
-        $body = readJsonBody();
-
-        $rows = filter_var($body['rows'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 20]]);
-        $cols = filter_var($body['cols'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 30]]);
-        $defaultType = trim((string) ($body['default_type'] ?? 'Thuong'));
-
-        if ($rows === false || $cols === false) {
-            throw new ApiException('Số hàng / số ghế mỗi hàng không hợp lệ.', 422);
-        }
-
-        if (!in_array($defaultType, ['Thuong', 'VIP', 'Couple'], true)) {
-            throw new ApiException('Loại ghế không hợp lệ.', 422);
-        }
-
-        $this->admin->generateSeats($id, $rows, $cols, $defaultType);
-
-        jsonResponse(['ok' => true, 'data' => ['room_id' => $id]]);
-    }
 
     public function updateSeat(): void
     {
