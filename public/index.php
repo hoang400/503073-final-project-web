@@ -130,11 +130,11 @@
                     <i class="fa-solid fa-tags"></i>
                 </div>
 
-                <h3>Vé Chỉ Từ 45.000 VNĐ</h3>
+                <h3>Vé Chỉ Từ 90.000 VNĐ</h3>
 
                 <p>
-                    Đồng giá ưu đãi đặc biệt cho Học sinh -
-                    Sinh viên cả tuần.
+                    Giá vé cố định theo loại ghế: Thường 90.000 VNĐ,
+                    VIP 110.000 VNĐ, Couple 200.000 VNĐ.
                 </p>
             </article>
 
